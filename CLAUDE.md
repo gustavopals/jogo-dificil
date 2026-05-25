@@ -196,3 +196,128 @@ Regra prática:
 - `CLAUDE.md` define como trabalhar.
 - `IDEIA.md` define o que estamos criando.
 
+## Conteúdo Migrado de AGENTS.md
+
+# AGENTS.md
+
+## Projeto
+
+Este repositório contém um jogo de navegador 2D de plataforma: difícil,
+preciso, rápido de reiniciar e baseado em surpresa, tentativa e erro e
+aprendizado.
+
+A referência de sensação é Trap Adventure 2, mas o jogo deve ter identidade
+própria. Não copiar personagens, nomes, mapas, músicas, sprites, efeitos
+sonoros, UI, layout de fases ou assets dessa referência.
+
+## Fontes de Verdade
+
+- `IDEIA.md`: visão, backlog, perguntas abertas e decisões de design.
+- `CLAUDE.md`: regras detalhadas de engenharia, gameplay, assets e workflow.
+- `README.md`: visão pública do projeto quando for expandido.
+
+Ao tomar uma decisão de design, registre em `IDEIA.md`. Ao mudar uma regra de
+engenharia ou workflow, atualize este arquivo e `CLAUDE.md` se a regra também
+valer para outros agentes.
+
+## Direção Técnica Preferida
+
+Antes da primeira implementação grande, preferir:
+
+- TypeScript.
+- Vite.
+- Phaser 3.
+- Vitest para lógica pura.
+- Playwright para smoke tests no navegador.
+- ESLint e Prettier.
+
+Se a stack mudar, registre o motivo em `IDEIA.md`.
+
+## Estrutura Esperada
+
+Quando o projeto for scaffoldado, preferir algo próximo de:
+
+```text
+src/
+  main.ts
+  game/
+    config.ts
+    scenes/
+    systems/
+    entities/
+    traps/
+    input/
+    physics/
+    ui/
+  data/
+    levels/
+    characters/
+    audio/
+  shared/
+assets/
+  sprites/
+  tilesets/
+  maps/
+  audio/
+  fonts/
+tests/
+docs/
+```
+
+## Princípios de Implementação
+
+- Código simples, legível e modular.
+- TypeScript em modo estrito quando a stack existir.
+- Separar lógica pura de integração com engine.
+- Preferir dados declarativos para fases, traps, animações e áudio.
+- Evitar `any`; se inevitável, justificar com comentário curto.
+- Evitar números mágicos; nomear constantes de gameplay.
+- Não misturar UI, física, áudio, input e estado em uma classe grande.
+- Remover logs temporários, código morto e hacks antes de finalizar tarefas.
+
+## Princípios de Gameplay
+
+- Difícil, mas aprendível.
+- Restart imediato.
+- Controles responsivos e previsíveis.
+- Armadilhas surpreendentes, mas compreensíveis depois da morte.
+- Checkpoints pensados para reduzir frustração inútil.
+- Fases planejadas como conteúdo, não improvisadas no código.
+- Evitar softlocks, hitboxes injustas demais e longas caminhadas antes de
+  tentar de novo.
+
+## Assets
+
+- Todos os assets devem ser originais, gerados para o projeto ou usados com
+  licença compatível.
+- Usar nomes em kebab-case.
+- Separar assets por domínio: sprites, tilesets, mapas, áudio e fontes.
+- Manter pivôs, dimensões e hitboxes consistentes.
+- O jogo deve funcionar mutado e ter controle de volume.
+
+## Workflow
+
+Antes de editar:
+
+- Verificar `git status`.
+- Ler arquivos próximos da mudança.
+- Preservar alterações de usuário e não reverter mudanças não relacionadas.
+
+Durante a implementação:
+
+- Fazer mudanças pequenas e coesas.
+- Atualizar documentação relevante junto com decisões novas.
+- Não transformar tarefas pequenas em refatorações amplas sem necessidade.
+
+Antes de concluir:
+
+- Rodar lint, testes e build quando existirem.
+- Para mudanças visuais ou de jogo, validar no navegador.
+- Conferir console, input, canvas, assets e textos sobrepostos.
+- Resumir o que mudou e qualquer verificação que não foi possível executar.
+
+## Estado Atual
+
+O repositório ainda está em fase inicial de planejamento. Não há scaffold,
+`package.json`, comandos de build/teste ou código de jogo neste momento.
+
