@@ -196,11 +196,11 @@ estrutura de pastas.
 
 ### Task 1.1 - Inicializar Projeto Vite + TypeScript
 
-- [ ] Criar `package.json`.
-- [ ] Instalar Vite com template TypeScript.
-- [ ] Criar `index.html`.
-- [ ] Criar `src/main.ts`.
-- [ ] Confirmar que `npm run dev` inicia o projeto.
+- [x] Criar `package.json`.
+- [x] Instalar Vite com template TypeScript.
+- [x] Criar `index.html`.
+- [x] Criar `src/main.ts`.
+- [x] Confirmar que `npm run dev` inicia o projeto.
 
 Pronto quando:
 
@@ -1116,3 +1116,6 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
 
 - [x] Roadmap operacional criado.
 - [x] Decisoes base documentadas em `IDEIA.md`.
+- [x] Task 1.1 concluida: scaffold Vite + TypeScript criado, dependencias
+  `vite` e `typescript` instaladas, `npm run dev` validado com resposta HTTP
+  200 em `http://127.0.0.1:5173/`.
