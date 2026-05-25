@@ -424,10 +424,10 @@ Pronto quando:
 
 ### Task 3.5 - Criar Entidade Player
 
-- [ ] Criar classe ou modulo `Player`.
-- [ ] Separar estado visual de estado fisico.
-- [ ] Aplicar hitbox definida.
-- [ ] Expor metodos claros para morrer, respawnar e atualizar movimento.
+- [x] Criar classe ou modulo `Player`.
+- [x] Separar estado visual de estado fisico.
+- [x] Aplicar hitbox definida.
+- [x] Expor metodos claros para morrer, respawnar e atualizar movimento.
 
 Pronto quando:
 
@@ -1181,3 +1181,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `src/data/characters/pino-animations.ts`, com placeholders para idle, run,
   jump, fall, death, respawn, acao principal e acao secundaria. `LevelScene`
   registra as animacoes no Phaser e escolhe a animacao inicial por estado.
+- [x] Task 3.5 concluida: entidade `Player` criada em
+  `src/game/entities/player.ts`, separando estado fisico e visual, aplicando a
+  hitbox real 10x22px no corpo Arcade e expondo metodos para update de
+  movimento, morte, respawn e leitura de estado. `LevelScene` passou a
+  instanciar a entidade em vez de manter sprite solto.

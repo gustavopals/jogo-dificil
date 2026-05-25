@@ -718,6 +718,26 @@ Decisões de animação fechadas na Task 3.4:
 - A `LevelScene` registra as animações no Phaser e escolhe a animação inicial a
   partir do estado do personagem, em vez de fixar uma textura diretamente.
 
+### Entidade Player
+
+Decisões de entidade fechadas na Task 3.5:
+
+- Classe inicial: `src/game/entities/player.ts`.
+- A entidade `Player` encapsula o sprite Arcade, registro de animações,
+  aplicação de hitbox, estado físico e estado visual.
+- Estado físico: posição, velocidade, aterramento e hitbox real.
+- Estado visual: direção, animação atual, vida, respawn e flags de ação.
+- A hitbox aplicada no corpo Arcade usa as medidas da Task 3.2: 10x22px com
+  offset de 1px em relação ao sprite visual 12x24px.
+- A `LevelScene` não cria mais sprite solto do jogador; ela instancia `Player`,
+  chama `updateMovement` no `update` da cena e destrói a entidade no shutdown.
+- Métodos iniciais expostos: `updateMovement`, `die`, `respawn`,
+  `finishRespawn`, `getEntityState`, `getPhysicsState`, `getVisualState`,
+  `getSprite` e `destroy`.
+- Movimento completo, input real, colisão com terreno e resposta de pulo ficam
+  para a Fase 4. Nesta etapa, a entidade prepara o ponto de integração sem
+  implementar controles finais.
+
 ### Critérios de Pronto da Fase 1
 
 A Fase 1 estará pronta quando:
@@ -1425,6 +1445,9 @@ Direção pendente:
 - Dados declarativos de animação do Pino criados em
   `src/data/characters/pino-animations.ts`, cobrindo idle, run, jump, fall,
   death, respawn, ação principal e ação secundária com seleção por estado.
+- Entidade `Player` criada em `src/game/entities/player.ts`, separando estado
+  físico e visual, aplicando a hitbox real e expondo métodos básicos de morte,
+  respawn e atualização de movimento.
 
 ## Perguntas Abertas
 
