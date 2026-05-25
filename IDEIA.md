@@ -50,6 +50,9 @@ Status geral: concluído.
 6. Formato das fases.
 7. Pipeline de assets.
 8. Critério de pronto do primeiro build.
+9. Resolução base e tamanho de tile.
+10. Funções da ação principal e secundária.
+11. Comportamento do canvas.
 
 ### Ponto 1 - Stack Técnica
 
@@ -172,7 +175,7 @@ Valores iniciais para protótipo:
 
 Observação:
 
-Esses valores são ponto de partida. Devem ser ajustados depois que resolução base, tamanho de tile, tamanho do personagem e primeira fase de teste estiverem definidos.
+Esses valores são ponto de partida. A resolução base, tamanho de tile e tamanho do personagem já estão definidos (Ponto 9): 480x270, tiles de 16px, personagem ~24px de altura. Com isso, o pulo de pico fica em ~77px (~5 tiles) e a velocidade máxima cobre ~12 tiles por segundo. Esses valores ainda devem ser revalidados depois da primeira fase de teste jogável.
 
 ### Ponto 4 - Mapa de Controles
 
@@ -373,6 +376,99 @@ O primeiro build será considerado pronto quando:
 Observação:
 
 O primeiro build não precisa ter arte final, trilha final, história completa, ranking, replay fantasma ou conquistas completas. Ele precisa provar que o ciclo principal do jogo funciona.
+
+### Ponto 9 - Resolução Base e Tamanho de Tile
+
+Status: Decidido.
+
+Decisões a registrar:
+
+- Resolução base do jogo.
+- Tamanho do tile.
+- Tamanho aproximado do personagem em pixels.
+- Relação entre resolução base e telas comuns.
+
+Decisão:
+
+- Resolução base: 480x270 pixels.
+- Tamanho do tile: 16x16 pixels.
+- Tamanho aproximado do personagem: ~24px de altura, ~12px de largura.
+- Grid resultante: 30 tiles de largura por ~17 tiles de altura.
+- A resolução base escala 1:1 para resoluções comuns:
+  - 2x → 960x540.
+  - 3x → 1440x810.
+  - 4x → 1920x1080 (Full HD).
+- Os valores de física definidos no Ponto 3 continuam válidos: pulo de pico ~77px equivale a ~5 tiles.
+
+Regras:
+
+- Todo sprite e tileset deve respeitar a base de 16px.
+- Personagem e elementos importantes devem ser legíveis em escala 1x.
+- Mapas devem ser desenhados pensando no grid de 16px.
+- Mudanças nessa resolução base depois de assets criados forçam retrabalho — evitar.
+
+### Ponto 10 - Funções da Ação Principal e Secundária
+
+Status: Decidido.
+
+Decisões a registrar:
+
+- Função da ação principal.
+- Função da ação secundária.
+- Como cada ação se integra ao design de fases.
+
+Decisão:
+
+- Ação principal: Dash.
+  - Impulso horizontal curto e rápido.
+  - Duração inicial: ~150 ms.
+  - Cooldown inicial: ~300 ms.
+  - Utilizável no chão e no ar.
+  - Aumenta teto de habilidade e permite atravessar gaps maiores ou esquivar projéteis.
+- Ação secundária: Interagir.
+  - Aciona alavancas, botões e mecanismos.
+  - Abre portas.
+  - Pega ou usa itens contextuais.
+  - Sem cooldown.
+
+Regras:
+
+- O Dash deve ser previsível: mesma distância sempre, sem variação por tempo de botão.
+- A Fase 1 não precisa exigir Dash; ele é introduzido na Fase 2.
+- Interagir é usado a partir da Fase 2, com primeiro mecanismo simples.
+- Valores exatos de duração, distância e cooldown do Dash serão ajustados durante o protótipo de movimento.
+- Ações principal e secundária não devem ser obrigatórias para concluir a Fase 1.
+
+### Ponto 11 - Comportamento do Canvas
+
+Status: Decidido.
+
+Decisões a registrar:
+
+- Modo de escala do canvas.
+- Suporte a pixel art.
+- FPS alvo.
+- Suporte a mobile/touch no MVP.
+- Aspect ratio.
+
+Decisão:
+
+- Modo de escala do Phaser: `FIT`.
+- Auto-center: `CENTER_BOTH`.
+- `pixelArt: true` para manter nitidez.
+- `roundPixels: true` para evitar sub-pixel rendering.
+- FPS alvo: 60.
+- Aspect ratio fixo: 16:9 (480x270).
+- Letterbox quando o aspect ratio da janela não bater.
+- Escala inteira priorizada quando possível.
+- Mobile e touch ficam fora do MVP.
+
+Regras:
+
+- O jogo deve ser jogável apenas com teclado no MVP.
+- Telas com aspect ratio diferente recebem barras pretas, não distorção.
+- A escala deve ser inteira sempre que a janela permitir, para manter pixel art nítido.
+- Suporte a controle/gamepad e touch ficam planejados para depois do MVP.
 
 ## Roadmap de Desenvolvimento com IA
 
@@ -587,14 +683,16 @@ Comandos de sistema não contam como ações de gameplay:
 - Pausar.
 - Mutar áudio.
 
+Funções definidas (ver Ponto 10):
+
+- Ação principal: Dash.
+- Ação secundária: Interagir.
+- Pulo variável por tempo de botão: sim (ver Ponto 3).
+- Teclas: ver Ponto 4.
+
 Decisões pendentes:
 
-- Qual será a função da ação principal?
-- Qual será a função da ação secundária?
-- Quais teclas ou botões serão usados para cada ação?
-- Haverá pulo variável por tempo de botão?
-- Dash, agachar, interagir ou wall jump existirão apenas se forem definidos como função da ação principal ou secundária.
-- O jogo terá suporte a controle/gamepad?
+- O jogo terá suporte a controle/gamepad? (fora do MVP)
 
 ## Ações e Sistemas
 
@@ -606,13 +704,10 @@ Controles de gameplay definidos:
 - Ação principal.
 - Ação secundária.
 
-Funções candidatas para ação principal e secundária:
+Funções definidas (ver Ponto 10):
 
-- Interagir com objetos.
-- Ativar mecanismos.
-- Usar item contextual.
-- Preparar defesa, ferramenta ou habilidade especial.
-- Cancelar, segurar ou modificar alguma ação de movimento.
+- Ação principal: Dash (impulso horizontal curto, ~150 ms, cooldown ~300 ms, chão e ar).
+- Ação secundária: Interagir (alavancas, botões, portas, itens contextuais).
 
 Sistemas candidatos:
 
@@ -1248,17 +1343,21 @@ Direção pendente:
 - Critério de pronto do primeiro build definido: dev server, build, tela inicial, personagem, controles, 3 fases concluíveis, morte, respawn, checkpoints, contador, áudio básico, smoke test e README.
 - Roadmap operacional definido em `ROADMAP.md` para desenvolvimento com IA por fases, tasks e subtasks.
 - Stack técnica definida: TypeScript, Vite, Phaser 3, Vitest, Playwright, ESLint, Prettier e npm.
+- Resolução base do jogo: 480x270 com tiles de 16px, escalando 1:1 para 960x540, 1440x810 e 1920x1080.
+- Ação principal: Dash (impulso horizontal curto, no chão e no ar). Ação secundária: Interagir (alavancas, botões, portas, itens).
+- Canvas usa modo `FIT` do Phaser, com pixel art ativado, letterbox em aspect ratio diferente e 60 FPS alvo. Sem mobile/touch no MVP.
 - Trap Adventure 2 é referência de sensação, não fonte de cópia.
 - O projeto será estruturado desde o início, com planejamento de personagens, animações, mapas, músicas e ações.
 
 ## Perguntas Abertas
 
 - Qual será o nome do jogo?
-- Qual será a estética visual?
+- Qual será a estética visual (pixel art com paleta limitada, paleta ampla, estilo cartoon)?
 - O personagem será humano, objeto animado ou criatura original?
 - A dificuldade será puramente cruel ou terá camadas de acessibilidade?
 - O jogo terá história ou será mais arcade?
 - Depois das 3 fases iniciais, a expansão será por fases lineares, hub de seleção ou mundos separados?
-- Quais serão as funções exatas da ação principal e da ação secundária nos desafios?
 - Qual será o estilo musical principal do jogo?
 - A música será única para as 3 fases iniciais ou terá variações por fase?
+- Persistência: mortes e checkpoints sobrevivem ao fechar a aba (`localStorage`) ou resetam por sessão?
+- Onde o jogo será hospedado (GitHub Pages, Vercel, Netlify, outro)?
