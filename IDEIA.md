@@ -374,6 +374,25 @@ Observação:
 
 O primeiro build não precisa ter arte final, trilha final, história completa, ranking, replay fantasma ou conquistas completas. Ele precisa provar que o ciclo principal do jogo funciona.
 
+## Roadmap de Desenvolvimento com IA
+
+Documento operacional: `ROADMAP.md`.
+
+O desenvolvimento deve seguir o roadmap por fases, tasks e subtasks. Cada IA que trabalhar no projeto deve:
+
+- Ler `IDEIA.md`, `CLAUDE.md`, `AGENTS.md` e `ROADMAP.md`.
+- Executar o primeiro item pendente que desbloqueia progresso real.
+- Fazer mudanças pequenas e verificáveis.
+- Marcar tasks e subtasks concluídas em `ROADMAP.md`.
+- Registrar bloqueios no próprio roadmap quando existirem.
+- Atualizar `IDEIA.md` sempre que uma decisão de design mudar.
+
+Regra prática:
+
+- `IDEIA.md` define o produto e as decisões.
+- `ROADMAP.md` define a execução item a item.
+- `CLAUDE.md` e `AGENTS.md` definem como agentes devem trabalhar no repositório.
+
 ## Fases de Desenvolvimento Iniciais
 
 O desenvolvimento inicial será dividido em fases pequenas e bem definidas. A ideia é construir primeiro uma base jogável 2D de plataforma, sem sistemas grandes demais antes de validar personagem, leitura visual, animação e movimento.
@@ -1192,6 +1211,7 @@ Direção pendente:
 ## Backlog Inicial
 
 - Fechar decisões base antes de iniciar desenvolvimento.
+- Executar `ROADMAP.md` item a item, marcando progresso.
 - Definir nome do jogo.
 - Escolher stack técnica.
 - Criar projeto base.
@@ -1226,6 +1246,7 @@ Direção pendente:
 - Música e efeitos sonoros devem reforçar feedback, humor e ritmo sem cansar o jogador durante muitas mortes.
 - Antes da implementação, serão documentadas as decisões base de stack, MVP, física, controles, morte/respawn, fases, assets e primeiro build.
 - Critério de pronto do primeiro build definido: dev server, build, tela inicial, personagem, controles, 3 fases concluíveis, morte, respawn, checkpoints, contador, áudio básico, smoke test e README.
+- Roadmap operacional definido em `ROADMAP.md` para desenvolvimento com IA por fases, tasks e subtasks.
 - Stack técnica definida: TypeScript, Vite, Phaser 3, Vitest, Playwright, ESLint, Prettier e npm.
 - Trap Adventure 2 é referência de sensação, não fonte de cópia.
 - O projeto será estruturado desde o início, com planejamento de personagens, animações, mapas, músicas e ações.
