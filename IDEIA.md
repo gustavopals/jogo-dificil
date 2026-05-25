@@ -685,6 +685,21 @@ Regra prática:
 
 A hitbox deve favorecer precisão e justiça. O sprite pode ter detalhes externos, mas a colisão principal precisa ser previsível para o jogador.
 
+### Placeholder Visual Inicial
+
+Decisões de placeholder fechadas na Task 3.3:
+
+- Primeiro asset: `assets/sprites/player-pino-idle.png`.
+- Formato: PNG transparente, 12x24px, sem escala interna.
+- Pose: idle neutro, com corpo em cápsula e pés pequenos.
+- Direção: Pino olha para a direita por padrão; visor, ponta frontal e acento
+  coral ficam do lado direito para leitura imediata de direção.
+- Contraste: corpo amarelo-sinalização contra fundo escuro, contorno
+  azul-petróleo e visor ciano claro.
+- Uso: asset temporário de gameplay para leitura, posicionamento, escala e
+  animações futuras. Pode ser substituído pela arte final mantendo a mesma área
+  visual e pivô definidos na Task 3.2.
+
 ### Critérios de Pronto da Fase 1
 
 A Fase 1 estará pronta quando:
@@ -1386,6 +1401,9 @@ Direção pendente:
 - Escala inicial de Pino definida: sprite visual 12x24px, hitbox real 10x22px,
   margem visual de 1px em todos os lados, pivô no centro inferior e relação de
   0,75x1,5 tile para o sprite.
+- Placeholder visual inicial de Pino criado em
+  `assets/sprites/player-pino-idle.png`, com corpo amarelo, contorno
+  azul-petróleo, visor ciano e indicação de direção para a direita.
 
 ## Perguntas Abertas
 

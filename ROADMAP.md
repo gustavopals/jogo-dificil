@@ -397,10 +397,10 @@ Pronto quando:
 
 ### Task 3.3 - Criar Placeholder Visual
 
-- [ ] Criar sprite placeholder de idle.
-- [ ] Criar indicacao visual de direcao.
-- [ ] Criar contraste suficiente com fundo.
-- [ ] Registrar asset em `assets/ASSETS.md`.
+- [x] Criar sprite placeholder de idle.
+- [x] Criar indicacao visual de direcao.
+- [x] Criar contraste suficiente com fundo.
+- [x] Registrar asset em `assets/ASSETS.md`.
 
 Pronto quando:
 
@@ -1173,3 +1173,7 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   e refletida em `src/game/constants.ts`. Pino usa sprite visual 12x24px, hitbox
   real 10x22px, margem visual de 1px em todos os lados, pivô no centro inferior
   e relação de 0,75x1,5 tile para o sprite.
+- [x] Task 3.3 concluida: placeholder visual idle criado em
+  `assets/sprites/player-pino-idle.png`, registrado em `assets/ASSETS.md`,
+  carregado no `PreloadScene` e usado na `LevelScene` com o pivô definido para
+  o personagem.

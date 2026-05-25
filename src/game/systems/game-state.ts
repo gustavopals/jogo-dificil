@@ -1,4 +1,4 @@
-import { GAME_RESOLUTION, PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
+import { GAME_RESOLUTION, TILE_SIZE_PX } from "../constants";
 import type { CheckpointId, LevelId, Vector2Like } from "../../shared";
 import { emitGameEvent, GAME_EVENTS, type DeathCause } from "./game-events";
 

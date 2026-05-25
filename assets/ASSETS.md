@@ -27,6 +27,6 @@ jogo.
 
 ## Registro
 
-| Arquivo                       | Origem | Licenca | Observacoes             |
-| ----------------------------- | ------ | ------- | ----------------------- |
-| Nenhum asset registrado ainda | -      | -       | Pipeline inicial criado |
+| Arquivo                               | Origem                         | Licenca             | Observacoes                                                         |
+| ------------------------------------- | ------------------------------ | ------------------- | ------------------------------------------------------------------- |
+| `assets/sprites/player-pino-idle.png` | Gerado no projeto com `magick` | Original do projeto | Placeholder idle 12x24px do Pino, olhando para a direita, com alfa. |
