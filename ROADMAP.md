@@ -1186,3 +1186,7 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   hitbox real 10x22px no corpo Arcade e expondo metodos para update de
   movimento, morte, respawn e leitura de estado. `LevelScene` passou a
   instanciar a entidade em vez de manter sprite solto.
+- [x] Revisao da Fase 3 concluida: conceito, escala, placeholder visual, dados
+  de animacao e entidade `Player` conferidos. Ajustado `Player` para tipar a
+  chave de animacao e derivar `isGrounded` do corpo Arcade quando a cena nao
+  informar estado explicito.

@@ -46,7 +46,7 @@ export class LevelScene extends Phaser.Scene {
   }
 
   public override update(): void {
-    this.player?.updateMovement();
+    this.player?.updateMovement({ isGrounded: true });
   }
 
   private pauseLevel(): void {

@@ -6,6 +6,7 @@ import {
   PINO_ANIMATIONS,
   PINO_TEXTURE_KEYS,
   selectPinoAnimationDefinition,
+  type PinoAnimationKey,
   type PinoAnimationState,
 } from "../../data/characters/pino-animations";
 import type {
@@ -40,7 +41,7 @@ export type PlayerPhysicsState = {
 export type PlayerVisualState = {
   readonly facing: FacingDirection;
   readonly animationState: PinoAnimationState;
-  readonly animationKey: string;
+  readonly animationKey: PinoAnimationKey;
   readonly isAlive: boolean;
   readonly isRespawning: boolean;
   readonly isUsingPrimaryAction: boolean;
@@ -180,8 +181,7 @@ export class Player {
       x: body.velocity.x,
       y: body.velocity.y,
     };
-    const isGrounded =
-      update.isGrounded ?? this.physicsState.isGrounded ?? body.blocked.down;
+    const isGrounded = update.isGrounded ?? body.blocked.down;
     const facing = update.facing ?? this.resolveFacingFromVelocity(velocity);
 
     this.physicsState = {

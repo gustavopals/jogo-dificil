@@ -33,7 +33,9 @@ export type PinoAnimationKey =
   (typeof PINO_ANIMATION_KEYS)[keyof typeof PINO_ANIMATION_KEYS];
 
 export type PinoAnimationDefinition =
-  CharacterAnimationDefinition<PinoAnimationState>;
+  CharacterAnimationDefinition<PinoAnimationState> & {
+    readonly key: PinoAnimationKey;
+  };
 
 export type PinoAnimationSelectorInput = {
   readonly isAlive: boolean;
