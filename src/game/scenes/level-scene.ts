@@ -2,11 +2,13 @@ import Phaser from "phaser";
 
 import { GAME_RESOLUTION, TILE_SIZE_PX } from "../constants";
 import { Player } from "../entities";
+import { ActionInput } from "../input";
 import { gameStateStore } from "../systems/game-state";
 import { SCENE_KEYS } from "./scene-keys";
 
 export class LevelScene extends Phaser.Scene {
   private player?: Player;
+  private actionInput?: ActionInput;
 
   public constructor() {
     super(SCENE_KEYS.LEVEL);
@@ -16,6 +18,7 @@ export class LevelScene extends Phaser.Scene {
     this.scene.launch(SCENE_KEYS.HUD);
     gameStateStore.setPaused(false);
     Player.registerAnimations(this);
+    this.actionInput = new ActionInput(this);
 
     const { activeCheckpoint } = gameStateStore.getSnapshot();
     const groundY = GAME_RESOLUTION.height - TILE_SIZE_PX * 3;
@@ -40,12 +43,18 @@ export class LevelScene extends Phaser.Scene {
       fontSize: "10px",
     });
 
-    this.input.keyboard?.on("keydown-ESC", this.pauseLevel, this);
-    this.input.keyboard?.on("keydown-M", this.toggleMute, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
 
   public override update(): void {
+    if (this.actionInput?.wasPressed("pause")) {
+      this.pauseLevel();
+    }
+
+    if (this.actionInput?.wasPressed("mute")) {
+      this.toggleMute();
+    }
+
     this.player?.updateMovement({ isGrounded: true });
   }
 
@@ -64,8 +73,8 @@ export class LevelScene extends Phaser.Scene {
   }
 
   private cleanup(): void {
-    this.input.keyboard?.off("keydown-ESC", this.pauseLevel, this);
-    this.input.keyboard?.off("keydown-M", this.toggleMute, this);
+    this.actionInput?.destroy();
+    this.actionInput = undefined;
     this.player?.destroy();
     this.player = undefined;
     this.scene.stop(SCENE_KEYS.HUD);

@@ -15,3 +15,10 @@ export type InputBinding = {
 };
 
 export type InputState = Readonly<Record<InputAction, boolean>>;
+
+export type InputReader = {
+  isDown(action: InputAction): boolean;
+  wasPressed(action: InputAction): boolean;
+  wasReleased(action: InputAction): boolean;
+  getState(): InputState;
+};

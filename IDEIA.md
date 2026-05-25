@@ -775,6 +775,15 @@ Funções definidas (ver Ponto 10):
 - Pulo variável por tempo de botão: sim (ver Ponto 3).
 - Teclas: ver Ponto 4.
 
+Implementação inicial do mapa de input:
+
+- Bindings puros: `src/game/input/input-bindings.ts`.
+- Adaptador Phaser: `src/game/input/action-input.ts`.
+- A gameplay deve consultar ações por `isDown`, `wasPressed`, `wasReleased` e
+  `getState`, evitando condicionais espalhadas por tecla.
+- `LevelScene` e `PauseScene` usam a ação `pause` em vez de ouvir `Esc`
+  diretamente. `LevelScene` usa a ação `mute` em vez de ouvir `M` diretamente.
+
 Decisões pendentes:
 
 - O jogo terá suporte a controle/gamepad? (fora do MVP)
@@ -1448,6 +1457,8 @@ Direção pendente:
 - Entidade `Player` criada em `src/game/entities/player.ts`, separando estado
   físico e visual, aplicando a hitbox real e expondo métodos básicos de morte,
   respawn e atualização de movimento.
+- Mapa de input inicial implementado em `src/game/input`, com bindings para
+  movimento, pulo, ações principal/secundária, reinício, pausa e mute.
 
 ## Perguntas Abertas
 

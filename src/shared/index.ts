@@ -41,6 +41,7 @@ export type {
   GameplayAction,
   InputAction,
   InputBinding,
+  InputReader,
   InputState,
   SystemAction,
 } from "./input";

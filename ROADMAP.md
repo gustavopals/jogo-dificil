@@ -439,15 +439,15 @@ Objetivo: validar a sensacao de controle antes de construir fases complexas.
 
 ### Task 4.1 - Implementar Mapa De Input
 
-- [ ] Mapear `A` e seta esquerda.
-- [ ] Mapear `D` e seta direita.
-- [ ] Mapear `Espaco`, `W` e seta cima.
-- [ ] Mapear `J` e `Z`.
-- [ ] Mapear `K` e `X`.
-- [ ] Mapear `R`.
-- [ ] Mapear `Esc`.
-- [ ] Mapear `M`.
-- [ ] Criar interface para consulta de input por acao.
+- [x] Mapear `A` e seta esquerda.
+- [x] Mapear `D` e seta direita.
+- [x] Mapear `Espaco`, `W` e seta cima.
+- [x] Mapear `J` e `Z`.
+- [x] Mapear `K` e `X`.
+- [x] Mapear `R`.
+- [x] Mapear `Esc`.
+- [x] Mapear `M`.
+- [x] Criar interface para consulta de input por acao.
 
 Pronto quando:
 
@@ -1190,3 +1190,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   de animacao e entidade `Player` conferidos. Ajustado `Player` para tipar a
   chave de animacao e derivar `isGrounded` do corpo Arcade quando a cena nao
   informar estado explicito.
+- [x] Task 4.1 concluida: mapa de input criado em `src/game/input`, com
+  bindings para movimento, pulo, acao principal, acao secundaria, restart,
+  pausa e mute. `ActionInput` expoe consulta por acao e `LevelScene` /
+  `PauseScene` passaram a usar acoes em vez de eventos diretos de tecla para
+  pausa e mute.
