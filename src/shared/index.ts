@@ -1,5 +1,10 @@
 export type { AudioCategory, AudioDefinition, AudioSettings } from "./audio";
 export type {
+  AnimationPlaybackMode,
+  CharacterAnimationDefinition,
+  CharacterAnimationFrameDefinition,
+} from "./animations";
+export type {
   EntityDefinition,
   EntityId,
   EntityKind,

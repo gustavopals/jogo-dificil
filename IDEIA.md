@@ -700,6 +700,24 @@ Decisões de placeholder fechadas na Task 3.3:
   animações futuras. Pode ser substituído pela arte final mantendo a mesma área
   visual e pivô definidos na Task 3.2.
 
+### Dados De Animação
+
+Decisões de animação fechadas na Task 3.4:
+
+- Arquivo declarativo inicial: `src/data/characters/pino-animations.ts`.
+- Animações esperadas para o Pino: `idle`, `run`, `jump`, `fall`, `death`,
+  `respawn`, `primary-action` e `secondary-action`.
+- Todas as animações começam como placeholder e usam o asset
+  `player-pino-idle` até existirem spritesheets ou frames dedicados.
+- `idle` e `run` são animações em loop. `jump`, `fall`, `death`, `respawn`,
+  `primary-action` e `secondary-action` são animações de execução única no
+  placeholder.
+- A ação principal representa o dash. A ação secundária representa interação.
+- A seleção de animação segue prioridade: respawn, morte, ação principal, ação
+  secundária, ar subindo, ar caindo, corrida e idle.
+- A `LevelScene` registra as animações no Phaser e escolhe a animação inicial a
+  partir do estado do personagem, em vez de fixar uma textura diretamente.
+
 ### Critérios de Pronto da Fase 1
 
 A Fase 1 estará pronta quando:
@@ -1404,6 +1422,9 @@ Direção pendente:
 - Placeholder visual inicial de Pino criado em
   `assets/sprites/player-pino-idle.png`, com corpo amarelo, contorno
   azul-petróleo, visor ciano e indicação de direção para a direita.
+- Dados declarativos de animação do Pino criados em
+  `src/data/characters/pino-animations.ts`, cobrindo idle, run, jump, fall,
+  death, respawn, ação principal e ação secundária com seleção por estado.
 
 ## Perguntas Abertas
 

@@ -408,15 +408,15 @@ Pronto quando:
 
 ### Task 3.4 - Criar Dados De Animacao
 
-- [ ] Definir animacoes esperadas.
-- [ ] Criar estrutura declarativa de animacoes.
-- [ ] Criar animacao `idle` placeholder.
-- [ ] Criar animacao `run` placeholder.
-- [ ] Criar animacao `jump` placeholder.
-- [ ] Criar animacao `fall` placeholder.
-- [ ] Criar animacao `death` placeholder.
-- [ ] Criar animacao `respawn` placeholder.
-- [ ] Criar animacoes de acao principal e secundaria placeholder.
+- [x] Definir animacoes esperadas.
+- [x] Criar estrutura declarativa de animacoes.
+- [x] Criar animacao `idle` placeholder.
+- [x] Criar animacao `run` placeholder.
+- [x] Criar animacao `jump` placeholder.
+- [x] Criar animacao `fall` placeholder.
+- [x] Criar animacao `death` placeholder.
+- [x] Criar animacao `respawn` placeholder.
+- [x] Criar animacoes de acao principal e secundaria placeholder.
 
 Pronto quando:
 
@@ -1177,3 +1177,7 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `assets/sprites/player-pino-idle.png`, registrado em `assets/ASSETS.md`,
   carregado no `PreloadScene` e usado na `LevelScene` com o pivô definido para
   o personagem.
+- [x] Task 3.4 concluida: dados declarativos de animacao criados em
+  `src/data/characters/pino-animations.ts`, com placeholders para idle, run,
+  jump, fall, death, respawn, acao principal e acao secundaria. `LevelScene`
+  registra as animacoes no Phaser e escolhe a animacao inicial por estado.
