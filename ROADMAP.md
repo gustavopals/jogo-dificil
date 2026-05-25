@@ -223,13 +223,13 @@ Pronto quando:
 
 ### Task 1.3 - Criar Scripts Do Projeto
 
-- [ ] Adicionar `dev`.
-- [ ] Adicionar `build`.
-- [ ] Adicionar `preview`.
-- [ ] Adicionar `test`.
-- [ ] Adicionar `test:e2e`.
-- [ ] Adicionar `lint`.
-- [ ] Adicionar `format`.
+- [x] Adicionar `dev`.
+- [x] Adicionar `build`.
+- [x] Adicionar `preview`.
+- [x] Adicionar `test`.
+- [x] Adicionar `test:e2e`.
+- [x] Adicionar `lint`.
+- [x] Adicionar `format`.
 
 Pronto quando:
 
@@ -238,20 +238,20 @@ Pronto quando:
 
 ### Task 1.4 - Criar Estrutura De Pastas
 
-- [ ] Criar `src/game/`.
-- [ ] Criar `src/game/scenes/`.
-- [ ] Criar `src/game/systems/`.
-- [ ] Criar `src/game/entities/`.
-- [ ] Criar `src/game/traps/`.
-- [ ] Criar `src/game/input/`.
-- [ ] Criar `src/game/physics/`.
-- [ ] Criar `src/game/ui/`.
-- [ ] Criar `src/data/levels/`.
-- [ ] Criar `src/data/characters/`.
-- [ ] Criar `src/data/audio/`.
-- [ ] Criar `src/shared/`.
-- [ ] Criar `tests/`.
-- [ ] Criar `docs/`, se necessario.
+- [x] Criar `src/game/`.
+- [x] Criar `src/game/scenes/`.
+- [x] Criar `src/game/systems/`.
+- [x] Criar `src/game/entities/`.
+- [x] Criar `src/game/traps/`.
+- [x] Criar `src/game/input/`.
+- [x] Criar `src/game/physics/`.
+- [x] Criar `src/game/ui/`.
+- [x] Criar `src/data/levels/`.
+- [x] Criar `src/data/characters/`.
+- [x] Criar `src/data/audio/`.
+- [x] Criar `src/shared/`.
+- [x] Criar `tests/`.
+- [x] Criar `docs/`, se necessario.
 
 Pronto quando:
 
@@ -1123,3 +1123,10 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `package.json`: `phaser@3`, `typescript`, `vitest`, `@playwright/test`,
   `eslint` e `prettier`. Projeto validado novamente com `npm run dev` e
   resposta HTTP 200.
+- [x] Task 1.3 concluida: scripts `dev`, `build`, `preview`, `test`,
+  `test:e2e`, `lint` e `format` adicionados ao `package.json`. `build`,
+  `test`, `preview` e `dev` validados. `lint` e `test:e2e` documentados no
+  `README.md` como dependentes de configuracao/conteudo futuro.
+- [x] Task 1.4 concluida: estrutura inicial de pastas criada em `src/game`,
+  `src/data`, `src/shared`, `tests` e `docs`, sem arquivos temporarios de
+  placeholder.
