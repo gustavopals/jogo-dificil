@@ -260,14 +260,14 @@ Pronto quando:
 
 ### Task 1.5 - Criar Pipeline Inicial De Assets
 
-- [ ] Criar `assets/sprites/`.
-- [ ] Criar `assets/tilesets/`.
-- [ ] Criar `assets/audio/music/`.
-- [ ] Criar `assets/audio/sfx/`.
-- [ ] Criar `assets/fonts/`.
-- [ ] Criar `assets/temp/`.
-- [ ] Criar `assets/ASSETS.md`.
-- [ ] Documentar regra de nomes em `assets/ASSETS.md`.
+- [x] Criar `assets/sprites/`.
+- [x] Criar `assets/tilesets/`.
+- [x] Criar `assets/audio/music/`.
+- [x] Criar `assets/audio/sfx/`.
+- [x] Criar `assets/fonts/`.
+- [x] Criar `assets/temp/`.
+- [x] Criar `assets/ASSETS.md`.
+- [x] Documentar regra de nomes em `assets/ASSETS.md`.
 
 Pronto quando:
 
@@ -1128,8 +1128,11 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `test`, `preview` e `dev` validados. `lint` e `test:e2e` documentados no
   `README.md` como dependentes de configuracao/conteudo futuro.
 - [x] Task 1.4 concluida: estrutura inicial de pastas criada em `src/game`,
-  `src/data`, `src/shared`, `tests` e `docs`, sem arquivos temporarios de
-  placeholder.
+  `src/data`, `src/shared`, `tests` e `docs`, com marcadores `.gitkeep` para
+  preservar diretorios vazios no commit.
+- [x] Task 1.5 concluida: pipeline inicial de assets criado em `assets/`, com
+  pastas por dominio, marcadores `.gitkeep` e regras de nome/origem/licenca em
+  `assets/ASSETS.md`.
 - [x] Task 1.6 concluida: `tsconfig.json` estrito criado e `npm run build`
   ajustado para executar `tsc --noEmit` antes de `vite build`. Alias de import
   avaliado e adiado por nao haver imports internos ainda. Build validado com
