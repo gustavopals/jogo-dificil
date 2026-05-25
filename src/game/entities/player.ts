@@ -24,6 +24,7 @@ export type PlayerSpawnConfig = {
 };
 
 export type PlayerMovementUpdate = {
+  readonly position?: Vector2Like;
   readonly velocity?: Vector2Like;
   readonly isGrounded?: boolean;
   readonly facing?: FacingDirection;
@@ -146,20 +147,30 @@ export class Player {
   }
 
   public getEntityState(): PlayerEntityState {
+    const physicsState = this.getPhysicsState();
+
     return {
       id: this.id,
-      position: cloneVector(this.physicsState.position),
-      velocity: cloneVector(this.physicsState.velocity),
+      position: physicsState.position,
+      velocity: physicsState.velocity,
       facing: this.visualState.facing,
       isAlive: this.visualState.isAlive,
-      isGrounded: this.physicsState.isGrounded,
+      isGrounded: physicsState.isGrounded,
     };
   }
 
   public getPhysicsState(): PlayerPhysicsState {
+    const body = this.getBody();
+
     return {
-      position: cloneVector(this.physicsState.position),
-      velocity: cloneVector(this.physicsState.velocity),
+      position: {
+        x: this.sprite.x,
+        y: this.sprite.y,
+      },
+      velocity: {
+        x: body.velocity.x,
+        y: body.velocity.y,
+      },
       isGrounded: this.physicsState.isGrounded,
       hitbox: cloneHitbox(this.physicsState.hitbox),
     };
@@ -173,6 +184,10 @@ export class Player {
 
   public updateMovement(update: PlayerMovementUpdate = {}): void {
     const body = this.getBody();
+
+    if (update.position) {
+      this.sprite.setPosition(update.position.x, update.position.y);
+    }
 
     if (update.velocity) {
       this.sprite.setVelocity(update.velocity.x, update.velocity.y);

@@ -5,7 +5,10 @@ import { Player } from "../entities";
 import { ActionInput } from "../input";
 import {
   calculateHorizontalVelocity,
+  calculateJumpMovement,
+  createInitialJumpMovementState,
   getHorizontalDirection,
+  type JumpMovementState,
 } from "../physics";
 import { gameStateStore } from "../systems/game-state";
 import { SCENE_KEYS } from "./scene-keys";
@@ -13,6 +16,8 @@ import { SCENE_KEYS } from "./scene-keys";
 export class LevelScene extends Phaser.Scene {
   private player?: Player;
   private actionInput?: ActionInput;
+  private jumpState: JumpMovementState = createInitialJumpMovementState();
+  private readonly groundY = GAME_RESOLUTION.height - TILE_SIZE_PX * 3;
 
   public constructor() {
     super(SCENE_KEYS.LEVEL);
@@ -23,13 +28,13 @@ export class LevelScene extends Phaser.Scene {
     gameStateStore.setPaused(false);
     Player.registerAnimations(this);
     this.actionInput = new ActionInput(this);
+    this.jumpState = createInitialJumpMovementState();
 
     const { activeCheckpoint } = gameStateStore.getSnapshot();
-    const groundY = GAME_RESOLUTION.height - TILE_SIZE_PX * 3;
 
     this.add.rectangle(
       GAME_RESOLUTION.width / 2,
-      groundY,
+      this.groundY,
       GAME_RESOLUTION.width,
       TILE_SIZE_PX,
       0x314b57,
@@ -67,7 +72,8 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
-    const { velocity } = this.player.getPhysicsState();
+    const { position, velocity } = this.player.getPhysicsState();
+    const isGrounded = position.y >= this.groundY && velocity.y >= 0;
     const direction = getHorizontalDirection({
       isMovingLeft: this.actionInput.isDown("move-left"),
       isMovingRight: this.actionInput.isDown("move-right"),
@@ -75,19 +81,36 @@ export class LevelScene extends Phaser.Scene {
     const horizontalVelocity = calculateHorizontalVelocity({
       currentVelocityX: velocity.x,
       direction,
-      isGrounded: true,
+      isGrounded,
       deltaMs: delta,
     });
+    const jumpMovement = calculateJumpMovement({
+      currentPositionY: position.y,
+      currentVelocityY: velocity.y,
+      groundY: this.groundY,
+      isGrounded,
+      isJumpDown: this.actionInput.isDown("jump"),
+      wasJumpPressed: this.actionInput.wasPressed("jump"),
+      wasJumpReleased: this.actionInput.wasReleased("jump"),
+      deltaMs: delta,
+      state: this.jumpState,
+    });
+
+    this.jumpState = jumpMovement.state;
 
     this.player.updateMovement({
+      position: {
+        x: position.x,
+        y: jumpMovement.positionY,
+      },
       velocity: {
         x: horizontalVelocity,
-        y: 0,
+        y: jumpMovement.velocityY,
       },
       ...(direction !== 0
         ? { facing: direction === -1 ? "left" : "right" }
         : {}),
-      isGrounded: true,
+      isGrounded: jumpMovement.isGrounded,
     });
   }
 

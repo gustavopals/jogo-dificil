@@ -192,6 +192,20 @@ Implementação inicial do movimento horizontal:
 - Gravidade vertical da entidade `Player` permanece desativada nesta etapa para
   manter o protótipo horizontal estável até as tasks de pulo e colisão.
 
+Implementação inicial do pulo:
+
+- Lógica pura criada em `src/game/physics/jump-movement.ts`.
+- `LevelScene` consulta a ação `jump` por `isDown`, `wasPressed` e
+  `wasReleased`, mantendo estado de coyote time e jump buffer entre frames.
+- Velocidade inicial do pulo: -430 px/s.
+- Gravidade aplicada no cálculo vertical: 1200 px/s².
+- Pulo variável: ao soltar o botão durante subida, a velocidade vertical
+  restante é reduzida para 45%.
+- `coyote time`: 90 ms.
+- `jump buffer`: 100 ms.
+- Até a Task 4.4, o chão visual da `LevelScene` é usado como limite temporário
+  de pouso para validar sensação de pulo sem ainda implementar colisão geral.
+
 Observação:
 
 Esses valores são ponto de partida. A resolução base, tamanho de tile e tamanho do personagem já estão definidos (Ponto 9): 480x270, tiles de 16px, personagem ~24px de altura. Com isso, o pulo de pico fica em ~77px (~5 tiles) e a velocidade máxima cobre ~12 tiles por segundo. Esses valores ainda devem ser revalidados depois da primeira fase de teste jogável.
@@ -1475,6 +1489,9 @@ Direção pendente:
   movimento, pulo, ações principal/secundária, reinício, pausa e mute.
 - Movimento horizontal inicial implementado com velocidade máxima de 190 px/s,
   aceleração de 1800 px/s² e desaceleração separada para chão e ar.
+- Pulo inicial implementado com velocidade de -430 px/s, gravidade de
+  1200 px/s², corte variável para 45%, coyote time de 90 ms e jump buffer de
+  100 ms.
 
 ## Perguntas Abertas
 

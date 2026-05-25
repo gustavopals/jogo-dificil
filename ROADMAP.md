@@ -467,12 +467,12 @@ Pronto quando:
 
 ### Task 4.3 - Implementar Pulo
 
-- [ ] Aplicar velocidade inicial de pulo de -430 px/s.
-- [ ] Aplicar gravidade de 1200 px/s².
-- [ ] Implementar pulo variavel.
-- [ ] Implementar corte de pulo para 45%.
-- [ ] Implementar `coyote time` de 90 ms.
-- [ ] Implementar `jump buffer` de 100 ms.
+- [x] Aplicar velocidade inicial de pulo de -430 px/s.
+- [x] Aplicar gravidade de 1200 px/s².
+- [x] Implementar pulo variavel.
+- [x] Implementar corte de pulo para 45%.
+- [x] Implementar `coyote time` de 90 ms.
+- [x] Implementar `jump buffer` de 100 ms.
 
 Pronto quando:
 
@@ -1200,3 +1200,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   190 px/s, aceleracao de 1800 px/s², desaceleracao de 2200 px/s² no chao e
   900 px/s² no ar. `LevelScene` passou a consultar `ActionInput` para
   `move-left`/`move-right` e atualizar a velocidade horizontal do `Player`.
+- [x] Task 4.3 concluida: pulo inicial criado em
+  `src/game/physics/jump-movement.ts`, com velocidade inicial de -430 px/s,
+  gravidade de 1200 px/s², corte de pulo para 45%, coyote time de 90 ms e jump
+  buffer de 100 ms. `LevelScene` passou a consultar a acao `jump` e aplicar
+  limite temporario de pouso no chao visual ate a colisao basica da Task 4.4.
