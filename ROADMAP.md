@@ -303,11 +303,11 @@ Objetivo: criar o esqueleto interno do jogo antes de adicionar conteudo pesado.
 
 ### Task 2.1 - Configuracao Central Do Jogo
 
-- [ ] Criar `src/game/config.ts`.
-- [ ] Definir resolucao base provisoria.
-- [ ] Definir cor de fundo provisoria.
-- [ ] Definir escala e renderizacao.
-- [ ] Definir constantes iniciais de fisica.
+- [x] Criar `src/game/config.ts`.
+- [x] Definir resolucao base provisoria.
+- [x] Definir cor de fundo provisoria.
+- [x] Definir escala e renderizacao.
+- [x] Definir constantes iniciais de fisica.
 
 Pronto quando:
 
@@ -315,12 +315,12 @@ Pronto quando:
 
 ### Task 2.2 - Criar Cenas Principais
 
-- [ ] Criar `BootScene`.
-- [ ] Criar `PreloadScene`.
-- [ ] Criar `MenuScene`.
-- [ ] Criar `LevelScene`.
-- [ ] Criar `HudScene` ou HUD dentro de sistema separado.
-- [ ] Criar `PauseScene` se necessario.
+- [x] Criar `BootScene`.
+- [x] Criar `PreloadScene`.
+- [x] Criar `MenuScene`.
+- [x] Criar `LevelScene`.
+- [x] Criar `HudScene` ou HUD dentro de sistema separado.
+- [x] Criar `PauseScene` se necessario.
 
 Pronto quando:
 
@@ -1140,3 +1140,11 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
 - [x] Task 1.7 concluida: ESLint e Prettier configurados, ignores para
   artefatos gerados adicionados, comandos documentados no `README.md`, e
   `npm run lint` / `npm run format` validados.
+- [x] Task 2.1 concluida: configuracao central criada em
+  `src/game/config.ts`, com resolucao 480x270, tile de 16px, escala Phaser
+  `FIT`/`CENTER_BOTH`, renderizacao para pixel art, FPS alvo 60, Arcade Physics
+  e constantes iniciais de movimento/fisica.
+- [x] Task 2.2 concluida: cenas `BootScene`, `PreloadScene`, `MenuScene`,
+  `LevelScene`, `HudScene` e `PauseScene` criadas. `main.ts` agora inicia
+  Phaser com fluxo boot -> preload -> menu -> level, HUD sobre a fase e pausa
+  via `Esc`.
