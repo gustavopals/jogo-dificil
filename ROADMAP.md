@@ -209,12 +209,12 @@ Pronto quando:
 
 ### Task 1.2 - Instalar Dependencias Principais
 
-- [ ] Instalar `phaser`.
-- [ ] Instalar `typescript` se necessario.
-- [ ] Instalar `vitest`.
-- [ ] Instalar `@playwright/test`.
-- [ ] Instalar ESLint.
-- [ ] Instalar Prettier.
+- [x] Instalar `phaser`.
+- [x] Instalar `typescript` se necessario.
+- [x] Instalar `vitest`.
+- [x] Instalar `@playwright/test`.
+- [x] Instalar ESLint.
+- [x] Instalar Prettier.
 
 Pronto quando:
 
@@ -1119,3 +1119,7 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
 - [x] Task 1.1 concluida: scaffold Vite + TypeScript criado, dependencias
   `vite` e `typescript` instaladas, `npm run dev` validado com resposta HTTP
   200 em `http://127.0.0.1:5173/`.
+- [x] Task 1.2 concluida: dependencias principais instaladas em
+  `package.json`: `phaser@3`, `typescript`, `vitest`, `@playwright/test`,
+  `eslint` e `prettier`. Projeto validado novamente com `npm run dev` e
+  resposta HTTP 200.
