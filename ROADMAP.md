@@ -455,11 +455,11 @@ Pronto quando:
 
 ### Task 4.2 - Implementar Movimento Horizontal
 
-- [ ] Aplicar velocidade maxima inicial de 190 px/s.
-- [ ] Aplicar aceleracao inicial de 1800 px/s².
-- [ ] Aplicar desaceleracao no chao de 2200 px/s².
-- [ ] Aplicar desaceleracao no ar de 900 px/s².
-- [ ] Permitir troca rapida de direcao.
+- [x] Aplicar velocidade maxima inicial de 190 px/s.
+- [x] Aplicar aceleracao inicial de 1800 px/s².
+- [x] Aplicar desaceleracao no chao de 2200 px/s².
+- [x] Aplicar desaceleracao no ar de 900 px/s².
+- [x] Permitir troca rapida de direcao.
 
 Pronto quando:
 
@@ -1195,3 +1195,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   pausa e mute. `ActionInput` expoe consulta por acao e `LevelScene` /
   `PauseScene` passaram a usar acoes em vez de eventos diretos de tecla para
   pausa e mute.
+- [x] Task 4.2 concluida: movimento horizontal inicial criado em
+  `src/game/physics/horizontal-movement.ts`, usando velocidade maxima de
+  190 px/s, aceleracao de 1800 px/s², desaceleracao de 2200 px/s² no chao e
+  900 px/s² no ar. `LevelScene` passou a consultar `ActionInput` para
+  `move-left`/`move-right` e atualizar a velocidade horizontal do `Player`.

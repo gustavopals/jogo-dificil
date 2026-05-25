@@ -115,6 +115,7 @@ export class Player {
       .setOrigin(PLAYER_SIZE.pivot.x, PLAYER_SIZE.pivot.y);
 
     this.applyHitbox();
+    this.getBody().allowGravity = false;
 
     this.physicsState = {
       position: cloneVector(config.position),

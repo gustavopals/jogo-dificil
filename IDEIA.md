@@ -178,6 +178,20 @@ Valores iniciais para protótipo:
 - `coyote time`: 90 ms.
 - `jump buffer`: 100 ms.
 
+Implementação inicial do movimento horizontal:
+
+- Lógica pura criada em `src/game/physics/horizontal-movement.ts`.
+- `LevelScene` consulta `move-left` e `move-right` pelo `ActionInput`, calcula a
+  direção horizontal e envia velocidade para a entidade `Player`.
+- Velocidade horizontal máxima: 190 px/s.
+- Aceleração horizontal: 1800 px/s².
+- Desaceleração no chão: 2200 px/s².
+- Desaceleração no ar: 900 px/s².
+- Troca de direção usa aceleração somada à desaceleração do estado atual para o
+  personagem virar rápido sem ultrapassar a velocidade máxima.
+- Gravidade vertical da entidade `Player` permanece desativada nesta etapa para
+  manter o protótipo horizontal estável até as tasks de pulo e colisão.
+
 Observação:
 
 Esses valores são ponto de partida. A resolução base, tamanho de tile e tamanho do personagem já estão definidos (Ponto 9): 480x270, tiles de 16px, personagem ~24px de altura. Com isso, o pulo de pico fica em ~77px (~5 tiles) e a velocidade máxima cobre ~12 tiles por segundo. Esses valores ainda devem ser revalidados depois da primeira fase de teste jogável.
@@ -1459,6 +1473,8 @@ Direção pendente:
   respawn e atualização de movimento.
 - Mapa de input inicial implementado em `src/game/input`, com bindings para
   movimento, pulo, ações principal/secundária, reinício, pausa e mute.
+- Movimento horizontal inicial implementado com velocidade máxima de 190 px/s,
+  aceleração de 1800 px/s² e desaceleração separada para chão e ar.
 
 ## Perguntas Abertas
 

@@ -3,6 +3,10 @@ import Phaser from "phaser";
 import { GAME_RESOLUTION, TILE_SIZE_PX } from "../constants";
 import { Player } from "../entities";
 import { ActionInput } from "../input";
+import {
+  calculateHorizontalVelocity,
+  getHorizontalDirection,
+} from "../physics";
 import { gameStateStore } from "../systems/game-state";
 import { SCENE_KEYS } from "./scene-keys";
 
@@ -46,7 +50,7 @@ export class LevelScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
 
-  public override update(): void {
+  public override update(_time: number, delta: number): void {
     if (this.actionInput?.wasPressed("pause")) {
       this.pauseLevel();
     }
@@ -55,7 +59,36 @@ export class LevelScene extends Phaser.Scene {
       this.toggleMute();
     }
 
-    this.player?.updateMovement({ isGrounded: true });
+    this.updatePlayerMovement(delta);
+  }
+
+  private updatePlayerMovement(delta: number): void {
+    if (!this.player || !this.actionInput) {
+      return;
+    }
+
+    const { velocity } = this.player.getPhysicsState();
+    const direction = getHorizontalDirection({
+      isMovingLeft: this.actionInput.isDown("move-left"),
+      isMovingRight: this.actionInput.isDown("move-right"),
+    });
+    const horizontalVelocity = calculateHorizontalVelocity({
+      currentVelocityX: velocity.x,
+      direction,
+      isGrounded: true,
+      deltaMs: delta,
+    });
+
+    this.player.updateMovement({
+      velocity: {
+        x: horizontalVelocity,
+        y: 0,
+      },
+      ...(direction !== 0
+        ? { facing: direction === -1 ? "left" : "right" }
+        : {}),
+      isGrounded: true,
+    });
   }
 
   private pauseLevel(): void {
