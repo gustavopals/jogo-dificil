@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-import { GAME_BACKGROUND_COLOR } from "../config";
+import { GAME_BACKGROUND_COLOR } from "../constants";
 import { SCENE_KEYS } from "./scene-keys";
 
 export class PreloadScene extends Phaser.Scene {

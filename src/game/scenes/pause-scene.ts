@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
-import { GAME_RESOLUTION } from "../config";
+import { GAME_RESOLUTION } from "../constants";
+import { gameStateStore } from "../systems/game-state";
 import { SCENE_KEYS } from "./scene-keys";
 
 export class PauseScene extends Phaser.Scene {
@@ -9,6 +10,8 @@ export class PauseScene extends Phaser.Scene {
   }
 
   public create(): void {
+    gameStateStore.setPaused(true);
+
     this.add.rectangle(
       GAME_RESOLUTION.width / 2,
       GAME_RESOLUTION.height / 2,
@@ -45,6 +48,7 @@ export class PauseScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.input.keyboard?.once("keydown-ESC", () => {
+      gameStateStore.setPaused(false);
       this.scene.stop();
       this.scene.resume(SCENE_KEYS.LEVEL);
     });

@@ -328,12 +328,12 @@ Pronto quando:
 
 ### Task 2.3 - Criar Fluxo De Estados
 
-- [ ] Definir estado de jogo.
-- [ ] Definir estado de fase atual.
-- [ ] Definir contador de mortes.
-- [ ] Definir checkpoint ativo.
-- [ ] Definir estado de pausa.
-- [ ] Definir estado de mute.
+- [x] Definir estado de jogo.
+- [x] Definir estado de fase atual.
+- [x] Definir contador de mortes.
+- [x] Definir checkpoint ativo.
+- [x] Definir estado de pausa.
+- [x] Definir estado de mute.
 
 Pronto quando:
 
@@ -341,12 +341,12 @@ Pronto quando:
 
 ### Task 2.4 - Criar Tipos Compartilhados
 
-- [ ] Criar tipo `Vector2Like`.
-- [ ] Criar tipo `RectLike`.
-- [ ] Criar tipos de fase.
-- [ ] Criar tipos de input.
-- [ ] Criar tipos de audio.
-- [ ] Criar tipos de entidades.
+- [x] Criar tipo `Vector2Like`.
+- [x] Criar tipo `RectLike`.
+- [x] Criar tipos de fase.
+- [x] Criar tipos de input.
+- [x] Criar tipos de audio.
+- [x] Criar tipos de entidades.
 
 Pronto quando:
 
@@ -354,11 +354,11 @@ Pronto quando:
 
 ### Task 2.5 - Criar Sistema De Eventos Internos
 
-- [ ] Definir eventos de morte.
-- [ ] Definir eventos de respawn.
-- [ ] Definir eventos de checkpoint.
-- [ ] Definir eventos de fim de fase.
-- [ ] Definir eventos de audio.
+- [x] Definir eventos de morte.
+- [x] Definir eventos de respawn.
+- [x] Definir eventos de checkpoint.
+- [x] Definir eventos de fim de fase.
+- [x] Definir eventos de audio.
 
 Pronto quando:
 
@@ -371,12 +371,12 @@ placeholder suficientes para desenvolver o gameplay.
 
 ### Task 3.1 - Fechar Conceito Inicial Do Personagem
 
-- [ ] Definir nome provisório.
-- [ ] Definir se e humano, objeto animado ou criatura original.
-- [ ] Definir personalidade visual.
-- [ ] Definir silhueta.
-- [ ] Definir proporcao geral.
-- [ ] Registrar decisoes em `IDEIA.md`.
+- [x] Definir nome provisório.
+- [x] Definir se e humano, objeto animado ou criatura original.
+- [x] Definir personalidade visual.
+- [x] Definir silhueta.
+- [x] Definir proporcao geral.
+- [x] Registrar decisoes em `IDEIA.md`.
 
 Pronto quando:
 
@@ -1140,11 +1140,32 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
 - [x] Task 1.7 concluida: ESLint e Prettier configurados, ignores para
   artefatos gerados adicionados, comandos documentados no `README.md`, e
   `npm run lint` / `npm run format` validados.
-- [x] Task 2.1 concluida: configuracao central criada em
-  `src/game/config.ts`, com resolucao 480x270, tile de 16px, escala Phaser
-  `FIT`/`CENTER_BOTH`, renderizacao para pixel art, FPS alvo 60, Arcade Physics
-  e constantes iniciais de movimento/fisica.
+- [x] Task 2.1 concluida: constantes centrais extraidas para
+  `src/game/constants.ts` e configuracao Phaser criada em `src/game/config.ts`,
+  com resolucao 480x270, tile de 16px, escala `FIT`/`CENTER_BOTH`,
+  renderizacao para pixel art, FPS alvo 60, Arcade Physics e constantes
+  iniciais de movimento/fisica.
 - [x] Task 2.2 concluida: cenas `BootScene`, `PreloadScene`, `MenuScene`,
   `LevelScene`, `HudScene` e `PauseScene` criadas. `main.ts` agora inicia
   Phaser com fluxo boot -> preload -> menu -> level, HUD sobre a fase e pausa
   via `Esc`.
+- [x] Task 2.3 concluida: fluxo de estado central criado em
+  `src/game/systems/game-state.ts`, cobrindo status do jogo, fase atual,
+  contador de mortes, checkpoint ativo, pausa e mute. Cenas passaram a usar o
+  estado central para iniciar fase, pausar/retomar, alternar mute e atualizar
+  HUD.
+- [x] Task 2.4 concluida: tipos compartilhados criados em `src/shared`, com
+  geometria (`Vector2Like`, `RectLike`), fase, input, audio e entidades.
+  `game-state` passou a usar tipos compartilhados para level, checkpoint e
+  posicao.
+- [x] Task 2.5 concluida: sistema interno de eventos criado em
+  `src/game/systems/game-events.ts`, com eventos tipados para morte, respawn,
+  checkpoint, fim de fase e audio. `game-state` passou a emitir eventos para
+  checkpoint, morte, respawn, fim de fase e mute.
+- [x] Revisao da Fase 2 concluida: constantes puras separadas da configuracao
+  Phaser para permitir testes Node sem `window`, e testes unitarios adicionados
+  para eventos internos e fluxo de estado.
+- [x] Task 3.1 concluida: conceito inicial do personagem registrado em
+  `IDEIA.md`. Nome provisório definido como Pino, uma criatura original de corpo
+  compacto em cápsula, visor frontal, antena curta, pés pequenos e humor visual
+  desconfiado/desajeitado.

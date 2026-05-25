@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
-import { GAME_RESOLUTION, GAME_TITLE } from "../config";
+import { GAME_RESOLUTION, GAME_TITLE } from "../constants";
+import { gameStateStore, INITIAL_LEVEL_ID } from "../systems/game-state";
 import { SCENE_KEYS } from "./scene-keys";
 
 export class MenuScene extends Phaser.Scene {
@@ -9,6 +10,8 @@ export class MenuScene extends Phaser.Scene {
   }
 
   public create(): void {
+    gameStateStore.enterMenu();
+
     const centerX = GAME_RESOLUTION.width / 2;
     const centerY = GAME_RESOLUTION.height / 2;
 
@@ -34,6 +37,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private startLevel(): void {
+    gameStateStore.startLevel(INITIAL_LEVEL_ID);
     this.scene.start(SCENE_KEYS.LEVEL);
   }
 }

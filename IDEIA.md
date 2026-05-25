@@ -18,11 +18,16 @@ A inspiração de sensação é Trap Adventure 2, mas o jogo deve ter identidade
 
 ## Identidade Original
 
+Definido inicialmente:
+
+- Personagem principal provisório: Pino, uma criatura original pequena, teimosa
+  e legível em pixel art de baixa resolução.
+
 Ainda vamos definir:
 
 - Nome do jogo.
-- Tema visual.
-- Personagem principal.
+- Tema visual final.
+- Nome definitivo do personagem principal.
 - Mundo.
 - Tom de humor.
 - Estilo de música.
@@ -628,14 +633,33 @@ Entregáveis esperados:
 - Notas sobre personalidade e expressão.
 - Observação de quais partes podem deformar ou exagerar em animações.
 
-Decisões pendentes:
+Decisões de conceito fechadas na Task 3.1:
 
-- O personagem será humano, objeto animado ou criatura original?
-- O corpo será mais compacto ou alongado?
-- O humor visual será fofo, estranho, sarcástico, desajeitado ou seco?
-- O personagem terá rosto expressivo?
-- O personagem terá acessórios importantes?
-- O personagem terá alguma limitação visual proposital, como pernas curtas, cabeça grande ou corpo geométrico?
+- Nome provisório: Pino.
+- Tipo: criatura original. Não é humano e não é um objeto animado literal.
+- Função narrativa provisória: Pino é um pequeno testador de salas impossíveis,
+  teimoso o bastante para voltar depois de cada morte.
+- Personalidade visual: curioso, desconfiado e levemente desajeitado, com humor
+  seco. Ele parece sempre pronto para cair em uma armadilha que já suspeitava
+  existir.
+- Silhueta: corpo compacto em formato de cápsula inclinada, frente levemente
+  pontuda para indicar direção, antena curta no topo e dois pés pequenos e
+  separados na base.
+- Proporção geral: personagem alto e estreito, com leitura aproximada de 2:1
+  entre altura e largura. Cabeça e corpo funcionam como uma massa única para
+  preservar legibilidade em 24px de altura.
+- Rosto e direção: um visor/olho frontal grande indica para onde Pino está
+  olhando. O sprite pode ser espelhado, mas o ponto frontal deve continuar
+  óbvio.
+- Acessórios importantes: antena curta e ponta frontal; ambos podem exagerar em
+  animações de dash, morte e respawn, mas não devem entrar na hitbox principal.
+- Limitação visual proposital: pernas curtas e corpo geométrico. O personagem
+  deve parecer preciso para colisão, mas vulnerável e cômico quando morre.
+- Paleta inicial de placeholder: corpo amarelo-sinalização, visor claro/ciano,
+  sombra azul-petróleo e acento coral para feedback de dano ou perigo.
+- Regra para próximas tarefas: a Task 3.2 pode ajustar medidas, hitbox, pivô e
+  margens sem redesenhar o conceito; a Task 3.3 deve produzir o primeiro
+  placeholder visual seguindo esta silhueta.
 
 ### Tamanho e Leitura
 
@@ -1348,12 +1372,15 @@ Direção pendente:
 - Canvas usa modo `FIT` do Phaser, com pixel art ativado, letterbox em aspect ratio diferente e 60 FPS alvo. Sem mobile/touch no MVP.
 - Trap Adventure 2 é referência de sensação, não fonte de cópia.
 - O projeto será estruturado desde o início, com planejamento de personagens, animações, mapas, músicas e ações.
+- Personagem principal provisório definido como Pino: criatura original compacta
+  com corpo em cápsula, visor frontal, antena curta, pés pequenos e humor visual
+  desconfiado/desajeitado.
 
 ## Perguntas Abertas
 
 - Qual será o nome do jogo?
 - Qual será a estética visual (pixel art com paleta limitada, paleta ampla, estilo cartoon)?
-- O personagem será humano, objeto animado ou criatura original?
+- O nome provisório Pino será mantido ou trocado antes da arte final?
 - A dificuldade será puramente cruel ou terá camadas de acessibilidade?
 - O jogo terá história ou será mais arcade?
 - Depois das 3 fases iniciais, a expansão será por fases lineares, hub de seleção ou mundos separados?
