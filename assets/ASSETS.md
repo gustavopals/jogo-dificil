@@ -27,6 +27,6 @@ jogo.
 
 ## Registro
 
-| Arquivo | Origem | Licenca | Observacoes |
-| --- | --- | --- | --- |
-| Nenhum asset registrado ainda | - | - | Pipeline inicial criado |
+| Arquivo                       | Origem | Licenca | Observacoes             |
+| ----------------------------- | ------ | ------- | ----------------------- |
+| Nenhum asset registrado ainda | -      | -       | Pipeline inicial criado |
