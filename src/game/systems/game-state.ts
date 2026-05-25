@@ -24,9 +24,9 @@ export type GameStateSnapshot = {
 
 type GameStateListener = (state: GameStateSnapshot) => void;
 
-const INITIAL_PLAYER_X = TILE_SIZE_PX * 4;
+const INITIAL_PLAYER_PIVOT_X = TILE_SIZE_PX * 4;
 const INITIAL_GROUND_Y = GAME_RESOLUTION.height - TILE_SIZE_PX * 3;
-const INITIAL_PLAYER_Y = INITIAL_GROUND_Y - PLAYER_SIZE.visualHeight / 2;
+const INITIAL_PLAYER_PIVOT_Y = INITIAL_GROUND_Y;
 
 function createInitialCheckpointId(levelId: LevelId): CheckpointId {
   return `${levelId}-start`;
@@ -36,8 +36,8 @@ function createInitialCheckpoint(levelId: LevelId): ActiveCheckpoint {
   return {
     id: createInitialCheckpointId(levelId),
     levelId,
-    x: INITIAL_PLAYER_X,
-    y: INITIAL_PLAYER_Y,
+    x: INITIAL_PLAYER_PIVOT_X,
+    y: INITIAL_PLAYER_PIVOT_Y,
   };
 }
 

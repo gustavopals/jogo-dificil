@@ -663,15 +663,23 @@ Decisões de conceito fechadas na Task 3.1:
 
 ### Tamanho e Leitura
 
-Decisões a definir durante a Fase 1:
+Decisões de escala fechadas na Task 3.2:
 
-- Resolução base do jogo.
-- Tamanho dos tiles.
-- Altura e largura do personagem.
-- Área real de colisão.
-- Área visual do sprite.
-- Pivô do personagem.
-- Margem de segurança entre sprite e hitbox.
+- Resolução base do jogo: 480x270.
+- Tamanho dos tiles: 16x16px.
+- Área visual do sprite: 12x24px.
+- Hitbox real inicial: 10x22px, centralizada dentro da área visual.
+- Margem entre sprite e hitbox: 1px em cada lado, topo e base. Antena, ponta
+  frontal e deformações visuais podem ocupar essa margem, mas não devem mudar a
+  colisão principal.
+- Pivô do personagem: centro inferior do sprite, equivalente a x=6px e y=24px
+  dentro da área visual. Checkpoints e respawn devem usar esse ponto como
+  posição de referência.
+- Relação com tile: sprite visual de 0,75 tile de largura por 1,5 tile de
+  altura; hitbox de 0,625 tile de largura por 1,375 tile de altura.
+- Leitura prática: Pino cabe visualmente em dois tiles de altura com folga e
+  ocupa menos de um tile de largura, favorecendo plataformas estreitas e colisão
+  previsível.
 
 Regra prática:
 
@@ -1375,6 +1383,9 @@ Direção pendente:
 - Personagem principal provisório definido como Pino: criatura original compacta
   com corpo em cápsula, visor frontal, antena curta, pés pequenos e humor visual
   desconfiado/desajeitado.
+- Escala inicial de Pino definida: sprite visual 12x24px, hitbox real 10x22px,
+  margem visual de 1px em todos os lados, pivô no centro inferior e relação de
+  0,75x1,5 tile para o sprite.
 
 ## Perguntas Abertas
 

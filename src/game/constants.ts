@@ -13,6 +13,24 @@ export const TARGET_FPS = 60;
 export const PLAYER_SIZE = {
   visualWidth: 12,
   visualHeight: 24,
+  hitboxWidth: 10,
+  hitboxHeight: 22,
+  spriteMargin: {
+    left: 1,
+    right: 1,
+    top: 1,
+    bottom: 1,
+  },
+  pivot: {
+    x: 0.5,
+    y: 1,
+  },
+  tileScale: {
+    visualWidth: 12 / TILE_SIZE_PX,
+    visualHeight: 24 / TILE_SIZE_PX,
+    hitboxWidth: 10 / TILE_SIZE_PX,
+    hitboxHeight: 22 / TILE_SIZE_PX,
+  },
 } as const;
 
 export const PLAYER_MOVEMENT = {

@@ -24,9 +24,17 @@ export class LevelScene extends Phaser.Scene {
       0x314b57,
     );
 
+    const playerCenterX =
+      activeCheckpoint.x +
+      PLAYER_SIZE.visualWidth * (0.5 - PLAYER_SIZE.pivot.x);
+    const playerCenterY =
+      activeCheckpoint.y -
+      PLAYER_SIZE.visualHeight * PLAYER_SIZE.pivot.y +
+      PLAYER_SIZE.visualHeight / 2;
+
     this.add.rectangle(
-      activeCheckpoint.x,
-      activeCheckpoint.y,
+      playerCenterX,
+      playerCenterY,
       PLAYER_SIZE.visualWidth,
       PLAYER_SIZE.visualHeight,
       0xf25b5b,

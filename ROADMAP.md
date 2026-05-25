@@ -384,12 +384,12 @@ Pronto quando:
 
 ### Task 3.2 - Definir Escala Do Personagem
 
-- [ ] Definir altura visual.
-- [ ] Definir largura visual.
-- [ ] Definir hitbox real.
-- [ ] Definir margem entre sprite e hitbox.
-- [ ] Definir pivô.
-- [ ] Registrar relacao com tamanho de tile.
+- [x] Definir altura visual.
+- [x] Definir largura visual.
+- [x] Definir hitbox real.
+- [x] Definir margem entre sprite e hitbox.
+- [x] Definir pivô.
+- [x] Registrar relacao com tamanho de tile.
 
 Pronto quando:
 
@@ -1169,3 +1169,7 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `IDEIA.md`. Nome provisório definido como Pino, uma criatura original de corpo
   compacto em cápsula, visor frontal, antena curta, pés pequenos e humor visual
   desconfiado/desajeitado.
+- [x] Task 3.2 concluida: escala inicial do personagem registrada em `IDEIA.md`
+  e refletida em `src/game/constants.ts`. Pino usa sprite visual 12x24px, hitbox
+  real 10x22px, margem visual de 1px em todos os lados, pivô no centro inferior
+  e relação de 0,75x1,5 tile para o sprite.

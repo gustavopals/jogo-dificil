@@ -8,6 +8,11 @@ import {
   type PlayerDiedEvent,
   type PlayerRespawnedEvent,
 } from "../src/game/systems/game-events";
+import {
+  GAME_RESOLUTION,
+  PLAYER_SIZE,
+  TILE_SIZE_PX,
+} from "../src/game/constants";
 import { gameStateStore } from "../src/game/systems/game-state";
 
 beforeEach(() => {
@@ -19,6 +24,19 @@ afterEach(() => {
 });
 
 describe("game state", () => {
+  it("uses the player bottom-center pivot as checkpoint position", () => {
+    gameStateStore.startLevel("level-01");
+
+    expect(gameStateStore.getSnapshot().activeCheckpoint).toMatchObject({
+      x: TILE_SIZE_PX * 4,
+      y: GAME_RESOLUTION.height - TILE_SIZE_PX * 3,
+    });
+    expect(PLAYER_SIZE.pivot).toEqual({
+      x: 0.5,
+      y: 1,
+    });
+  });
+
   it("tracks the active level and derives its start checkpoint", () => {
     gameStateStore.startLevel("level-02");
 
