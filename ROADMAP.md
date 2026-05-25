@@ -276,10 +276,10 @@ Pronto quando:
 
 ### Task 1.6 - Configurar TypeScript Estrito
 
-- [ ] Criar ou revisar `tsconfig.json`.
-- [ ] Ativar `strict`.
-- [ ] Configurar alias de import se for util.
-- [ ] Garantir que build TypeScript nao aceite erros silenciosos.
+- [x] Criar ou revisar `tsconfig.json`.
+- [x] Ativar `strict`.
+- [x] Configurar alias de import se for util.
+- [x] Garantir que build TypeScript nao aceite erros silenciosos.
 
 Pronto quando:
 
@@ -287,10 +287,10 @@ Pronto quando:
 
 ### Task 1.7 - Configurar Qualidade De Codigo
 
-- [ ] Configurar ESLint.
-- [ ] Configurar Prettier.
-- [ ] Garantir que arquivos gerados nao criem ruido.
-- [ ] Documentar comandos no `README.md`.
+- [x] Configurar ESLint.
+- [x] Configurar Prettier.
+- [x] Garantir que arquivos gerados nao criem ruido.
+- [x] Documentar comandos no `README.md`.
 
 Pronto quando:
 
@@ -1130,3 +1130,10 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
 - [x] Task 1.4 concluida: estrutura inicial de pastas criada em `src/game`,
   `src/data`, `src/shared`, `tests` e `docs`, sem arquivos temporarios de
   placeholder.
+- [x] Task 1.6 concluida: `tsconfig.json` estrito criado e `npm run build`
+  ajustado para executar `tsc --noEmit` antes de `vite build`. Alias de import
+  avaliado e adiado por nao haver imports internos ainda. Build validado com
+  sucesso.
+- [x] Task 1.7 concluida: ESLint e Prettier configurados, ignores para
+  artefatos gerados adicionados, comandos documentados no `README.md`, e
+  `npm run lint` / `npm run format` validados.

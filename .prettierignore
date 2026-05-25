@@ -5,5 +5,7 @@ coverage/
 playwright-report/
 test-results/
 
-*.local
-*.log
+AGENTS.md
+CLAUDE.md
+IDEIA.md
+ROADMAP.md
