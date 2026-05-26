@@ -49,3 +49,17 @@ O primeiro tileset coerente fica em `assets/tilesets/` e usa tiles 16x16px:
 
 Todos foram gerados no projeto com `magick`, usam licenca original do projeto e
 estao registrados em `assets/ASSETS.md`.
+
+## Sprite Do Pino
+
+Pino continua com sprite 12x24px e pivô no centro inferior. A primeira arte de
+personagem coerente cobre:
+
+- `idle`: capsula amarela neutra, visor ciano voltado para a direita.
+- `run`: dois frames com inclinacao e troca de apoio dos pes.
+- `jump`: silhueta vertical esticada para indicar subida.
+- `fall`: visor mais baixo e pes soltos para leitura de queda.
+- `death`: dois frames vermelhos, comprimidos, usando a cor de hazard.
+- `respawn`: dois frames ciano/hero, com varredura e reconstrucao do corpo.
+
+A hitbox permanece 10x22px; esses sprites mudam apenas leitura visual.

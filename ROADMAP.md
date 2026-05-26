@@ -914,12 +914,12 @@ Pronto quando:
 
 ### Task 11.3 - Arte Do Personagem
 
-- [ ] Melhorar sprite idle.
-- [ ] Melhorar corrida.
-- [ ] Melhorar pulo.
-- [ ] Melhorar queda.
-- [ ] Melhorar morte.
-- [ ] Melhorar respawn.
+- [x] Melhorar sprite idle.
+- [x] Melhorar corrida.
+- [x] Melhorar pulo.
+- [x] Melhorar queda.
+- [x] Melhorar morte.
+- [x] Melhorar respawn.
 
 Pronto quando:
 
@@ -1402,3 +1402,7 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   simples registrados em `assets/ASSETS.md`. `LevelScene` agora renderiza fundo,
   terreno e hazards com texturas repetiveis sem alterar colisao ou dados de
   gameplay.
+- [x] Task 11.3 concluida: Pino recebeu sprites 12x24px dedicados para idle,
+  corrida em dois frames, pulo, queda, morte em dois frames e respawn em dois
+  frames. `PINO_ANIMATIONS` agora usa esses frames nas animacoes centrais, o
+  preload carrega todos os PNGs e a hitbox permaneceu 10x22px.

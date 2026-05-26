@@ -1219,8 +1219,9 @@ Decisões de animação fechadas na Task 3.4:
 - Arquivo declarativo inicial: `src/data/characters/pino-animations.ts`.
 - Animações esperadas para o Pino: `idle`, `run`, `jump`, `fall`, `death`,
   `respawn`, `primary-action` e `secondary-action`.
-- Todas as animações começam como placeholder e usam o asset
-  `player-pino-idle` até existirem spritesheets ou frames dedicados.
+- As animações centrais de movimento agora usam frames dedicados criados na
+  Fase 11.3. Ações principal e secundária ainda usam frames reaproveitados até
+  terem arte própria.
 - `idle` e `run` são animações em loop. `jump`, `fall`, `death`, `respawn`,
   `primary-action` e `secondary-action` são animações de execução única no
   placeholder.
@@ -1970,6 +1971,9 @@ Direção pendente:
 - Placeholder visual inicial de Pino criado em
   `assets/sprites/player-pino-idle.png`, com corpo amarelo, contorno
   azul-petróleo, visor ciano e indicação de direção para a direita.
+- Arte inicial de movimento do Pino criada em sprites 12x24px para idle,
+  corrida em dois frames, pulo, queda, morte em dois frames e respawn em dois
+  frames. A hitbox continua 10x22px; a mudança é somente visual.
 - Dados declarativos de animação do Pino criados em
   `src/data/characters/pino-animations.ts`, cobrindo idle, run, jump, fall,
   death, respawn, ação principal e ação secundária com seleção por estado.
