@@ -785,11 +785,11 @@ Objetivo: adicionar som sem cansar o jogador em repeticao.
 
 ### Task 9.1 - Criar Audio Manager
 
-- [ ] Controlar volume geral.
-- [ ] Controlar volume de musica.
-- [ ] Controlar volume de efeitos.
-- [ ] Implementar mute.
-- [ ] Lidar com bloqueio de autoplay do navegador.
+- [x] Controlar volume geral.
+- [x] Controlar volume de musica.
+- [x] Controlar volume de efeitos.
+- [x] Implementar mute.
+- [x] Lidar com bloqueio de autoplay do navegador.
 
 Pronto quando:
 
@@ -797,13 +797,13 @@ Pronto quando:
 
 ### Task 9.2 - Sons Do Personagem
 
-- [ ] Som de pulo.
-- [ ] Som de aterrissagem, se nao ficar excessivo.
-- [ ] Som de morte.
-- [ ] Variacoes de morte.
-- [ ] Som de respawn.
-- [ ] Som de acao principal.
-- [ ] Som de acao secundaria.
+- [x] Som de pulo.
+- [x] Som de aterrissagem, se nao ficar excessivo.
+- [x] Som de morte.
+- [x] Variacoes de morte.
+- [x] Som de respawn.
+- [x] Som de acao principal.
+- [x] Som de acao secundaria.
 
 Pronto quando:
 
@@ -1351,3 +1351,14 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   conteudo jogavel completo, com testes de conteudo por fase, contratos de
   balanceamento da curva inicial, documentacao atualizada e pacote pronto para
   commit.
+- [x] Task 9.1 concluida: Audio Manager inicial criado em
+  `src/game/systems/audio-manager.ts`, com controle de volume geral, musica,
+  efeitos, mute e fila para autoplay bloqueado. `AudioScene` conecta eventos de
+  audio ao Phaser sem exigir assets finais ainda, e os contratos unitarios ficam
+  em `tests/audio-manager.test.ts`.
+- [x] Task 9.2 concluida: sons placeholder originais do Pino criados em
+  `assets/audio/sfx/`, metadados declarados em `src/data/audio/player-audio.ts`
+  e preload integrado. Pulo, aterrissagem filtrada, tres variacoes de morte,
+  respawn, acao primaria e acao secundaria agora emitem cues de audio, com
+  contratos em `tests/player-audio.test.ts` e
+  `tests/player-audio-feedback.test.ts`.

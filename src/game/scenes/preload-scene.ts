@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-import { IMAGE_ASSETS } from "../assets";
+import { AUDIO_ASSETS, IMAGE_ASSETS } from "../assets";
 import { GAME_BACKGROUND_COLOR } from "../constants";
 import { SCENE_KEYS } from "./scene-keys";
 
@@ -14,6 +14,9 @@ export class PreloadScene extends Phaser.Scene {
 
     IMAGE_ASSETS.forEach((asset) => {
       this.load.image(asset.key, asset.url);
+    });
+    AUDIO_ASSETS.forEach((asset) => {
+      this.load.audio(asset.key, asset.url);
     });
   }
 

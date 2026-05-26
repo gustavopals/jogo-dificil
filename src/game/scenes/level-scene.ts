@@ -11,6 +11,7 @@ import type {
   RectLike,
   TrapId,
 } from "../../shared";
+import { PLAYER_AUDIO_IDS } from "../../data/audio";
 import { PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
 import { Player } from "../entities";
 import { ActionInput } from "../input";
@@ -25,7 +26,11 @@ import {
   type KinematicBodyCollisionConfig,
 } from "../physics";
 import { gameStateStore } from "../systems/game-state";
-import type { DeathCause } from "../systems/game-events";
+import {
+  emitGameEvent,
+  GAME_EVENTS,
+  type DeathCause,
+} from "../systems/game-events";
 import {
   findTouchedDeadlyHazard,
   getHazardPlaceholderColor,
@@ -51,6 +56,10 @@ import {
   AUTO_RESPAWN_DELAY_MS,
   RESPAWN_RECOVERY_MS,
 } from "../systems/player-respawn";
+import {
+  getPlayerActionAudioId,
+  shouldPlayLandingAudio,
+} from "../systems/player-audio-feedback";
 import {
   getSolidTerrainAreas,
   getTerrainPlaceholderColor,
@@ -258,6 +267,20 @@ export class LevelScene extends Phaser.Scene {
         : {}),
       isGrounded: collision.isGrounded,
     });
+
+    if (jumpMovement.didJump) {
+      this.playPlayerSfx(PLAYER_AUDIO_IDS.JUMP);
+    }
+
+    if (
+      shouldPlayLandingAudio({
+        wasGrounded: isGrounded,
+        isGrounded: collision.isGrounded,
+        velocityY: jumpMovement.velocityY,
+      })
+    ) {
+      this.playPlayerSfx(PLAYER_AUDIO_IDS.LAND);
+    }
   }
 
   private drawTerrain(level: LevelDefinition): void {
@@ -615,6 +638,8 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
+    this.playPlayerSfx(getPlayerActionAudioId(pressedAction));
+
     const playerHitbox = getWorldHitbox(
       this.player.getPhysicsState().position,
       PLAYER_COLLISION_BODY,
@@ -930,6 +955,13 @@ export class LevelScene extends Phaser.Scene {
 
   private toggleMute(): void {
     gameStateStore.toggleMuted();
+  }
+
+  private playPlayerSfx(audioId: string): void {
+    emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
+      audioId,
+      category: "sfx",
+    });
   }
 
   private cleanup(): void {

@@ -10,6 +10,7 @@ export class BootScene extends Phaser.Scene {
 
   public create(): void {
     gameStateStore.resetRun();
+    this.scene.launch(SCENE_KEYS.AUDIO);
     this.scene.start(SCENE_KEYS.PRELOAD);
   }
 }

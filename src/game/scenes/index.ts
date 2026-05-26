@@ -1,3 +1,4 @@
+export { AudioScene } from "./audio-scene";
 export { BootScene } from "./boot-scene";
 export { HudScene } from "./hud-scene";
 export { LevelScene } from "./level-scene";

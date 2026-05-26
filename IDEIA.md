@@ -675,6 +675,36 @@ Revisão final da Fase 8:
 - A Fase 8 ficou pronta para commit com validação automática e smoke test no
   navegador.
 
+Implementação inicial do Audio Manager:
+
+- `src/game/systems/audio-manager.ts` centraliza volume geral, volume de música,
+  volume de efeitos, mute e fila de reprodução quando o navegador ainda bloqueia
+  autoplay.
+- `AudioScene` fica ativa desde o boot e conecta o manager aos eventos internos
+  `audio:play-requested`, `audio:stop-requested` e `audio:mute-changed`.
+- `PhaserAudioEngine` adapta o manager ao Sound Manager do Phaser e ignora de
+  forma segura sons ainda não carregados, mantendo a infraestrutura pronta para
+  as próximas tasks sem exigir assets finais agora.
+- O mute global continua vindo de `gameStateStore`, então `M` muda o estado do
+  jogo, atualiza o HUD e sincroniza o manager.
+- Sons bloqueados por autoplay ficam enfileirados até o Phaser emitir
+  `unlocked` ou até a primeira interação de teclado/mouse registrada pela
+  `AudioScene`.
+
+Implementação inicial dos sons do personagem:
+
+- Foram gerados placeholders originais em `.wav` para pulo, aterrissagem, três
+  mortes, respawn, ação primária e ação secundária do Pino.
+- Os metadados ficam em `src/data/audio/player-audio.ts`, separados do manager,
+  para manter a troca futura por assets finais simples.
+- `PreloadScene` carrega os sons do personagem via `AUDIO_ASSETS`.
+- `LevelScene` emite cues de pulo, aterrissagem e ações por eventos de áudio,
+  sem tocar Phaser Sound diretamente.
+- `AudioScene` escuta `player:died` e `player:respawned` para tocar variações
+  de morte e respawn sem acoplar o estado global ao motor de áudio.
+- O som de aterrissagem só dispara depois de queda real acima de velocidade
+  mínima, evitando ruído em microcolisões.
+
 ### Ponto 7 - Pipeline de Assets
 
 Status: Decidido.

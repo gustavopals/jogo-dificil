@@ -2,6 +2,7 @@ import Phaser from "phaser";
 
 import { createGameConfig } from "./game/config";
 import {
+  AudioScene,
   BootScene,
   HudScene,
   LevelScene,
@@ -12,6 +13,7 @@ import {
 
 new Phaser.Game(
   createGameConfig([
+    AudioScene,
     BootScene,
     PreloadScene,
     MenuScene,
