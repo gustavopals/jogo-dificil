@@ -4,12 +4,15 @@ import { GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
 import { LEVEL_01, LEVEL_02, LEVEL_03 } from "../src/data/levels";
 import {
   findTriggeredPositionTraps,
+  getProjectileTrailFeedback,
   getProjectileTextureKey,
   getTrapBodyTextureKey,
   getTrapFeedback,
+  getTrapVisualState,
 } from "../src/game/systems/level-traps";
 import {
   createInitialRoomState,
+  markTrapResolved,
   markTrapTriggered,
   resetRoomStateForRespawn,
 } from "../src/game/systems/room-state";
@@ -109,6 +112,103 @@ describe("level traps", () => {
     expect(triggeredFeedback.audio).toEqual({
       cueId: "trap:spike-pop:triggered",
       event: "triggered",
+    });
+  });
+
+  it("classifies armed, triggered and visually resolved trap states", () => {
+    const spikePop = LEVEL_01.traps.find(
+      (candidate) => candidate.kind === "spike-pop",
+    )!;
+    const breakableFloor = LEVEL_03.traps.find(
+      (candidate) => candidate.kind === "breakable-floor",
+    )!;
+    const roomState = createInitialRoomState(LEVEL_03);
+    const resolvedBreakableState = markTrapResolved(
+      markTrapTriggered(roomState, breakableFloor.id),
+      breakableFloor.id,
+    );
+    const resetState = resetRoomStateForRespawn(
+      resolvedBreakableState,
+      LEVEL_03,
+    );
+
+    expect(
+      getTrapVisualState(
+        spikePop,
+        createInitialRoomState(LEVEL_01).traps[spikePop.id]!,
+      ),
+    ).toBe("armed");
+    expect(
+      getTrapVisualState(
+        spikePop,
+        markTrapTriggered(createInitialRoomState(LEVEL_01), spikePop.id).traps[
+          spikePop.id
+        ]!,
+      ),
+    ).toBe("triggered");
+    expect(
+      getTrapVisualState(
+        breakableFloor,
+        resolvedBreakableState.traps[breakableFloor.id]!,
+      ),
+    ).toBe("resolved");
+    expect(
+      getTrapVisualState(breakableFloor, resetState.traps[breakableFloor.id]!),
+    ).toBe("armed");
+  });
+
+  it("adds stronger tells for projectile and breakable floor feedback", () => {
+    const projectile = LEVEL_02.traps.find(
+      (candidate) => candidate.kind === "projectile",
+    )!;
+    const breakableFloor = LEVEL_03.traps.find(
+      (candidate) => candidate.kind === "breakable-floor",
+    )!;
+    const projectileFeedback = getTrapFeedback(
+      projectile,
+      createInitialRoomState(LEVEL_02).traps[projectile.id]!,
+    );
+    const armedBreakableFeedback = getTrapFeedback(
+      breakableFloor,
+      createInitialRoomState(LEVEL_03).traps[breakableFloor.id]!,
+    );
+    const resolvedBreakableFeedback = getTrapFeedback(
+      breakableFloor,
+      markTrapResolved(
+        markTrapTriggered(createInitialRoomState(LEVEL_03), breakableFloor.id),
+        breakableFloor.id,
+      ).traps[breakableFloor.id]!,
+    );
+
+    expect(projectileFeedback.visual.tellAlpha).toBeGreaterThan(0);
+    expect(armedBreakableFeedback.visual.crackAlpha).toBeGreaterThan(0);
+    expect(resolvedBreakableFeedback.visual.crackAlpha).toBeGreaterThan(
+      armedBreakableFeedback.visual.crackAlpha,
+    );
+  });
+
+  it("creates projectile trail feedback behind the projectile direction", () => {
+    expect(
+      getProjectileTrailFeedback(
+        {
+          x: 100,
+          y: 40,
+          width: 8,
+          height: 8,
+        },
+        {
+          x: -150,
+          y: 0,
+        },
+      ),
+    ).toMatchObject({
+      area: {
+        x: 108,
+        y: 42.5,
+        height: 3,
+      },
+      color: 0x9b5de5,
+      alpha: 0.42,
     });
   });
 

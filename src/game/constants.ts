@@ -43,6 +43,7 @@ export const PLAYER_MOVEMENT = {
   jumpCutMultiplier: 0.45,
   coyoteTimeMs: 90,
   jumpBufferMs: 100,
+  dashSpeed: 420,
   dashDurationMs: 150,
   dashCooldownMs: 300,
 } as const;

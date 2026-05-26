@@ -209,7 +209,11 @@ describe("game state", () => {
       x: 128,
       y: 192,
     });
-    gameStateStore.registerDeath("trap", { x: 130, y: 194 });
+    gameStateStore.registerDeath(
+      "trap",
+      { x: 130, y: 194 },
+      "level-01-spike-pop",
+    );
     gameStateStore.respawnAtCheckpoint();
 
     expect(checkpointEvents).toEqual([
@@ -228,6 +232,7 @@ describe("game state", () => {
         checkpointId: "level-01-mid",
         deathCount: 1,
         cause: "trap",
+        sourceId: "level-01-spike-pop",
         position: {
           x: 130,
           y: 194,

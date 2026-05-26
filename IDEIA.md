@@ -948,6 +948,33 @@ Expansao pos-MVP e Fase 15:
   visual das traps e adicionar motivos locais para rejogar.
 - A analise completa e o backlog da Fase 15 ficam registrados em
   `docs/phase-15-improvement-plan.md`.
+- Implementacao inicial do Dash controlado:
+  - `J`/`Z` agora executa um dash horizontal real.
+  - O dash usa velocidade de 420 px/s por 150 ms, com cooldown de 300 ms.
+  - Sem direcao horizontal pressionada, o dash usa a direcao atual do Pino.
+  - O dash mantem colisao solida, nao atravessa paredes e preserva o movimento
+    vertical/pulo.
+  - Audio e animacao de acao principal so disparam quando o dash realmente
+    inicia.
+  - O estado de dash e resetado em morte, respawn automatico e reinicio manual.
+- Implementacao inicial do feedback de morte:
+  - Eventos `player:died` agora carregam causa e `sourceId` opcional.
+  - Hazards informam o proprio id como fonte da morte.
+  - Traps informam o id da trap, e projeteis informam o id do projetil.
+  - Causas cobertas no contrato atual: `fall`, `hazard`, `trap`,
+    `projectile`, `crusher`, `manual-restart` e `unknown`.
+  - O HUD mostra uma mensagem curta de aprendizado por 850 ms, sem atrasar o
+    respawn nem explicar demais a solucao.
+- Implementacao inicial da leitura visual de traps:
+  - Traps agora possuem estado visual `armed`, `triggered` e `resolved`.
+  - `spike-pop` fica quase escondida enquanto armada e faz surgimento curto
+    quando acionada.
+  - `breakable-floor` exibe rachadura discreta antes do acionamento e rachadura
+    forte depois de resolver.
+  - Projeteis recebem rastro visual roxo curto, e o emissor ganha tell mais
+    claro ao disparar.
+  - A melhoria nao muda hitboxes, colisao, dano, reset de sala ou dificuldade
+    declarada das fases.
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 

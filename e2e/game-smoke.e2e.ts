@@ -109,6 +109,16 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
     .poll(async () => (await readSmokeSnapshot(page)).player?.x ?? 0)
     .toBeGreaterThan((startSnapshot.player?.x ?? 0) + 20);
 
+  const beforeDashSnapshot = await readSmokeSnapshot(page);
+
+  await page.keyboard.down("KeyJ");
+  await page.waitForTimeout(90);
+  await page.keyboard.up("KeyJ");
+
+  await expect
+    .poll(async () => (await readSmokeSnapshot(page)).player?.x ?? 0)
+    .toBeGreaterThan((beforeDashSnapshot.player?.x ?? 0) + 25);
+
   expect(pageErrors).toEqual([]);
   expect(consoleErrors).toEqual([]);
 });

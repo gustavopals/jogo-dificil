@@ -131,6 +131,7 @@ class GameStateStore {
   public registerDeath(
     cause: DeathCause = "unknown",
     position: Vector2Like = this.state.activeCheckpoint,
+    sourceId?: string,
   ): number {
     if (this.state.playerLifeState === "dead") {
       return this.state.deathCount;
@@ -147,6 +148,7 @@ class GameStateStore {
       checkpointId: this.state.activeCheckpoint.id,
       deathCount,
       cause,
+      ...(sourceId ? { sourceId } : {}),
       position: {
         x: position.x,
         y: position.y,

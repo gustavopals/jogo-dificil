@@ -1071,12 +1071,12 @@ Documento de analise: `docs/phase-15-improvement-plan.md`.
 
 ### Task 15.1 - Implementar Dash Controlado
 
-- [ ] Criar estado puro de dash com duracao, cooldown, direcao e reset.
-- [ ] Integrar `J`/`Z` ao movimento real do jogador.
-- [ ] Garantir que dash nao atravesse solidos.
-- [ ] Reproduzir audio/animacao somente quando o dash acontecer.
-- [ ] Resetar dash em morte, respawn e reinicio manual.
-- [ ] Cobrir duracao, cooldown, direcao e reset com testes unitarios.
+- [x] Criar estado puro de dash com duracao, cooldown, direcao e reset.
+- [x] Integrar `J`/`Z` ao movimento real do jogador.
+- [x] Garantir que dash nao atravesse solidos.
+- [x] Reproduzir audio/animacao somente quando o dash acontecer.
+- [x] Resetar dash em morte, respawn e reinicio manual.
+- [x] Cobrir duracao, cooldown, direcao e reset com testes unitarios.
 
 Pronto quando:
 
@@ -1084,11 +1084,11 @@ Pronto quando:
 
 ### Task 15.2 - Feedback De Morte E Aprendizado
 
-- [ ] Registrar causa da morte.
-- [ ] Registrar fonte da morte quando houver id de hazard/trap/projetil.
-- [ ] Mostrar mensagem curta no HUD ou no respawn.
-- [ ] Emitir evento de morte com causa para testes e estatisticas futuras.
-- [ ] Cobrir formatacao e mapeamento de causas com testes.
+- [x] Registrar causa da morte.
+- [x] Registrar fonte da morte quando houver id de hazard/trap/projetil.
+- [x] Mostrar mensagem curta no HUD ou no respawn.
+- [x] Emitir evento de morte com causa para testes e estatisticas futuras.
+- [x] Cobrir formatacao e mapeamento de causas com testes.
 
 Pronto quando:
 
@@ -1096,11 +1096,11 @@ Pronto quando:
 
 ### Task 15.3 - Melhorar Leitura Visual Das Traps
 
-- [ ] Adicionar estado visual armado/acionado/resetado para traps.
-- [ ] Criar feedback curto de surgimento para `spike-pop`.
-- [ ] Criar rachadura visual para `breakable-floor`.
-- [ ] Criar rastro ou preparacao legivel para projetil.
-- [ ] Atualizar a revisao de justica das armadilhas.
+- [x] Adicionar estado visual armado/acionado/resetado para traps.
+- [x] Criar feedback curto de surgimento para `spike-pop`.
+- [x] Criar rachadura visual para `breakable-floor`.
+- [x] Criar rastro ou preparacao legivel para projetil.
+- [x] Atualizar a revisao de justica das armadilhas.
 
 Pronto quando:
 
@@ -1119,6 +1119,18 @@ Pronto quando:
 
 - Concluir uma fase gera uma marca local que incentiva repeticao sem depender de
   ranking online.
+
+### Task 15.5 - Selecionar E Continuar Fases Desbloqueadas
+
+- [ ] Persistir maior fase desbloqueada localmente.
+- [ ] Adicionar opcao simples de continuar no menu.
+- [ ] Adicionar selecao compacta de fases desbloqueadas.
+- [ ] Resetar run atual ao selecionar fase sem apagar recordes locais.
+- [ ] Manter campanha linear como fluxo padrao.
+
+Pronto quando:
+
+- O jogador consegue voltar a fases ja desbloqueadas sem criar um hub jogavel.
 
 ### Task 15.6 - Planejar E Criar Bloco 2 De Fases
 
@@ -1540,3 +1552,20 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   morte, leitura visual de traps, resultados locais, selecao/continuacao de
   fases desbloqueadas, Bloco 2 de fases, ferramentas de QA e otimizacao de
   build.
+- [x] Task 15.1 concluida: dash controlado implementado em
+  `src/game/physics/dash-movement.ts`, integrado ao `LevelScene` com `J`/`Z`,
+  velocidade previsivel, duracao/cooldown, colisao solida existente,
+  audio/animacao somente no dash valido e reset em morte, respawn e reinicio
+  manual. Testes unitarios adicionados em `tests/dash-movement.test.ts` e smoke
+  Playwright atualizado para validar movimento de dash.
+- [x] Task 15.2 concluida: eventos de morte agora carregam causa e `sourceId`
+  quando a fonte tem id de hazard, trap ou projetil. `HudScene` mostra feedback
+  curto de aprendizado por menos de 1 segundo usando
+  `src/game/ui/death-feedback.ts`. Testes cobrem formatacao, duracao, fonte,
+  eventos, estado, hazards e traps.
+- [x] Task 15.3 concluida: traps agora expõem estado visual `armed`,
+  `triggered` e `resolved` em `src/game/systems/level-traps.ts`. `LevelScene`
+  renderiza tells, rachaduras e rastros de projeteis, com surgimento curto para
+  `spike-pop`, rachadura reforcada para `breakable-floor` e rastro roxo para
+  projeteis. A revisao de justica foi atualizada em
+  `docs/trap-fairness-review.md`.

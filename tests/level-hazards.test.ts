@@ -33,6 +33,30 @@ const FALL_HAZARD = {
   isInstantDeath: true,
 } as const satisfies HazardDefinition;
 
+const PROJECTILE_HAZARD = {
+  id: "test-projectile-zone",
+  kind: "projectile",
+  area: {
+    x: 112,
+    y: 80,
+    width: 8,
+    height: 8,
+  },
+  isInstantDeath: true,
+} as const satisfies HazardDefinition;
+
+const CRUSHER_HAZARD = {
+  id: "test-crusher-zone",
+  kind: "crusher",
+  area: {
+    x: 128,
+    y: 80,
+    width: 16,
+    height: 16,
+  },
+  isInstantDeath: true,
+} as const satisfies HazardDefinition;
+
 describe("level hazards", () => {
   it("detects contact with instant-death hazards", () => {
     expect(
@@ -82,8 +106,10 @@ describe("level hazards", () => {
     ).toBeUndefined();
   });
 
-  it("maps fall hazards to fall death and other hazards to generic hazard death", () => {
+  it("maps hazard kinds to death causes", () => {
     expect(getDeathCauseForHazard(FALL_HAZARD)).toBe("fall");
+    expect(getDeathCauseForHazard(PROJECTILE_HAZARD)).toBe("projectile");
+    expect(getDeathCauseForHazard(CRUSHER_HAZARD)).toBe("crusher");
     expect(getDeathCauseForHazard(SPIKES_HAZARD)).toBe("hazard");
   });
 

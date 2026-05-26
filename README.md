@@ -78,7 +78,7 @@ npm run format
 - `A` ou `Seta Esquerda`: andar para esquerda.
 - `D` ou `Seta Direita`: andar para direita.
 - `Espaco`, `W` ou `Seta Cima`: pular.
-- `J` ou `Z`: acao principal.
+- `J` ou `Z`: dash.
 - `K` ou `X`: acao secundaria/interagir.
 - `R`: reiniciar do checkpoint ativo.
 - `Esc`: pausar/retomar.

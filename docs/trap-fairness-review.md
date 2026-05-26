@@ -8,6 +8,11 @@ falha. A revisao abaixo registra causa esperada da morte, risco de softlock,
 espera apos erro e pontos que precisam de acabamento visual/sonoro nas proximas
 fases.
 
+Atualizacao pos-MVP: na Fase 15.3, as traps ganharam estados visuais de
+`armed`, `triggered` e `resolved`, alem de feedback curto de ativacao para
+`spike-pop`, rachadura reforcada para `breakable-floor` e rastro visual para
+projeteis.
+
 ## Regras Da Revisao
 
 - Toda trap destrutiva do MVP precisa resetar no respawn.
@@ -16,6 +21,11 @@ fases.
 - Tempos configurados de trap devem ficar abaixo do tempo de respawn automatico,
   para nao criar esperas longas alem da propria morte.
 - Portas fechadas precisam ter pelo menos uma forma declarada de abertura.
+- O estado visual `armed` pode sugerir risco de forma discreta, mas nao deve
+  entregar a solucao antes da primeira falha.
+- O estado visual `triggered` deve explicar rapidamente o que matou o jogador.
+- O estado visual `resolved` deve deixar claro que a sala mudou ate o proximo
+  respawn/reset.
 - Riscos conhecidos devem ficar anotados antes da fase ganhar arte final.
 
 ## Level 01 - Entrada Cruel
@@ -45,12 +55,13 @@ fases.
 - Tipo: trap `spike-pop`.
 - Causa esperada: `trap`.
 - Leitura apos morte: a area de corpo aparece como marcador da trap depois do
-  acionamento e fica no local que matou o jogador.
+  acionamento e fica no local que matou o jogador. Na Fase 15.3, o corpo fica
+  quase invisivel enquanto armado e pisca rapidamente para alpha cheio ao ser
+  acionado, deixando a origem da morte mais clara sem virar aviso longo.
 - Softlock: baixo. A trap tem `resetOnRespawn: true`.
 - Espera apos erro: `delayMs` esta abaixo do tempo de respawn automatico.
-- Risco conhecido: o `delayMs` ainda e apenas dado declarativo; quando houver
-  animacao, adicionar um frame de surgimento que deixe a morte mais clara sem
-  virar aviso longo demais.
+- Risco conhecido: o `delayMs` ainda e apenas dado declarativo; se a animacao
+  futura ficar lenta demais, preservar a duracao curta atual de feedback.
 
 ## Level 02 - O Caminho Nao Confia Em Voce
 
@@ -79,13 +90,14 @@ fases.
 ### `level-02-side-projectile`
 
 - Tipo: trap `projectile`.
-- Causa esperada: `trap`.
-- Leitura apos morte: o projetil usa marcador visual e vem da area declarada da
-  trap.
+- Causa esperada: `projectile`.
+- Leitura apos morte: o projetil usa marcador visual, vem da area declarada da
+  trap e agora carrega rastro roxo curto enquanto se move. O emissor tambem fica
+  com tell visual mais forte ao disparar.
 - Softlock: baixo. A trap tem `resetOnRespawn: true` e projeteis sao limpos no
   reset da sala.
 - Espera apos erro: sem espera adicional; projetil nasce no acionamento.
-- Risco conhecido: falta animacao/som de disparo. Antes da arte final, manter
+- Risco conhecido: quando houver animacao/som de disparo final, manter
   velocidade legivel e evitar tiro saindo fora da camera sem pista visual.
 
 ### `level-02-exit-door` / `level-02-lever-exit`
@@ -118,12 +130,14 @@ fases.
 - Tipo: trap `breakable-floor`.
 - Causa esperada: `fall` se o jogador cair apos quebrar o chao.
 - Leitura apos morte: o corpo da plataforma fica com alpha reduzido apos o
-  gatilho; o token opcional fica acima dela para sinalizar risco/recompensa.
+  gatilho; o token opcional fica acima dela para sinalizar risco/recompensa. Na
+  Fase 15.3, a rachadura fica discreta quando armada e mais forte quando o piso
+  resolve, comunicando que o chao mudou.
 - Softlock: baixo. A trap tem `resetOnRespawn: true`.
 - Espera apos erro: sem espera adicional.
-- Risco conhecido: o corpo some logicamente de imediato; adicionar animacao de
-  rachadura curta quando houver sprites e conferir se o token nao incentiva
-  espera longa demais na plataforma.
+- Risco conhecido: o corpo ainda some logicamente de imediato; se o token
+  incentivar espera longa demais na plataforma, reduzir a janela visual ou
+  reposicionar o token.
 
 ### `level-03-false-floor`
 
@@ -143,4 +157,10 @@ fases.
 A Fase 7 ficou aceitavel para seguir e a Fase 8 converteu os riscos principais
 em ajustes de layout das tres fases iniciais. As armadilhas atuais sao
 resetaveis, nao criam espera longa apos erro e tem causa compreensivel com os
-marcadores placeholder. Arte, animacao e audio reais seguem para fases futuras.
+marcadores placeholder.
+
+Na Fase 15.3, a leitura visual melhorou sem alterar hitboxes ou dificuldade:
+traps armadas, acionadas e resolvidas agora usam feedback visual distinto,
+`spike-pop` tem surgimento curto, `breakable-floor` reforca rachadura e
+projeteis deixam rastro. Arte, animacao e audio finais ainda podem evoluir em
+fases futuras, mas a causa da morte ficou mais clara apos a primeira falha.

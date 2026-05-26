@@ -20,6 +20,7 @@ export const DEFAULT_TRAP_PROJECTILE_SPEED_PX_PER_SECOND = 140;
 
 export type TouchedTrapThreat = {
   readonly trapId: TrapId;
+  readonly sourceId: string;
   readonly cause: DeathCause;
 };
 
@@ -106,6 +107,7 @@ export function findTouchedTrapThreat(
   if (spikeTrap) {
     return {
       trapId: spikeTrap.id,
+      sourceId: spikeTrap.id,
       cause: "trap",
     };
   }
@@ -117,7 +119,8 @@ export function findTouchedTrapThreat(
   if (projectile) {
     return {
       trapId: projectile.sourceId,
-      cause: "trap",
+      sourceId: projectile.id,
+      cause: "projectile",
     };
   }
 

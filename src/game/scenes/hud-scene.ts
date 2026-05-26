@@ -1,7 +1,14 @@
 import Phaser from "phaser";
 
 import { getRequiredLevelDefinition } from "../../data/levels";
+import { GAME_EVENTS, onGameEvent } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
+import {
+  DEATH_FEEDBACK_DURATION_MS,
+  DEATH_FEEDBACK_LAYOUT,
+  DEATH_FEEDBACK_TEXT_STYLE,
+  formatDeathFeedback,
+} from "../ui/death-feedback";
 import {
   formatHudLabels,
   HUD_ACCENT_TEXT_STYLE,
@@ -67,6 +74,19 @@ export class HudScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(11);
 
+    const deathFeedbackText = this.add
+      .text(
+        DEATH_FEEDBACK_LAYOUT.x,
+        DEATH_FEEDBACK_LAYOUT.y,
+        "",
+        DEATH_FEEDBACK_TEXT_STYLE,
+      )
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0)
+      .setDepth(12);
+
+    let deathFeedbackTimer: Phaser.Time.TimerEvent | undefined;
+
     const unsubscribe = gameStateStore.subscribe((state) => {
       const labels = formatHudLabels(
         state,
@@ -77,7 +97,26 @@ export class HudScene extends Phaser.Scene {
       levelText.setText(labels.level);
       muteText.setText(labels.mute);
     });
+    const unsubscribeDeathFeedback = onGameEvent(
+      GAME_EVENTS.PLAYER_DIED,
+      (event) => {
+        deathFeedbackTimer?.remove(false);
+        deathFeedbackText.setText(formatDeathFeedback(event));
+        deathFeedbackText.setAlpha(1);
+        deathFeedbackTimer = this.time.delayedCall(
+          DEATH_FEEDBACK_DURATION_MS,
+          () => {
+            deathFeedbackText.setText("");
+            deathFeedbackTimer = undefined;
+          },
+        );
+      },
+    );
 
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, unsubscribe);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      deathFeedbackTimer?.remove(false);
+      unsubscribe();
+      unsubscribeDeathFeedback();
+    });
   }
 }

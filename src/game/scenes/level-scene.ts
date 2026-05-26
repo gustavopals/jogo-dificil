@@ -17,12 +17,17 @@ import { PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
 import { Player } from "../entities";
 import { ActionInput } from "../input";
 import {
+  calculateDashMovement,
   calculateHorizontalVelocity,
   calculateJumpMovement,
+  createInitialDashMovementState,
   createInitialJumpMovementState,
   getHorizontalDirection,
   getWorldHitbox,
+  resetDashMovementState,
   resolveKinematicCollisions,
+  type DashDirection,
+  type DashMovementState,
   type JumpMovementState,
   type KinematicBodyCollisionConfig,
 } from "../physics";
@@ -78,6 +83,7 @@ import {
 import {
   findTriggeredPositionTraps,
   getProjectileTextureKey,
+  getProjectileTrailFeedback,
   getTrapBodyTextureKey,
   getTrapFeedback,
 } from "../systems/level-traps";
@@ -118,12 +124,20 @@ const PLAYER_COLLISION_BODY = {
 type TrapMarker = {
   readonly trigger: Phaser.GameObjects.Rectangle;
   readonly body?: Phaser.GameObjects.Image | Phaser.GameObjects.TileSprite;
+  readonly tell?: Phaser.GameObjects.Rectangle;
+  readonly crack?: Phaser.GameObjects.Graphics;
+};
+
+type PlayerDeathContext = {
+  readonly cause: DeathCause;
+  readonly sourceId?: string;
 };
 
 export class LevelScene extends Phaser.Scene {
   private player?: Player;
   private actionInput?: ActionInput;
   private jumpState: JumpMovementState = createInitialJumpMovementState();
+  private dashState: DashMovementState = createInitialDashMovementState();
   private level?: LevelDefinition;
   private roomState?: RoomRuntimeState;
   private solids: readonly RectLike[] = [];
@@ -141,6 +155,10 @@ export class LevelScene extends Phaser.Scene {
     string,
     Phaser.GameObjects.Image
   >();
+  private readonly projectileTrailMarkers = new Map<
+    string,
+    Phaser.GameObjects.Rectangle
+  >();
   private respawnTimer?: Phaser.Time.TimerEvent;
   private respawnRecoveryTimer?: Phaser.Time.TimerEvent;
   private hasCompletedLevel = false;
@@ -155,6 +173,7 @@ export class LevelScene extends Phaser.Scene {
     Player.registerAnimations(this);
     this.actionInput = new ActionInput(this);
     this.jumpState = createInitialJumpMovementState();
+    this.dashState = createInitialDashMovementState();
 
     const { activeCheckpoint, currentLevelId } = gameStateStore.getSnapshot();
     this.level = getRequiredLevelDefinition(currentLevelId);
@@ -216,18 +235,28 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
-    const { position, velocity } = this.player.getPhysicsState();
-    const isGrounded = this.player.getPhysicsState().isGrounded;
+    const physicsState = this.player.getPhysicsState();
+    const { position, velocity, isGrounded } = physicsState;
     const direction = getHorizontalDirection({
       isMovingLeft: this.actionInput.isDown("move-left"),
       isMovingRight: this.actionInput.isDown("move-right"),
     });
-    const horizontalVelocity = calculateHorizontalVelocity({
+    const walkingVelocity = calculateHorizontalVelocity({
       currentVelocityX: velocity.x,
       direction,
       isGrounded,
       deltaMs: delta,
     });
+    const dashMovement = calculateDashMovement({
+      wasDashPressed: this.actionInput.wasPressed("primary"),
+      direction,
+      fallbackDirection: this.getPlayerFacingDirection(),
+      deltaMs: delta,
+      state: this.dashState,
+    });
+    const horizontalVelocity = dashMovement.isDashing
+      ? dashMovement.velocityX
+      : walkingVelocity;
     const jumpMovement = calculateJumpMovement({
       currentPositionY: position.y,
       currentVelocityY: velocity.y,
@@ -240,6 +269,7 @@ export class LevelScene extends Phaser.Scene {
     });
 
     this.jumpState = jumpMovement.state;
+    this.dashState = dashMovement.state;
     const deltaSeconds = delta / 1000;
     const collision = resolveKinematicCollisions({
       currentPosition: position,
@@ -262,7 +292,12 @@ export class LevelScene extends Phaser.Scene {
         ? { facing: direction === -1 ? "left" : "right" }
         : {}),
       isGrounded: collision.isGrounded,
+      isUsingPrimaryAction: dashMovement.isDashing,
     });
+
+    if (dashMovement.didStartDash) {
+      this.playPlayerSfx(getPlayerActionAudioId("primary"));
+    }
 
     if (jumpMovement.didJump) {
       this.playPlayerSfx(PLAYER_AUDIO_IDS.JUMP);
@@ -388,10 +423,14 @@ export class LevelScene extends Phaser.Scene {
         trap,
         feedback.visual.bodyAlpha,
       );
+      const tellMarker = this.createTrapTellMarker(trap, feedback);
+      const crackMarker = this.createTrapCrackMarker(trap, feedback);
 
       this.trapMarkers.set(trap.id, {
         trigger: triggerMarker,
         ...(bodyMarker ? { body: bodyMarker } : {}),
+        ...(tellMarker ? { tell: tellMarker } : {}),
+        ...(crackMarker ? { crack: crackMarker } : {}),
       });
     });
   }
@@ -412,7 +451,8 @@ export class LevelScene extends Phaser.Scene {
         .image(area.x + area.width / 2, area.y + area.height / 2, textureKey)
         .setOrigin(0.5)
         .setDisplaySize(area.width, area.height)
-        .setAlpha(alpha);
+        .setAlpha(alpha)
+        .setDepth(2);
     }
 
     return this.add
@@ -424,7 +464,49 @@ export class LevelScene extends Phaser.Scene {
         textureKey,
       )
       .setOrigin(0.5)
-      .setAlpha(alpha);
+      .setAlpha(alpha)
+      .setDepth(1);
+  }
+
+  private createTrapTellMarker(
+    trap: LevelDefinition["traps"][number],
+    feedback: ReturnType<typeof getTrapFeedback>,
+  ): Phaser.GameObjects.Rectangle | undefined {
+    const area = trap.area;
+
+    if (!area) {
+      return undefined;
+    }
+
+    return this.add
+      .rectangle(
+        area.x + area.width / 2,
+        area.y + area.height / 2,
+        area.width,
+        area.height,
+        feedback.visual.tellColor,
+        feedback.visual.tellAlpha,
+      )
+      .setStrokeStyle(
+        1,
+        feedback.visual.tellColor,
+        feedback.visual.tellStrokeAlpha,
+      )
+      .setDepth(3);
+  }
+
+  private createTrapCrackMarker(
+    trap: LevelDefinition["traps"][number],
+    feedback: ReturnType<typeof getTrapFeedback>,
+  ): Phaser.GameObjects.Graphics | undefined {
+    if (trap.kind !== "breakable-floor" || !trap.area) {
+      return undefined;
+    }
+
+    const crack = this.add.graphics().setDepth(4);
+    this.drawTrapCrack(crack, trap.area, feedback.visual.crackAlpha);
+
+    return crack;
   }
 
   private drawItems(level: LevelDefinition, roomState: RoomRuntimeState): void {
@@ -592,7 +674,10 @@ export class LevelScene extends Phaser.Scene {
     );
 
     if (touchedHazard) {
-      this.killPlayer(touchedHazard.cause);
+      this.killPlayer({
+        cause: touchedHazard.cause,
+        sourceId: touchedHazard.hazard.id,
+      });
 
       return true;
     }
@@ -602,7 +687,10 @@ export class LevelScene extends Phaser.Scene {
       : undefined;
 
     if (touchedTrapThreat) {
-      this.killPlayer(touchedTrapThreat.cause);
+      this.killPlayer({
+        cause: touchedTrapThreat.cause,
+        sourceId: touchedTrapThreat.sourceId,
+      });
 
       return true;
     }
@@ -611,7 +699,9 @@ export class LevelScene extends Phaser.Scene {
       return false;
     }
 
-    this.killPlayer("fall");
+    this.killPlayer({
+      cause: "fall",
+    });
 
     return true;
   }
@@ -686,11 +776,9 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
-    const pressedAction = this.actionInput.wasPressed("primary")
-      ? "primary"
-      : this.actionInput.wasPressed("secondary")
-        ? "secondary"
-        : undefined;
+    const pressedAction = this.actionInput.wasPressed("secondary")
+      ? "secondary"
+      : undefined;
 
     if (!pressedAction) {
       return;
@@ -720,7 +808,7 @@ export class LevelScene extends Phaser.Scene {
     });
   }
 
-  private killPlayer(cause: DeathCause): void {
+  private killPlayer(death: PlayerDeathContext): void {
     if (!this.player) {
       return;
     }
@@ -734,7 +822,8 @@ export class LevelScene extends Phaser.Scene {
     this.clearRespawnRecoveryTimer();
     this.player.die();
     this.jumpState = createInitialJumpMovementState();
-    gameStateStore.registerDeath(cause, position);
+    this.dashState = resetDashMovementState(this.dashState);
+    gameStateStore.registerDeath(death.cause, position, death.sourceId);
     this.scheduleAutomaticRespawn();
   }
 
@@ -788,6 +877,7 @@ export class LevelScene extends Phaser.Scene {
     }
 
     this.jumpState = createInitialJumpMovementState();
+    this.dashState = resetDashMovementState(this.dashState);
     this.hasCompletedLevel = false;
     this.updateTrapMarkers();
     this.updateItemMarkers();
@@ -825,6 +915,20 @@ export class LevelScene extends Phaser.Scene {
       );
 
     marker.body?.setAlpha(feedback.visual.bodyAlpha);
+    marker.body?.setTint(feedback.visual.bodyTint);
+    marker.tell
+      ?.setFillStyle(feedback.visual.tellColor, feedback.visual.tellAlpha)
+      .setStrokeStyle(
+        1,
+        feedback.visual.tellColor,
+        feedback.visual.tellStrokeAlpha,
+      );
+
+    if (marker.crack && trap.area) {
+      this.drawTrapCrack(marker.crack, trap.area, feedback.visual.crackAlpha);
+    }
+
+    this.playTrapVisualActivation(trap, marker, feedback);
   }
 
   private updateItemMarkers(): void {
@@ -908,6 +1012,8 @@ export class LevelScene extends Phaser.Scene {
     if (!this.roomState) {
       this.projectileMarkers.forEach((marker) => marker.destroy());
       this.projectileMarkers.clear();
+      this.projectileTrailMarkers.forEach((marker) => marker.destroy());
+      this.projectileTrailMarkers.clear();
       return;
     }
 
@@ -917,6 +1023,20 @@ export class LevelScene extends Phaser.Scene {
       activeProjectileIds.add(projectile.id);
 
       const hitbox = getProjectileHitbox(projectile);
+      const trailFeedback = getProjectileTrailFeedback(
+        hitbox,
+        projectile.velocity,
+      );
+      const trailMarker =
+        this.projectileTrailMarkers.get(projectile.id) ??
+        this.add.rectangle(
+          trailFeedback.area.x + trailFeedback.area.width / 2,
+          trailFeedback.area.y + trailFeedback.area.height / 2,
+          trailFeedback.area.width,
+          trailFeedback.area.height,
+          trailFeedback.color,
+          trailFeedback.alpha,
+        );
       const marker =
         this.projectileMarkers.get(projectile.id) ??
         this.add
@@ -925,13 +1045,24 @@ export class LevelScene extends Phaser.Scene {
             hitbox.y + hitbox.height / 2,
             getProjectileTextureKey(),
           )
-          .setOrigin(0.5);
+          .setOrigin(0.5)
+          .setDepth(6);
+
+      trailMarker
+        .setPosition(
+          trailFeedback.area.x + trailFeedback.area.width / 2,
+          trailFeedback.area.y + trailFeedback.area.height / 2,
+        )
+        .setSize(trailFeedback.area.width, trailFeedback.area.height)
+        .setFillStyle(trailFeedback.color, trailFeedback.alpha)
+        .setDepth(5);
 
       marker.setPosition(
         hitbox.x + hitbox.width / 2,
         hitbox.y + hitbox.height / 2,
       );
       marker.setDisplaySize(hitbox.width, hitbox.height);
+      this.projectileTrailMarkers.set(projectile.id, trailMarker);
       this.projectileMarkers.set(projectile.id, marker);
     });
 
@@ -943,6 +1074,69 @@ export class LevelScene extends Phaser.Scene {
       marker.destroy();
       this.projectileMarkers.delete(projectileId);
     });
+    this.projectileTrailMarkers.forEach((marker, projectileId) => {
+      if (activeProjectileIds.has(projectileId)) {
+        return;
+      }
+
+      marker.destroy();
+      this.projectileTrailMarkers.delete(projectileId);
+    });
+  }
+
+  private drawTrapCrack(
+    crack: Phaser.GameObjects.Graphics,
+    area: RectLike,
+    alpha: number,
+  ): void {
+    crack.clear();
+
+    if (alpha <= 0) {
+      return;
+    }
+
+    crack
+      .lineStyle(1, 0xe35d6a, alpha)
+      .beginPath()
+      .moveTo(area.x + area.width * 0.18, area.y + area.height * 0.28)
+      .lineTo(area.x + area.width * 0.44, area.y + area.height * 0.52)
+      .lineTo(area.x + area.width * 0.32, area.y + area.height * 0.78)
+      .moveTo(area.x + area.width * 0.56, area.y + area.height * 0.22)
+      .lineTo(area.x + area.width * 0.72, area.y + area.height * 0.48)
+      .lineTo(area.x + area.width * 0.62, area.y + area.height * 0.82)
+      .strokePath();
+  }
+
+  private playTrapVisualActivation(
+    trap: LevelDefinition["traps"][number],
+    marker: TrapMarker,
+    feedback: ReturnType<typeof getTrapFeedback>,
+  ): void {
+    if (feedback.visual.state === "armed") {
+      return;
+    }
+
+    if (trap.kind === "spike-pop" && marker.body) {
+      this.tweens.killTweensOf(marker.body);
+      marker.body.setAlpha(0.24);
+      this.tweens.add({
+        targets: marker.body,
+        alpha: feedback.visual.bodyAlpha,
+        duration: 120,
+        ease: "Quad.easeOut",
+      });
+    }
+
+    if (trap.kind === "projectile" && marker.tell) {
+      this.tweens.killTweensOf(marker.tell);
+      marker.tell.setAlpha(0.9);
+      this.tweens.add({
+        targets: marker.tell,
+        alpha: feedback.visual.tellAlpha,
+        duration: 160,
+        ease: "Quad.easeOut",
+      });
+    }
   }
 
   private scheduleRespawnRecoveryEnd(): void {
@@ -1003,6 +1197,10 @@ export class LevelScene extends Phaser.Scene {
     gameStateStore.toggleMuted();
   }
 
+  private getPlayerFacingDirection(): DashDirection {
+    return this.player?.getVisualState().facing === "left" ? -1 : 1;
+  }
+
   private playPlayerSfx(audioId: string): void {
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
       audioId,
@@ -1029,6 +1227,8 @@ export class LevelScene extends Phaser.Scene {
     this.level = undefined;
     this.roomState = undefined;
     this.solids = [];
+    this.jumpState = createInitialJumpMovementState();
+    this.dashState = createInitialDashMovementState();
     this.checkpointMarkers.clear();
     this.trapMarkers.clear();
     this.itemMarkers.forEach((marker) => marker.destroy());
@@ -1037,6 +1237,8 @@ export class LevelScene extends Phaser.Scene {
     this.interactiveObjectMarkers.clear();
     this.projectileMarkers.forEach((marker) => marker.destroy());
     this.projectileMarkers.clear();
+    this.projectileTrailMarkers.forEach((marker) => marker.destroy());
+    this.projectileTrailMarkers.clear();
     this.hasCompletedLevel = false;
     this.scene.stop(SCENE_KEYS.HUD);
   }

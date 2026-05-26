@@ -19,6 +19,8 @@ export type DeathCause =
   | "hazard"
   | "fall"
   | "trap"
+  | "projectile"
+  | "crusher"
   | "manual-restart"
   | "unknown";
 
@@ -27,6 +29,7 @@ export type PlayerDiedEvent = {
   readonly checkpointId: CheckpointId;
   readonly deathCount: number;
   readonly cause: DeathCause;
+  readonly sourceId?: string;
   readonly position: Vector2Like;
 };
 

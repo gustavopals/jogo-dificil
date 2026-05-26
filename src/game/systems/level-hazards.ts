@@ -36,7 +36,19 @@ export function findTouchedDeadlyHazard(
 export function getDeathCauseForHazard(
   hazard: Pick<HazardDefinition, "kind">,
 ): DeathCause {
-  return hazard.kind === "fall" ? "fall" : "hazard";
+  if (hazard.kind === "fall") {
+    return "fall";
+  }
+
+  if (hazard.kind === "projectile") {
+    return "projectile";
+  }
+
+  if (hazard.kind === "crusher") {
+    return "crusher";
+  }
+
+  return "hazard";
 }
 
 export function getHazardPlaceholderColor(

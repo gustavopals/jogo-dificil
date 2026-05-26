@@ -20,6 +20,7 @@ describe("game events", () => {
       checkpointId: "level-01-start",
       deathCount: 1,
       cause: "hazard",
+      sourceId: "level-01-fixed-spikes",
       position: {
         x: 64,
         y: 210,

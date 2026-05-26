@@ -23,6 +23,7 @@ describe("MVP traps", () => {
     });
     expect(findTouchedTrapThreat(trap.area!, LEVEL_01.traps, state)).toEqual({
       trapId: trap.id,
+      sourceId: trap.id,
       cause: "trap",
     });
   });
@@ -112,7 +113,8 @@ describe("MVP traps", () => {
       ),
     ).toEqual({
       trapId: projectileTrap.id,
-      cause: "trap",
+      sourceId: projectile.id,
+      cause: "projectile",
     });
 
     const movedState = updateTrapProjectiles(state, LEVEL_02, 100);
