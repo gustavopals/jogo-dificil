@@ -310,6 +310,16 @@ Pronto quando:
 - Build de producao nao expoe comandos de debug.
 - Smoke tests podem reaproveitar helpers sem depender de cliques longos.
 
+Implementacao inicial:
+
+- Em dev, `window.__JOGO_DIFICIL_QA__` expoe `startLevel`,
+  `goToCheckpoint`, `completeLevel` e `readSnapshot`.
+- A API consegue iniciar `level-04` diretamente para playtest do Bloco 2.
+- O snapshot informa fase, checkpoint, mortes, ultima morte e estado de traps.
+- O smoke test Playwright usa os helpers de QA para iniciar fase sem depender
+  da tela inicial.
+- A documentacao de uso fica em `docs/dev-qa-tools.md`.
+
 ### Task 15.8 - Otimizacao Inicial Do Build
 
 Problema: o build ja passa, mas o bundle principal esta acima do limite sugerido

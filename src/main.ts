@@ -11,4 +11,8 @@ const game = new Phaser.Game(createGameConfig([...GAME_SCENES]));
 
 if (import.meta.env.DEV) {
   (window as DebugWindow).__JOGO_DIFICIL_GAME__ = game;
+
+  void import("./game/systems/dev-qa-tools").then(({ installDevQaTools }) => {
+    installDevQaTools(game, window);
+  });
 }

@@ -1147,11 +1147,11 @@ Pronto quando:
 
 ### Task 15.7 - Ferramentas De QA Para Playtest
 
-- [ ] Criar modo dev para iniciar fase especifica.
-- [ ] Expor snapshot dev de fase, checkpoint, mortes, causa da ultima morte e
+- [x] Criar modo dev para iniciar fase especifica.
+- [x] Expor snapshot dev de fase, checkpoint, mortes, causa da ultima morte e
   estado de traps.
-- [ ] Criar helpers internos para ir ao checkpoint e simular conclusao.
-- [ ] Documentar uso sem afetar build de producao.
+- [x] Criar helpers internos para ir ao checkpoint e simular conclusao.
+- [x] Documentar uso sem afetar build de producao.
 
 Pronto quando:
 
@@ -1582,3 +1582,9 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   a terceira combina dash, chave, alavanca, porta, projetil e memoria curta.
   Testes de conteudo foram adicionados em `tests/block-2-content.test.ts`, e o
   checklist manual fica em `docs/block-2-gameplay-checklist.md`.
+- [x] Task 15.7 concluida: ferramentas dev de QA criadas em
+  `src/game/systems/dev-qa-tools.ts`, expostas apenas em `import.meta.env.DEV`
+  via `window.__JOGO_DIFICIL_QA__`. A API inicia fases diretamente, move para
+  checkpoint, simula conclusao e le snapshot com fase, checkpoint, mortes,
+  ultima morte e estado de traps. O smoke test Playwright passou a usar esses
+  helpers, e o uso esta documentado em `docs/dev-qa-tools.md`.

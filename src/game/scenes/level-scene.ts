@@ -32,6 +32,10 @@ import {
   type KinematicBodyCollisionConfig,
 } from "../physics";
 import { gameStateStore } from "../systems/game-state";
+import type {
+  DevQaDeathSnapshot,
+  DevQaLevelSnapshot,
+} from "../systems/dev-qa-tools";
 import {
   recordLevelCompletion,
   type LevelCompletionResult,
@@ -237,6 +241,86 @@ export class LevelScene extends Phaser.Scene {
     this.updateItemCollection();
     this.updateInteractiveObjectActions();
     this.updateLevelProgress();
+  }
+
+  public getDevQaLevelSnapshot(
+    lastDeath: DevQaDeathSnapshot | null,
+  ): DevQaLevelSnapshot | null {
+    if (!this.level) {
+      return null;
+    }
+
+    const snapshot = gameStateStore.getSnapshot();
+    const physicsState = this.player?.getPhysicsState();
+    const visualState = this.player?.getVisualState();
+
+    return {
+      levelId: this.level.id,
+      levelName: this.level.name,
+      checkpointId: snapshot.activeCheckpoint.id,
+      deathCount: snapshot.deathCount,
+      hasCompletedLevel: this.hasCompletedLevel,
+      lastDeath,
+      player:
+        physicsState && visualState
+          ? {
+              position: physicsState.position,
+              velocity: physicsState.velocity,
+              isGrounded: physicsState.isGrounded,
+              isAlive: visualState.isAlive,
+              animationState: visualState.animationState,
+            }
+          : null,
+      traps: Object.values(this.roomState?.traps ?? {}),
+      projectiles: this.roomState?.projectiles ?? [],
+      items: Object.values(this.roomState?.items ?? {}),
+      interactiveObjects: Object.values(
+        this.roomState?.interactiveObjects ?? {},
+      ),
+    };
+  }
+
+  public goToDevQaCheckpoint(checkpointId?: CheckpointId): boolean {
+    if (!this.level || !this.player) {
+      return false;
+    }
+
+    const checkpoint = checkpointId
+      ? this.level.checkpoints.find(
+          (candidate) => candidate.id === checkpointId,
+        )
+      : this.level.checkpoints[0];
+
+    if (!checkpoint) {
+      return false;
+    }
+
+    const activeCheckpoint = {
+      id: checkpoint.id,
+      levelId: this.level.id,
+      x: checkpoint.position.x,
+      y: checkpoint.position.y,
+    };
+
+    gameStateStore.setActiveCheckpoint(activeCheckpoint);
+    this.clearRespawnTimer();
+    this.clearRespawnRecoveryTimer();
+    this.resetRoomTransientState(checkpoint.id);
+    this.player.respawn(activeCheckpoint);
+    this.scheduleRespawnRecoveryEnd();
+
+    return true;
+  }
+
+  public completeDevQaLevel(): boolean {
+    if (!this.level || this.hasCompletedLevel) {
+      return false;
+    }
+
+    this.hasCompletedLevel = true;
+    this.completeLevel();
+
+    return true;
   }
 
   private updatePlayerMovement(delta: number): void {

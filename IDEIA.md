@@ -998,6 +998,15 @@ Expansao pos-MVP e Fase 15:
     fases desbloqueadas segue planejada para a Task 15.5.
   - O checklist manual do bloco fica em
     `docs/block-2-gameplay-checklist.md`.
+- Implementacao inicial das ferramentas de QA para playtest:
+  - Em modo dev, o jogo registra `window.__JOGO_DIFICIL_QA__`.
+  - A API permite iniciar fase por id, mover para checkpoint, simular conclusao
+    da fase atual e ler snapshot de jogo.
+  - O snapshot cobre fase, cenas ativas, checkpoint, mortes, ultima morte,
+    jogador, traps, projeteis, itens e objetos interativos.
+  - O build de producao nao registra o objeto global de QA.
+  - O smoke test Playwright usa esses helpers para iniciar fase em estado
+    conhecido sem depender de cliques longos.
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 

@@ -28,6 +28,41 @@ type DebugScene = {
   readonly player?: DebugPlayer;
 };
 
+type DevQaCommandResult = {
+  readonly ok: boolean;
+  readonly error?: string;
+  readonly snapshot?: DevQaSnapshot;
+};
+
+type DevQaSnapshot = {
+  readonly currentLevelId: string;
+  readonly deathCount: number;
+  readonly activeCheckpoint: {
+    readonly id: string;
+    readonly levelId: string;
+    readonly x: number;
+    readonly y: number;
+  };
+  readonly activeScenes: readonly string[];
+  readonly level: {
+    readonly levelId: string;
+    readonly checkpointId: string;
+    readonly traps: readonly {
+      readonly id: string;
+      readonly kind: string;
+      readonly isTriggered: boolean;
+      readonly isResolved: boolean;
+    }[];
+  } | null;
+};
+
+type DevQaApi = {
+  readonly readSnapshot?: () => DevQaSnapshot;
+  readonly startLevel?: (levelId: string) => DevQaCommandResult;
+  readonly goToCheckpoint?: (checkpointId?: string) => DevQaCommandResult;
+  readonly completeLevel?: () => DevQaCommandResult;
+};
+
 type DebugGame = {
   readonly canvas?: HTMLCanvasElement;
   readonly scene?: {
@@ -38,6 +73,7 @@ type DebugGame = {
 
 type DebugWindow = Window & {
   readonly __JOGO_DIFICIL_GAME__?: DebugGame;
+  readonly __JOGO_DIFICIL_QA__?: DevQaApi;
 };
 
 type SmokeSnapshot = {
@@ -86,8 +122,12 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
         height: 270,
       },
     });
+  await waitForQaTools(page);
+  await expect
+    .poll(async () => (await readSmokeSnapshot(page)).activeScenes)
+    .toContain("menu");
 
-  await page.keyboard.press("Enter");
+  await startLevelWithQa(page, "level-01");
   await expect
     .poll(async () => (await readSmokeSnapshot(page)).activeScenes)
     .toContain("level");
@@ -121,6 +161,61 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
 
   expect(pageErrors).toEqual([]);
   expect(consoleErrors).toEqual([]);
+});
+
+test("ferramentas dev de QA iniciam fase, pulam checkpoint e simulam conclusao", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await waitForQaTools(page);
+  await expect
+    .poll(async () => (await readSmokeSnapshot(page)).activeScenes)
+    .toContain("menu");
+
+  await startLevelWithQa(page, "level-04");
+
+  await expect
+    .poll(() => readQaSnapshot(page))
+    .toMatchObject({
+      currentLevelId: "level-04",
+      activeCheckpoint: {
+        id: "level-04-start",
+      },
+      level: {
+        levelId: "level-04",
+        checkpointId: "level-04-start",
+        traps: [],
+      },
+    });
+
+  const checkpointResult = await page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.goToCheckpoint?.(),
+  );
+
+  expect(checkpointResult).toMatchObject({
+    ok: true,
+  });
+  await expect
+    .poll(() => readQaSnapshot(page))
+    .toMatchObject({
+      activeCheckpoint: {
+        id: "level-04-after-first-dash",
+      },
+      level: {
+        checkpointId: "level-04-after-first-dash",
+      },
+    });
+
+  const completeResult = await page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.completeLevel?.(),
+  );
+
+  expect(completeResult).toMatchObject({
+    ok: true,
+  });
+  await expect
+    .poll(async () => (await readSmokeSnapshot(page)).activeScenes)
+    .toContain("level-transition");
 });
 
 async function readSmokeSnapshot(page: Page): Promise<SmokeSnapshot> {
@@ -159,4 +254,39 @@ async function readSmokeSnapshot(page: Page): Promise<SmokeSnapshot> {
           : undefined,
     };
   });
+}
+
+async function waitForQaTools(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const qa = (window as DebugWindow).__JOGO_DIFICIL_QA__;
+
+        return Boolean(
+          qa?.readSnapshot &&
+          qa.startLevel &&
+          qa.goToCheckpoint &&
+          qa.completeLevel,
+        );
+      }),
+    )
+    .toBe(true);
+}
+
+async function startLevelWithQa(page: Page, levelId: string): Promise<void> {
+  const result = await page.evaluate(
+    (targetLevelId) =>
+      (window as DebugWindow).__JOGO_DIFICIL_QA__?.startLevel?.(targetLevelId),
+    levelId,
+  );
+
+  expect(result).toMatchObject({
+    ok: true,
+  });
+}
+
+async function readQaSnapshot(page: Page): Promise<DevQaSnapshot | undefined> {
+  return page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.readSnapshot?.(),
+  );
 }
