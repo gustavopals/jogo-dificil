@@ -93,7 +93,9 @@ describe("pino animations", () => {
     ].forEach((state) => {
       expect(animationsByState[state]?.isPlaceholder, state).toBe(false);
     });
-    expect(animationsByState[PINO_ANIMATION_STATES.PRIMARY_ACTION]?.frames).toEqual([
+    expect(
+      animationsByState[PINO_ANIMATION_STATES.PRIMARY_ACTION]?.frames,
+    ).toEqual([
       {
         textureKey: PINO_TEXTURE_KEYS.DASH,
       },

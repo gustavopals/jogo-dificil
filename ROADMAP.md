@@ -1504,17 +1504,18 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   quando o jogador reinicia a partir da tela final.
 - [x] Task 11.1 concluida: direcao visual inicial definida como pixel art de
   baixa resolucao em laboratorio hostil, com tile 16x16px, Pino em
-  aproximadamente 12x24px e paleta semantica registrada em
+  aproximadamente 14x26px e paleta semantica registrada em
   `src/data/art/visual-direction.ts`, `docs/visual-direction.md` e `IDEIA.md`.
 - [x] Task 11.2 concluida: tileset placeholder coerente criado em
   `assets/tilesets/`, com bloco solido, plataforma, perigo de espinhos e fundo
   simples registrados em `assets/ASSETS.md`. `LevelScene` agora renderiza fundo,
   terreno e hazards com texturas repetiveis sem alterar colisao ou dados de
   gameplay.
-- [x] Task 11.3 concluida: Pino recebeu sprites 12x24px dedicados para idle,
-  corrida em dois frames, pulo, queda, morte em dois frames e respawn em dois
-  frames. `PINO_ANIMATIONS` agora usa esses frames nas animacoes centrais, o
-  preload carrega todos os PNGs e a hitbox permaneceu 10x22px.
+- [x] Task 11.3 concluida: Pino recebeu sprites 14x26px dedicados para idle,
+  corrida em tres frames, pulo em dois frames, queda, dash, morte em dois frames
+  e respawn em dois frames. `PINO_ANIMATIONS` agora usa esses frames nas
+  animacoes centrais, o preload carrega todos os PNGs e a hitbox permaneceu
+  10x22px.
 - [x] Task 11.4 concluida: sprites de traps, itens e marcadores criados em
   `assets/sprites/`, cobrindo espinhos, bloco falso, plataforma que cai,
   piso quebravel, projetil, chip, chave, token opcional, checkpoint ativo/
@@ -1600,3 +1601,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   define o tema original `Entrada Pulante`, diferente da trilha de gameplay. O
   menu toca essa faixa, a `LevelScene` troca para `Pulos de Azar` ao iniciar a
   fase e o botao `♪`/`OFF` tambem aparece na tela inicial.
+- [x] Revisao visual do Pino concluida: o personagem deixou a leitura de capsula
+  amarela e virou um lutador shonen original, com sprites 14x26px, cabelo
+  espetado, roupa azul/indigo, faixa coral, aura ciano, dash dedicado, ghost de
+  dash, faiscas de corrida e bursts de pulo/aterrissagem sem alterar a hitbox
+  10x22px.

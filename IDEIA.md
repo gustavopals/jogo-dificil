@@ -210,7 +210,7 @@ Implementação inicial de colisão básica:
 - `LevelScene` mantém uma sala de teste com chão, paredes laterais e
   plataformas sólidas curtas, todos definidos como retângulos sólidos
   temporários.
-- A colisão usa a hitbox real do Pino, com sprite visual 12x24px, hitbox 10x22px
+- A colisão usa a hitbox real do Pino, com sprite visual 14x26px, hitbox 10x22px
   e pivô no centro inferior.
 - O resolvedor cinemático aplica movimento por eixo, bloqueia chão, paredes,
   topo e parte inferior de sólidos, e evita atravessar blocos finos mesmo em
@@ -1282,27 +1282,29 @@ Entregáveis esperados:
 Decisões de conceito fechadas na Task 3.1:
 
 - Nome provisório: Pino.
-- Tipo: criatura original. Não é humano e não é um objeto animado literal.
+- Tipo: lutador original estilizado. Ele é humanoide o bastante para poses de
+  luta, mas permanece compacto e cartunesco para leitura de plataforma.
 - Função narrativa provisória: Pino é um pequeno testador de salas impossíveis,
   teimoso o bastante para voltar depois de cada morte.
 - Personalidade visual: curioso, desconfiado e levemente desajeitado, com humor
   seco. Ele parece sempre pronto para cair em uma armadilha que já suspeitava
   existir.
-- Silhueta: corpo compacto em formato de cápsula inclinada, frente levemente
-  pontuda para indicar direção, antena curta no topo e dois pés pequenos e
-  separados na base.
+- Silhueta: corpo compacto de lutador, cabelo espetado grande para leitura de
+  topo, tronco azul estreito, faixa coral e dois pés pequenos separados na base.
 - Proporção geral: personagem alto e estreito, com leitura aproximada de 2:1
   entre altura e largura. Cabeça e corpo funcionam como uma massa única para
   preservar legibilidade em 24px de altura.
-- Rosto e direção: um visor/olho frontal grande indica para onde Pino está
-  olhando. O sprite pode ser espelhado, mas o ponto frontal deve continuar
-  óbvio.
-- Acessórios importantes: antena curta e ponta frontal; ambos podem exagerar em
-  animações de dash, morte e respawn, mas não devem entrar na hitbox principal.
-- Limitação visual proposital: pernas curtas e corpo geométrico. O personagem
-  deve parecer preciso para colisão, mas vulnerável e cômico quando morre.
-- Paleta inicial de placeholder: corpo amarelo-sinalização, visor claro/ciano,
-  sombra azul-petróleo e acento coral para feedback de dano ou perigo.
+- Rosto e direção: olho/expressão lateral, pose do tronco, cabelo e faixa
+  indicam para onde Pino está olhando. O sprite pode ser espelhado, mas a direção
+  precisa continuar óbvia.
+- Acessórios importantes: cabelo espetado, faixa coral e aura ciano; todos podem
+  exagerar em animações de dash, morte e respawn, mas não devem entrar na hitbox
+  principal.
+- Limitação visual proposital: pernas curtas, tronco estreito e cabelo grande.
+  O personagem deve parecer preciso para colisão, mas vulnerável e cômico quando
+  morre.
+- Paleta atual: cabelo dourado, roupa azul/índigo, energia ciano, pele quente,
+  contorno quase preto e acento coral para faixa/dano.
 - Regra para próximas tarefas: a Task 3.2 pode ajustar medidas, hitbox, pivô e
   margens sem redesenhar o conceito; a Task 3.3 deve produzir o primeiro
   placeholder visual seguindo esta silhueta.
@@ -1381,8 +1383,8 @@ Decisões de entidade fechadas na Task 3.5:
   aplicação de hitbox, estado físico e estado visual.
 - Estado físico: posição, velocidade, aterramento e hitbox real.
 - Estado visual: direção, animação atual, vida, respawn e flags de ação.
-- A hitbox aplicada no corpo Arcade usa as medidas da Task 3.2: 10x22px com
-  offset de 1px em relação ao sprite visual 12x24px.
+- A hitbox aplicada no corpo Arcade usa 10x22px com offset de 2px no eixo X e
+  3px no eixo Y em relação ao sprite visual 14x26px.
 - A `LevelScene` não cria mais sprite solto do jogador; ela instancia `Player`,
   chama `updateMovement` no `update` da cena e destrói a entidade no shutdown.
 - Métodos iniciais expostos: `updateMovement`, `die`, `respawn`,

@@ -56,7 +56,9 @@ describe("player visual effects", () => {
   it("builds deterministic burst particles and timed effect gates", () => {
     expect(createJumpBurstParticles({ x: 40, y: 80 })).toHaveLength(3);
     expect(createLandingBurstParticles({ x: 40, y: 80 })).toHaveLength(3);
-    expect(createRunSparkParticle({ x: 40, y: 80 }, "right").offsetX).toBeLessThan(0);
+    expect(
+      createRunSparkParticle({ x: 40, y: 80 }, "right").offsetX,
+    ).toBeLessThan(0);
     expect(getDashGhostOffset("right").x).toBeLessThan(0);
     expect(getDashGhostOffset("left").x).toBeGreaterThan(0);
     expect(

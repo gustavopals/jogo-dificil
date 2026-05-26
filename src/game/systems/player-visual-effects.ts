@@ -130,9 +130,31 @@ export function createLandingBurstParticles(
   position: Vector2Like,
 ): readonly PlayerBurstParticle[] {
   return [
-    createBurstParticle(position, -8, 0, -14, 3, 7, 2, ENERGY_HOT_COLOR, 0.42, 160),
+    createBurstParticle(
+      position,
+      -8,
+      0,
+      -14,
+      3,
+      7,
+      2,
+      ENERGY_HOT_COLOR,
+      0.42,
+      160,
+    ),
     createBurstParticle(position, 0, 1, 0, 5, 6, 2, WHITE_COLOR, 0.32, 130),
-    createBurstParticle(position, 8, 0, 14, 3, 7, 2, ENERGY_HOT_COLOR, 0.42, 160),
+    createBurstParticle(
+      position,
+      8,
+      0,
+      14,
+      3,
+      7,
+      2,
+      ENERGY_HOT_COLOR,
+      0.42,
+      160,
+    ),
   ];
 }
 
