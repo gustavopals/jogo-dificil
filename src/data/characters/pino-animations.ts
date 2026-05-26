@@ -4,8 +4,11 @@ export const PINO_TEXTURE_KEYS = {
   IDLE: "player-pino-idle",
   RUN_01: "player-pino-run-01",
   RUN_02: "player-pino-run-02",
+  RUN_03: "player-pino-run-03",
   JUMP: "player-pino-jump",
+  JUMP_PEAK: "player-pino-jump-peak",
   FALL: "player-pino-fall",
+  DASH: "player-pino-dash",
   DEATH_01: "player-pino-death-01",
   DEATH_02: "player-pino-death-02",
   RESPAWN_01: "player-pino-respawn-01",
@@ -16,8 +19,8 @@ export type PinoTextureKey =
   (typeof PINO_TEXTURE_KEYS)[keyof typeof PINO_TEXTURE_KEYS];
 
 export const PINO_SPRITE_SIZE_PX = {
-  width: 12,
-  height: 24,
+  width: 14,
+  height: 26,
 } as const;
 
 export type PinoSpriteAssetDefinition = {
@@ -25,7 +28,7 @@ export type PinoSpriteAssetDefinition = {
   readonly path: `assets/sprites/${string}.png`;
   readonly sizePx: typeof PINO_SPRITE_SIZE_PX;
   readonly description: string;
-  readonly origin: "Gerado no projeto com magick";
+  readonly origin: "Gerado no projeto por script";
   readonly license: "Original do projeto";
 };
 
@@ -34,72 +37,108 @@ export const PINO_SPRITE_ASSETS = [
     key: PINO_TEXTURE_KEYS.IDLE,
     path: "assets/sprites/player-pino-idle.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Pose idle de Pino, com corpo amarelo e visor frontal.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Pose idle de Pino, agora como lutador shonen original com cabelo espetado e aura baixa.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.RUN_01,
     path: "assets/sprites/player-pino-run-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Frame 1 de corrida de Pino, corpo inclinado para frente.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Frame 1 de corrida de Pino, corpo inclinado e braço armado para impulso.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.RUN_02,
     path: "assets/sprites/player-pino-run-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Frame 2 de corrida de Pino, troca de apoio dos pes.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Frame 2 de corrida de Pino, troca de apoio com cabelo e faixa em atraso.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.RUN_03,
+    path: "assets/sprites/player-pino-run-03.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 3 de corrida de Pino, passada baixa com energia ciano no calcanhar.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.JUMP,
     path: "assets/sprites/player-pino-jump.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Pose de pulo de Pino, silhueta esticada para cima.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Pose de pulo de Pino, joelho alto, cabelo vertical e energia saindo dos pes.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.JUMP_PEAK,
+    path: "assets/sprites/player-pino-jump-peak.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame de ápice do pulo de Pino, pose compacta com aura ciano ao redor.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.FALL,
     path: "assets/sprites/player-pino-fall.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Pose de queda de Pino, visor baixo e pes soltos.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Pose de queda de Pino, braços abertos e cabelo puxado para cima pela descida.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.DASH,
+    path: "assets/sprites/player-pino-dash.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Pose de dash de Pino, corpo horizontal com rastro de aura e faixa atrasada.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.DEATH_01,
     path: "assets/sprites/player-pino-death-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Frame 1 de morte de Pino, impacto vermelho comprimido.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Frame 1 de morte de Pino, impacto vermelho quebrando a aura do lutador.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.DEATH_02,
     path: "assets/sprites/player-pino-death-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Frame 2 de morte de Pino, corpo quebrado e baixo.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Frame 2 de morte de Pino, silhueta baixa com cabelo e faixa desfeitos.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.RESPAWN_01,
     path: "assets/sprites/player-pino-respawn-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Frame 1 de respawn de Pino, silhueta em varredura ciano.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Frame 1 de respawn de Pino, silhueta shonen reconstruida por varredura ciano.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
   {
     key: PINO_TEXTURE_KEYS.RESPAWN_02,
     path: "assets/sprites/player-pino-respawn-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
-    description: "Frame 2 de respawn de Pino, corpo reconstruido.",
-    origin: "Gerado no projeto com magick",
+    description:
+      "Frame 2 de respawn de Pino, pose firme com aura e cabelo ja reconstruidos.",
+    origin: "Gerado no projeto por script",
     license: "Original do projeto",
   },
 ] as const satisfies readonly PinoSpriteAssetDefinition[];
@@ -184,25 +223,29 @@ const pinoIdleAnimation = createPinoAnimation({
 const pinoRunAnimation = createPinoAnimation({
   key: PINO_ANIMATION_KEYS.RUN,
   state: PINO_ANIMATION_STATES.RUN,
-  frameRate: 8,
+  frameRate: 12,
   repeat: -1,
-  frames: [PINO_TEXTURE_KEYS.RUN_01, PINO_TEXTURE_KEYS.RUN_02],
+  frames: [
+    PINO_TEXTURE_KEYS.RUN_01,
+    PINO_TEXTURE_KEYS.RUN_02,
+    PINO_TEXTURE_KEYS.RUN_03,
+  ],
   isPlaceholder: false,
 });
 const pinoJumpAnimation = createPinoAnimation({
   key: PINO_ANIMATION_KEYS.JUMP,
   state: PINO_ANIMATION_STATES.JUMP,
-  frameRate: 1,
-  repeat: 0,
-  frames: [PINO_TEXTURE_KEYS.JUMP],
+  frameRate: 10,
+  repeat: -1,
+  frames: [PINO_TEXTURE_KEYS.JUMP, PINO_TEXTURE_KEYS.JUMP_PEAK],
   isPlaceholder: false,
 });
 const pinoFallAnimation = createPinoAnimation({
   key: PINO_ANIMATION_KEYS.FALL,
   state: PINO_ANIMATION_STATES.FALL,
-  frameRate: 1,
-  repeat: 0,
-  frames: [PINO_TEXTURE_KEYS.FALL],
+  frameRate: 8,
+  repeat: -1,
+  frames: [PINO_TEXTURE_KEYS.JUMP_PEAK, PINO_TEXTURE_KEYS.FALL],
   isPlaceholder: false,
 });
 const pinoDeathAnimation = createPinoAnimation({
@@ -228,10 +271,10 @@ const pinoRespawnAnimation = createPinoAnimation({
 const pinoPrimaryActionAnimation = createPinoAnimation({
   key: PINO_ANIMATION_KEYS.PRIMARY_ACTION,
   state: PINO_ANIMATION_STATES.PRIMARY_ACTION,
-  frameRate: 16,
+  frameRate: 18,
   repeat: 0,
-  frames: [PINO_TEXTURE_KEYS.RUN_01, PINO_TEXTURE_KEYS.RUN_02],
-  isPlaceholder: true,
+  frames: [PINO_TEXTURE_KEYS.DASH],
+  isPlaceholder: false,
 });
 const pinoSecondaryActionAnimation = createPinoAnimation({
   key: PINO_ANIMATION_KEYS.SECONDARY_ACTION,

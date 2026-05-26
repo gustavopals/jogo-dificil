@@ -42,13 +42,22 @@ describe("pino animations", () => {
       {
         textureKey: PINO_TEXTURE_KEYS.RUN_02,
       },
+      {
+        textureKey: PINO_TEXTURE_KEYS.RUN_03,
+      },
     ]);
     expect(animationsByState[PINO_ANIMATION_STATES.JUMP]?.frames).toEqual([
       {
         textureKey: PINO_TEXTURE_KEYS.JUMP,
       },
+      {
+        textureKey: PINO_TEXTURE_KEYS.JUMP_PEAK,
+      },
     ]);
     expect(animationsByState[PINO_ANIMATION_STATES.FALL]?.frames).toEqual([
+      {
+        textureKey: PINO_TEXTURE_KEYS.JUMP_PEAK,
+      },
       {
         textureKey: PINO_TEXTURE_KEYS.FALL,
       },
@@ -80,12 +89,15 @@ describe("pino animations", () => {
       PINO_ANIMATION_STATES.FALL,
       PINO_ANIMATION_STATES.DEATH,
       PINO_ANIMATION_STATES.RESPAWN,
+      PINO_ANIMATION_STATES.PRIMARY_ACTION,
     ].forEach((state) => {
       expect(animationsByState[state]?.isPlaceholder, state).toBe(false);
     });
-    expect(
-      animationsByState[PINO_ANIMATION_STATES.PRIMARY_ACTION]?.isPlaceholder,
-    ).toBe(true);
+    expect(animationsByState[PINO_ANIMATION_STATES.PRIMARY_ACTION]?.frames).toEqual([
+      {
+        textureKey: PINO_TEXTURE_KEYS.DASH,
+      },
+    ]);
     expect(
       animationsByState[PINO_ANIMATION_STATES.SECONDARY_ACTION]?.isPlaceholder,
     ).toBe(true);
@@ -103,7 +115,7 @@ describe("pino animations", () => {
     PINO_SPRITE_ASSETS.forEach((asset) => {
       expect(asset.path).toMatch(/^assets\/sprites\/player-pino-.+\.png$/);
       expect(asset.sizePx).toEqual(PINO_SPRITE_SIZE_PX);
-      expect(asset.origin).toBe("Gerado no projeto com magick");
+      expect(asset.origin).toBe("Gerado no projeto por script");
       expect(asset.license).toBe("Original do projeto");
       expect(asset.description.length).toBeGreaterThan(24);
     });

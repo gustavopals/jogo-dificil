@@ -11,6 +11,7 @@ import type {
   ItemId,
   RectLike,
   TrapId,
+  Vector2Like,
 } from "../../shared";
 import { MUSIC_AUDIO_IDS, PLAYER_AUDIO_IDS } from "../../data/audio";
 import { PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
@@ -80,6 +81,19 @@ import {
   AUTO_RESPAWN_DELAY_MS,
   RESPAWN_RECOVERY_MS,
 } from "../systems/player-respawn";
+import {
+  PLAYER_DASH_TRAIL_INTERVAL_MS,
+  PLAYER_EFFECT_DEPTHS,
+  PLAYER_RUN_SPARK_INTERVAL_MS,
+  PLAYER_RUN_SPARK_SPEED_THRESHOLD,
+  createJumpBurstParticles,
+  createLandingBurstParticles,
+  createRunSparkParticle,
+  getDashGhostOffset,
+  getPlayerAuraConfig,
+  resolvePlayerEnergyMode,
+  shouldEmitTimedEffect,
+} from "../systems/player-visual-effects";
 import {
   getPlayerActionAudioId,
   shouldPlayLandingAudio,
@@ -172,6 +186,9 @@ export class LevelScene extends Phaser.Scene {
   private hasCompletedLevel = false;
   private levelStartedAtMs = 0;
   private levelStartDeathCount = 0;
+  private playerAura?: Phaser.GameObjects.Ellipse;
+  private lastDashTrailAtMs = 0;
+  private lastRunSparkAtMs = 0;
 
   public constructor() {
     super(SCENE_KEYS.LEVEL);
@@ -211,6 +228,11 @@ export class LevelScene extends Phaser.Scene {
           : createLevelStartCheckpoint(this.level),
       facing: "right",
     });
+    this.player.getSprite().setDepth(PLAYER_EFFECT_DEPTHS.sprite);
+    this.playerAura = this.add
+      .ellipse(0, 0, 1, 1, 0x80d7c2, 0)
+      .setDepth(PLAYER_EFFECT_DEPTHS.aura);
+    this.updatePlayerEnergyAura(false);
     this.configureCamera();
 
     this.input.keyboard?.on("keydown-ESC", this.pauseLevel, this);
@@ -378,6 +400,11 @@ export class LevelScene extends Phaser.Scene {
       body: PLAYER_COLLISION_BODY,
       solids: this.solids,
     });
+    const didLand = shouldPlayLandingAudio({
+      wasGrounded: isGrounded,
+      isGrounded: collision.isGrounded,
+      velocityY: jumpMovement.velocityY,
+    });
 
     this.player.updateMovement({
       position: collision.position,
@@ -389,6 +416,15 @@ export class LevelScene extends Phaser.Scene {
       isUsingPrimaryAction: dashMovement.isDashing,
     });
 
+    this.updatePlayerEnergyAura(dashMovement.isDashing);
+    this.emitPlayerMovementEffects({
+      isDashing: dashMovement.isDashing,
+      didJump: jumpMovement.didJump,
+      didLand,
+      isGrounded: collision.isGrounded,
+      velocity: collision.velocity,
+    });
+
     if (dashMovement.didStartDash) {
       this.playPlayerSfx(getPlayerActionAudioId("primary"));
     }
@@ -397,15 +433,146 @@ export class LevelScene extends Phaser.Scene {
       this.playPlayerSfx(PLAYER_AUDIO_IDS.JUMP);
     }
 
-    if (
-      shouldPlayLandingAudio({
-        wasGrounded: isGrounded,
-        isGrounded: collision.isGrounded,
-        velocityY: jumpMovement.velocityY,
-      })
-    ) {
+    if (didLand) {
       this.playPlayerSfx(PLAYER_AUDIO_IDS.LAND);
     }
+  }
+
+  private updatePlayerEnergyAura(isDashing: boolean): void {
+    if (!this.player || !this.playerAura) {
+      return;
+    }
+
+    const physicsState = this.player.getPhysicsState();
+    const visualState = this.player.getVisualState();
+    const aura = getPlayerAuraConfig(
+      physicsState.position,
+      resolvePlayerEnergyMode({
+        isAlive: visualState.isAlive,
+        isRespawning: visualState.isRespawning,
+        isGrounded: physicsState.isGrounded,
+        isDashing,
+        velocity: physicsState.velocity,
+      }),
+    );
+
+    this.playerAura
+      .setPosition(aura.x, aura.y)
+      .setSize(aura.width, aura.height)
+      .setFillStyle(aura.color, aura.alpha);
+  }
+
+  private emitPlayerMovementEffects(input: {
+    readonly isDashing: boolean;
+    readonly didJump: boolean;
+    readonly didLand: boolean;
+    readonly isGrounded: boolean;
+    readonly velocity: Vector2Like;
+  }): void {
+    if (!this.player) {
+      return;
+    }
+
+    if (input.isDashing) {
+      this.emitDashGhost();
+    } else if (
+      input.isGrounded &&
+      Math.abs(input.velocity.x) >= PLAYER_RUN_SPARK_SPEED_THRESHOLD &&
+      shouldEmitTimedEffect({
+        nowMs: this.time.now,
+        lastEmitMs: this.lastRunSparkAtMs,
+        intervalMs: PLAYER_RUN_SPARK_INTERVAL_MS,
+      })
+    ) {
+      this.lastRunSparkAtMs = this.time.now;
+      this.emitBurstParticles([
+        createRunSparkParticle(
+          this.player.getPhysicsState().position,
+          this.player.getVisualState().facing,
+        ),
+      ]);
+    }
+
+    if (input.didJump) {
+      this.emitBurstParticles(
+        createJumpBurstParticles(this.player.getPhysicsState().position),
+      );
+    }
+
+    if (input.didLand) {
+      this.emitBurstParticles(
+        createLandingBurstParticles(this.player.getPhysicsState().position),
+      );
+    }
+  }
+
+  private emitDashGhost(): void {
+    if (!this.player) {
+      return;
+    }
+
+    if (
+      !shouldEmitTimedEffect({
+        nowMs: this.time.now,
+        lastEmitMs: this.lastDashTrailAtMs,
+        intervalMs: PLAYER_DASH_TRAIL_INTERVAL_MS,
+      })
+    ) {
+      return;
+    }
+
+    this.lastDashTrailAtMs = this.time.now;
+    const sprite = this.player.getSprite();
+    const offset = getDashGhostOffset(this.player.getVisualState().facing);
+    const ghost = this.add
+      .image(sprite.x + offset.x, sprite.y + offset.y, sprite.texture.key)
+      .setOrigin(PLAYER_SIZE.pivot.x, PLAYER_SIZE.pivot.y)
+      .setFlipX(sprite.flipX)
+      .setScale(sprite.scaleX, sprite.scaleY)
+      .setAngle(sprite.angle)
+      .setAlpha(0.34)
+      .setTint(0x80d7c2)
+      .setDepth(PLAYER_EFFECT_DEPTHS.trail);
+
+    this.tweens.add({
+      targets: ghost,
+      alpha: 0,
+      x: ghost.x + offset.x,
+      duration: 160,
+      ease: "Quad.easeOut",
+      onComplete: () => {
+        ghost.destroy();
+      },
+    });
+  }
+
+  private emitBurstParticles(
+    particles: readonly ReturnType<typeof createRunSparkParticle>[],
+  ): void {
+    particles.forEach((particle) => {
+      const marker = this.add
+        .rectangle(
+          particle.x,
+          particle.y,
+          particle.width,
+          particle.height,
+          particle.color,
+          particle.alpha,
+        )
+        .setDepth(PLAYER_EFFECT_DEPTHS.burst);
+
+      this.tweens.add({
+        targets: marker,
+        x: marker.x + particle.offsetX,
+        y: marker.y + particle.offsetY,
+        alpha: 0,
+        duration: particle.durationMs,
+        ease: "Quad.easeOut",
+        onComplete: () => {
+          marker.destroy();
+        },
+      });
+    });
   }
 
   private drawTerrain(level: LevelDefinition): void {
@@ -928,6 +1095,10 @@ export class LevelScene extends Phaser.Scene {
 
     this.clearRespawnRecoveryTimer();
     this.player.die();
+    this.updatePlayerEnergyAura(false);
+    this.emitBurstParticles(
+      createLandingBurstParticles(this.player.getPhysicsState().position),
+    );
     this.jumpState = createInitialJumpMovementState();
     this.dashState = resetDashMovementState(this.dashState);
     gameStateStore.registerDeath(death.cause, position, death.sourceId);
@@ -973,6 +1144,8 @@ export class LevelScene extends Phaser.Scene {
 
     this.resetRoomTransientState(checkpoint.id);
     this.player.respawn(checkpoint);
+    this.updatePlayerEnergyAura(false);
+    this.emitBurstParticles(createJumpBurstParticles(checkpoint));
     this.scheduleRespawnRecoveryEnd();
   }
 
@@ -1332,6 +1505,8 @@ export class LevelScene extends Phaser.Scene {
   private cleanup(): void {
     this.clearRespawnTimer();
     this.clearRespawnRecoveryTimer();
+    this.playerAura?.destroy();
+    this.playerAura = undefined;
     this.input.keyboard?.off("keydown-ESC", this.pauseLevel, this);
     this.input.keyboard?.off("keydown-M", this.toggleMute, this);
     this.actionInput?.destroy();

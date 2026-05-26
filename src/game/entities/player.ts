@@ -325,7 +325,65 @@ export class Player {
       animationKey: animation.key,
     };
 
+    this.applyAnimationTransform(animation.state);
     this.sprite.play(animation.key, true);
+  }
+
+  private applyAnimationTransform(state: PinoAnimationState): void {
+    const facingSign = this.visualState.facing === "left" ? -1 : 1;
+    const transformByState = {
+      [PINO_ANIMATION_STATES.IDLE]: {
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+      },
+      [PINO_ANIMATION_STATES.RUN]: {
+        scaleX: 1.08,
+        scaleY: 0.96,
+        angle: -3 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.JUMP]: {
+        scaleX: 0.94,
+        scaleY: 1.08,
+        angle: -5 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.FALL]: {
+        scaleX: 1.04,
+        scaleY: 0.98,
+        angle: 5 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.DEATH]: {
+        scaleX: 1.16,
+        scaleY: 0.72,
+        angle: 12 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.RESPAWN]: {
+        scaleX: 0.88,
+        scaleY: 1.12,
+        angle: 0,
+      },
+      [PINO_ANIMATION_STATES.PRIMARY_ACTION]: {
+        scaleX: 1.2,
+        scaleY: 0.86,
+        angle: -8 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.SECONDARY_ACTION]: {
+        scaleX: 1.04,
+        scaleY: 1,
+        angle: -4 * facingSign,
+      },
+    } as const satisfies Record<
+      PinoAnimationState,
+      {
+        readonly scaleX: number;
+        readonly scaleY: number;
+        readonly angle: number;
+      }
+    >;
+    const transform = transformByState[state];
+
+    this.sprite.setScale(transform.scaleX, transform.scaleY);
+    this.sprite.setAngle(transform.angle);
   }
 
   private resolveFacingFromVelocity(velocity: Vector2Like): FacingDirection {

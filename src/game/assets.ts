@@ -17,13 +17,16 @@ import playerRespawnUrl from "../../assets/audio/sfx/player-respawn.wav";
 import playerSecondaryUrl from "../../assets/audio/sfx/player-secondary.wav";
 import playerPinoDeath01Url from "../../assets/sprites/player-pino-death-01.png";
 import playerPinoDeath02Url from "../../assets/sprites/player-pino-death-02.png";
+import playerPinoDashUrl from "../../assets/sprites/player-pino-dash.png";
 import playerPinoFallUrl from "../../assets/sprites/player-pino-fall.png";
 import playerPinoIdleUrl from "../../assets/sprites/player-pino-idle.png";
 import playerPinoJumpUrl from "../../assets/sprites/player-pino-jump.png";
+import playerPinoJumpPeakUrl from "../../assets/sprites/player-pino-jump-peak.png";
 import playerPinoRespawn01Url from "../../assets/sprites/player-pino-respawn-01.png";
 import playerPinoRespawn02Url from "../../assets/sprites/player-pino-respawn-02.png";
 import playerPinoRun01Url from "../../assets/sprites/player-pino-run-01.png";
 import playerPinoRun02Url from "../../assets/sprites/player-pino-run-02.png";
+import playerPinoRun03Url from "../../assets/sprites/player-pino-run-03.png";
 import itemMechanismKeyUrl from "../../assets/sprites/item-mechanism-key.png";
 import itemOptionalTokenUrl from "../../assets/sprites/item-optional-token.png";
 import itemRequiredChipUrl from "../../assets/sprites/item-required-chip.png";
@@ -54,8 +57,11 @@ export const ASSET_KEYS = {
   PLAYER_PINO_IDLE: PINO_TEXTURE_KEYS.IDLE,
   PLAYER_PINO_RUN_01: PINO_TEXTURE_KEYS.RUN_01,
   PLAYER_PINO_RUN_02: PINO_TEXTURE_KEYS.RUN_02,
+  PLAYER_PINO_RUN_03: PINO_TEXTURE_KEYS.RUN_03,
   PLAYER_PINO_JUMP: PINO_TEXTURE_KEYS.JUMP,
+  PLAYER_PINO_JUMP_PEAK: PINO_TEXTURE_KEYS.JUMP_PEAK,
   PLAYER_PINO_FALL: PINO_TEXTURE_KEYS.FALL,
+  PLAYER_PINO_DASH: PINO_TEXTURE_KEYS.DASH,
   PLAYER_PINO_DEATH_01: PINO_TEXTURE_KEYS.DEATH_01,
   PLAYER_PINO_DEATH_02: PINO_TEXTURE_KEYS.DEATH_02,
   PLAYER_PINO_RESPAWN_01: PINO_TEXTURE_KEYS.RESPAWN_01,
@@ -91,12 +97,24 @@ export const IMAGE_ASSETS = [
     url: playerPinoRun02Url,
   },
   {
+    key: ASSET_KEYS.PLAYER_PINO_RUN_03,
+    url: playerPinoRun03Url,
+  },
+  {
     key: ASSET_KEYS.PLAYER_PINO_JUMP,
     url: playerPinoJumpUrl,
   },
   {
+    key: ASSET_KEYS.PLAYER_PINO_JUMP_PEAK,
+    url: playerPinoJumpPeakUrl,
+  },
+  {
     key: ASSET_KEYS.PLAYER_PINO_FALL,
     url: playerPinoFallUrl,
+  },
+  {
+    key: ASSET_KEYS.PLAYER_PINO_DASH,
+    url: playerPinoDashUrl,
   },
   {
     key: ASSET_KEYS.PLAYER_PINO_DEATH_01,

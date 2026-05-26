@@ -45,7 +45,7 @@ export const INITIAL_VISUAL_PALETTE = {
   },
   hero: {
     hex: "#f4d35e",
-    usage: "Pino body, key items and collectible focus",
+    usage: "Pino hair energy, key items and collectible focus",
   },
   hazard: {
     hex: "#e35d6a",
@@ -68,16 +68,16 @@ export const INITIAL_VISUAL_DIRECTION = {
     "Low-res pixel art in a hostile test lab: clean silhouettes, hard contrast and saturated semantic accents for danger, progress and false safety.",
   tileSizePx: 16,
   playerApproxSizePx: {
-    width: 12,
-    height: 24,
+    width: 14,
+    height: 26,
   },
   playerHitboxSizePx: {
     width: 10,
     height: 22,
   },
   playerTileRatio: {
-    width: 0.75,
-    height: 1.5,
+    width: 0.875,
+    height: 1.625,
   },
   palette: INITIAL_VISUAL_PALETTE,
   assetRules: [

@@ -30,15 +30,18 @@ jogo.
 
 | Arquivo                                           | Origem                         | Licenca             | Observacoes                                                       |
 | ------------------------------------------------- | ------------------------------ | ------------------- | ----------------------------------------------------------------- |
-| `assets/sprites/player-pino-idle.png`             | Gerado no projeto com `magick` | Original do projeto | Sprite 12x24px de idle do Pino, olhando para a direita, com alfa. |
-| `assets/sprites/player-pino-run-01.png`           | Gerado no projeto com `magick` | Original do projeto | Frame 1 de corrida do Pino, com corpo inclinado para frente.      |
-| `assets/sprites/player-pino-run-02.png`           | Gerado no projeto com `magick` | Original do projeto | Frame 2 de corrida do Pino, com troca de apoio dos pés.           |
-| `assets/sprites/player-pino-jump.png`             | Gerado no projeto com `magick` | Original do projeto | Pose de pulo do Pino, com silhueta vertical esticada.             |
-| `assets/sprites/player-pino-fall.png`             | Gerado no projeto com `magick` | Original do projeto | Pose de queda do Pino, com visor baixo e pés soltos.              |
-| `assets/sprites/player-pino-death-01.png`         | Gerado no projeto com `magick` | Original do projeto | Frame 1 de morte do Pino, usando cor de hazard no impacto.        |
-| `assets/sprites/player-pino-death-02.png`         | Gerado no projeto com `magick` | Original do projeto | Frame 2 de morte do Pino, com corpo quebrado e baixo.             |
-| `assets/sprites/player-pino-respawn-01.png`       | Gerado no projeto com `magick` | Original do projeto | Frame 1 de respawn do Pino, com varredura ciano.                  |
-| `assets/sprites/player-pino-respawn-02.png`       | Gerado no projeto com `magick` | Original do projeto | Frame 2 de respawn do Pino, com corpo reconstruído.               |
+| `assets/sprites/player-pino-idle.png`             | Gerado no projeto por script   | Original do projeto | Sprite 14x26px de idle do Pino, lutador original com aura baixa.  |
+| `assets/sprites/player-pino-run-01.png`           | Gerado no projeto por script   | Original do projeto | Frame 1 de corrida do Pino, corpo inclinado e braço armado.       |
+| `assets/sprites/player-pino-run-02.png`           | Gerado no projeto por script   | Original do projeto | Frame 2 de corrida do Pino, troca de apoio e faixa em atraso.     |
+| `assets/sprites/player-pino-run-03.png`           | Gerado no projeto por script   | Original do projeto | Frame 3 de corrida do Pino, passada baixa com energia no pé.      |
+| `assets/sprites/player-pino-jump.png`             | Gerado no projeto por script   | Original do projeto | Pose de pulo do Pino, cabelo vertical e energia nos pés.          |
+| `assets/sprites/player-pino-jump-peak.png`        | Gerado no projeto por script   | Original do projeto | Frame de ápice do pulo do Pino, pose compacta com aura.           |
+| `assets/sprites/player-pino-fall.png`             | Gerado no projeto por script   | Original do projeto | Pose de queda do Pino, braços abertos e cabelo puxado para cima.  |
+| `assets/sprites/player-pino-dash.png`             | Gerado no projeto por script   | Original do projeto | Pose de dash do Pino, corpo horizontal com rastro de aura.        |
+| `assets/sprites/player-pino-death-01.png`         | Gerado no projeto por script   | Original do projeto | Frame 1 de morte do Pino, impacto vermelho quebrando a aura.      |
+| `assets/sprites/player-pino-death-02.png`         | Gerado no projeto por script   | Original do projeto | Frame 2 de morte do Pino, silhueta baixa com faixa desfeita.      |
+| `assets/sprites/player-pino-respawn-01.png`       | Gerado no projeto por script   | Original do projeto | Frame 1 de respawn do Pino, varredura ciano da silhueta.          |
+| `assets/sprites/player-pino-respawn-02.png`       | Gerado no projeto por script   | Original do projeto | Frame 2 de respawn do Pino, pose firme com aura reconstruída.     |
 | `assets/sprites/trap-spikes.png`                  | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de espinhos e spike-pop.                           |
 | `assets/sprites/trap-false-block.png`             | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de bloco falso com indício roxo sutil.             |
 | `assets/sprites/trap-falling-platform.png`        | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de plataforma instável.                            |

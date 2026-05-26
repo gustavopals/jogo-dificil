@@ -11,14 +11,14 @@ export const GAME_BACKGROUND_COLOR = "#111217";
 export const TARGET_FPS = 60;
 
 export const PLAYER_SIZE = {
-  visualWidth: 12,
-  visualHeight: 24,
+  visualWidth: 14,
+  visualHeight: 26,
   hitboxWidth: 10,
   hitboxHeight: 22,
   spriteMargin: {
-    left: 1,
-    right: 1,
-    top: 1,
+    left: 2,
+    right: 2,
+    top: 3,
     bottom: 1,
   },
   pivot: {
@@ -26,8 +26,8 @@ export const PLAYER_SIZE = {
     y: 1,
   },
   tileScale: {
-    visualWidth: 12 / TILE_SIZE_PX,
-    visualHeight: 24 / TILE_SIZE_PX,
+    visualWidth: 14 / TILE_SIZE_PX,
+    visualHeight: 26 / TILE_SIZE_PX,
     hitboxWidth: 10 / TILE_SIZE_PX,
     hitboxHeight: 22 / TILE_SIZE_PX,
   },
