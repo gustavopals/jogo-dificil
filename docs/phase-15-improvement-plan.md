@@ -144,8 +144,9 @@ Forcas:
 
 Riscos:
 
-- O aviso de chunk grande do Vite continua. Nao bloqueia o jogo, mas vira divida
-  quando conteudo, audio e menus crescerem.
+- O aviso de chunk grande do Vite foi tratado na Task 15.8 separando Phaser em
+  `phaser-vendor`; a proxima divida passa a ser carregamento por fase se
+  conteudo/audio crescerem muito.
 - O hook debug existe apenas em dev, mas ainda nao ha um modo formal de QA para
   iniciar fases, simular mortes e coletar diagnostico.
 
@@ -337,6 +338,17 @@ Pronto quando:
 - `npm run build` passa sem regressao.
 - O aviso de chunk grande e resolvido ou documentado com motivo para adiar.
 - Smoke test continua passando.
+
+Implementacao inicial:
+
+- `vite.config.ts` separa Phaser em `phaser-vendor` e demais dependencias em
+  `vendor`.
+- O chunk do app caiu de ~1.303 kB para ~104 kB.
+- O vendor do Phaser ficou em ~1.199 kB e fica aceito/documentado como cache
+  separado.
+- Audio continua emitido como arquivos e sprites pequenos seguem inlinados sem
+  ganho claro para mudar agora.
+- A medicao e a decisao ficam em `docs/build-optimization.md`.
 
 ## Ordem Recomendada Da Fase 15
 

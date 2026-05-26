@@ -1007,6 +1007,14 @@ Expansao pos-MVP e Fase 15:
   - O build de producao nao registra o objeto global de QA.
   - O smoke test Playwright usa esses helpers para iniciar fase em estado
     conhecido sem depender de cliques longos.
+- Implementacao inicial da otimizacao de build:
+  - `vite.config.ts` separa Phaser em `phaser-vendor`, preservando o codigo do
+    jogo em chunk proprio.
+  - O chunk principal passou de ~1.303 kB para ~104 kB.
+  - O vendor do Phaser permanece grande por natureza da engine, mas agora e
+    cacheavel separadamente e documentado.
+  - Audio continua como arquivos externos; sprites pequenos seguem inlinados
+    pelo Vite porque o chunk do app ficou pequeno.
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 

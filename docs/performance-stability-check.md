@@ -47,7 +47,8 @@ sem degradar perceptivelmente.
 
 ## Observacoes
 
-- O aviso conhecido do Vite sobre chunk acima de 500 kB continua existindo e
-  nao indicou degradacao perceptivel nesta medicao.
+- Na medicao inicial, o aviso conhecido do Vite sobre chunk acima de 500 kB
+  continuava existindo e nao indicou degradacao perceptivel. Atualizacao: a
+  Task 15.8 separou Phaser em `phaser-vendor` e removeu o aviso do build atual.
 - A medicao headless confirma estabilidade tecnica inicial; playtest humano
   longo ainda deve validar cansaco, legibilidade e sensacao de ritmo.

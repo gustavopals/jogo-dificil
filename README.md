@@ -102,6 +102,7 @@ npm run format
 - `docs/mvp-gameplay-checklist.md`: checklist manual do MVP.
 - `docs/block-2-gameplay-checklist.md`: plano e checklist manual das fases 4 a 6.
 - `docs/dev-qa-tools.md`: ferramentas dev para iniciar fases e acelerar playtest.
+- `docs/build-optimization.md`: decisao inicial de chunking do build.
 - `docs/performance-stability-check.md`: medicao inicial de estabilidade.
 - `docs/mvp-release-checklist.md`: checklist do primeiro build jogavel.
 - `docs/phase-15-improvement-plan.md`: analise pos-MVP e plano de melhorias.

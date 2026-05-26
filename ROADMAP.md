@@ -1159,11 +1159,11 @@ Pronto quando:
 
 ### Task 15.8 - Otimizacao Inicial Do Build
 
-- [ ] Investigar o aviso de chunk grande do Vite.
-- [ ] Avaliar separacao de Phaser/codigo do jogo em chunks.
-- [ ] Conferir imports de audio e imagens.
-- [ ] Ajustar build apenas se houver ganho claro.
-- [ ] Rodar build e smoke test apos mudancas.
+- [x] Investigar o aviso de chunk grande do Vite.
+- [x] Avaliar separacao de Phaser/codigo do jogo em chunks.
+- [x] Conferir imports de audio e imagens.
+- [x] Ajustar build apenas se houver ganho claro.
+- [x] Rodar build e smoke test apos mudancas.
 
 Pronto quando:
 
@@ -1588,3 +1588,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   checkpoint, simula conclusao e le snapshot com fase, checkpoint, mortes,
   ultima morte e estado de traps. O smoke test Playwright passou a usar esses
   helpers, e o uso esta documentado em `docs/dev-qa-tools.md`.
+- [x] Task 15.8 concluida: build otimizado com `vite.config.ts`, separando
+  Phaser em `phaser-vendor` e deixando o codigo do jogo em chunk proprio. O
+  chunk principal caiu de ~1.303 kB para ~104 kB, o vendor do Phaser ficou
+  cacheavel separadamente em ~1.199 kB e o aviso de chunk grande do Vite saiu
+  do build. A decisao fica registrada em `docs/build-optimization.md`.

@@ -67,7 +67,9 @@ criterios definidos em `IDEIA.md`.
 
 ## Observacoes
 
-- O build ainda mostra o aviso conhecido do Vite sobre chunk acima de 500 kB.
+- No checklist inicial, o build ainda mostrava o aviso conhecido do Vite sobre
+  chunk acima de 500 kB. Atualizacao: a Task 15.8 separou Phaser em
+  `phaser-vendor` e removeu o aviso do build atual.
   Isso nao bloqueia o MVP e fica melhor enquadrado na Task 12.4 ou em uma etapa
   futura de otimizacao.
 - A checagem valida fluxo, comandos, respawn e conclusao das fases, mas nao

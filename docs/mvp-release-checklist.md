@@ -31,7 +31,8 @@ Escopo: Task 13.2 da Fase 13, consolidando o primeiro build jogavel do MVP.
 
 ## Observacoes
 
-- O Vite ainda exibe o aviso conhecido de chunk acima de 500 kB. Ele nao bloqueia
-  o primeiro build jogavel e pode ser tratado em otimizacao pos-MVP.
+- No release inicial, o Vite ainda exibia o aviso conhecido de chunk acima de
+  500 kB. Atualizacao: a Task 15.8 separou Phaser em `phaser-vendor` e removeu
+  o aviso do build atual.
 - O MVP esta apto a ser apresentado como primeiro build jogavel, com escopo
   limitado a 3 fases iniciais e assets temporarios/originais.
