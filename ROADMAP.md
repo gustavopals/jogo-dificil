@@ -1039,13 +1039,13 @@ Objetivo: listar ideias futuras sem contaminar o escopo inicial.
 - [ ] Planejar novas mecânicas uma por vez.
 - [ ] Evitar aumentar dificuldade sem ensinar antes.
 
-### Task 14.2 - Gamepad
+### Task 14.2 - Gamepad :backlog:
 
 - [ ] Mapear controle.
 - [ ] Testar input analogico/digital.
 - [ ] Criar tela de remapeamento se necessario.
 
-### Task 14.3 - Sistemas Avancados
+### Task 14.3 - Sistemas Avancados :backlog:
 
 - [ ] Replay fantasma.
 - [ ] Medalhas locais.
@@ -1055,7 +1055,7 @@ Objetivo: listar ideias futuras sem contaminar o escopo inicial.
 - [ ] Conquistas internas.
 - [ ] Assist mode opcional.
 
-### Task 14.4 - Ferramentas De Mapa
+### Task 14.4 - Ferramentas De Mapa :backlog:
 
 - [ ] Avaliar Tiled.
 - [ ] Avaliar editor proprio simples.
