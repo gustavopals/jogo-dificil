@@ -1120,18 +1120,6 @@ Pronto quando:
 - Concluir uma fase gera uma marca local que incentiva repeticao sem depender de
   ranking online.
 
-### Task 15.5 - Selecionar E Continuar Fases Desbloqueadas
-
-- [ ] Persistir maior fase desbloqueada localmente.
-- [ ] Adicionar opcao simples de continuar no menu.
-- [ ] Adicionar selecao compacta de fases desbloqueadas.
-- [ ] Resetar run atual ao selecionar fase sem apagar recordes locais.
-- [ ] Manter campanha linear como fluxo padrao.
-
-Pronto quando:
-
-- O jogador consegue voltar a fases ja desbloqueadas sem criar um hub jogavel.
-
 ### Task 15.6 - Planejar E Criar Bloco 2 De Fases
 
 - [ ] Planejar `level-04`, `level-05` e `level-06`.
