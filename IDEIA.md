@@ -765,6 +765,57 @@ Implementação inicial do HUD:
 - `src/game/ui/hud.ts` concentra layout, estilos e formatadores para manter a
   cena Phaser fina e os contratos testáveis.
 
+Implementação inicial de pausa e mute:
+
+- `Esc` é tratado diretamente por `LevelScene` para pausar e por `PauseScene`
+  para retomar, evitando depender de leitura frame-a-frame para comandos de
+  sistema.
+- `M` alterna mute tanto durante a fase quanto na tela de pausa; o HUD e o
+  overlay de pausa refletem o estado vindo de `gameStateStore`.
+- Pausar usa `this.scene.pause()` na fase e lança `PauseScene`, então movimento,
+  armadilhas, colisões e timers da fase deixam de avançar enquanto o overlay
+  está ativo.
+- `AudioScene` já escutava `audio:mute-changed`; os testes do `AudioManager`
+  agora cobrem volumes ativos indo para zero ao mutar e voltando ao desmutar.
+- O overlay de pausa fica propositalmente curto: título, comando para voltar,
+  comando de áudio e estado atual do som.
+
+Implementação inicial da transição entre fases:
+
+- Ao tocar a saída, `LevelScene` emite `level:completed` e muda para
+  `LevelTransitionScene`, evitando que a fase continue processando depois da
+  conclusão.
+- A transição entre fases é curta e automática: mostra fase concluída, próxima
+  fase e mortes acumuladas por cerca de 1 segundo antes de iniciar a próxima
+  fase.
+- A decisão para o MVP é preservar o contador de mortes ao avançar entre as 3
+  fases, para medir o run inteiro; ele só é resetado quando o jogador reinicia a
+  partir da tela final.
+- Após a Fase 3, a mesma cena mostra uma tela final simples com mortes totais e
+  `ENTER reinicia`.
+- A vinheta de fim de fase continua sendo disparada por `AudioScene`; ao entrar
+  na próxima fase, a transição pede o loop musical do MVP novamente.
+
+Implementação inicial da direção visual:
+
+- Estilo escolhido: pixel art de baixa resolução, mantendo a base técnica já
+  definida para 480x270, grid de 16x16px, renderização `pixelArt` e leitura em
+  escala 1x.
+- Tese visual: laboratório de testes hostil, com fundos escuros, blocos
+  industriais, silhuetas limpas e acentos saturados para perigo, progresso e
+  falsa segurança.
+- Paleta inicial semântica registrada em `src/data/art/visual-direction.ts`:
+  fundo `#111217`, painel `#242630`, metal `#3f4958`, texto `#f5f7fb`,
+  sombra `#050608`, seguro/checkpoint `#80d7c2`, herói/item `#f4d35e`, perigo
+  `#e35d6a`, saída/truque `#e76f51` e trap especial `#9b5de5`.
+- Tile base mantido em 16x16px.
+- Tamanho final aproximado do Pino mantido em 12x24px visual, com hitbox 10x22px
+  e proporção de 0,75 tile de largura por 1,5 tile de altura.
+- Regras para novos assets: ler em 1x antes de detalhar, usar cor por
+  significado, manter perigos/objetivos mais claros que o fundo, preferir
+  contorno duro de 1px e evitar textura que confunda colisão.
+- Referência operacional adicional registrada em `docs/visual-direction.md`.
+
 ### Ponto 7 - Pipeline de Assets
 
 Status: Decidido.
@@ -1901,6 +1952,10 @@ Direção pendente:
 - Resolução base do jogo: 480x270 com tiles de 16px, escalando 1:1 para 960x540, 1440x810 e 1920x1080.
 - Ação principal: Dash (impulso horizontal curto, no chão e no ar). Ação secundária: Interagir (alavancas, botões, portas, itens).
 - Canvas usa modo `FIT` do Phaser, com pixel art ativado, letterbox em aspect ratio diferente e 60 FPS alvo. Sem mobile/touch no MVP.
+- Direção visual inicial definida como pixel art de baixa resolução em
+  laboratório de testes hostil, com tile 16x16px, Pino em aproximadamente
+  12x24px e paleta semântica para fundo, UI, terreno, herói, perigo, saída e
+  traps especiais.
 - Trap Adventure 2 é referência de sensação, não fonte de cópia.
 - O projeto será estruturado desde o início, com planejamento de personagens, animações, mapas, músicas e ações.
 - Personagem principal provisório definido como Pino: criatura original compacta
@@ -1929,7 +1984,6 @@ Direção pendente:
 ## Perguntas Abertas
 
 - Qual será o nome do jogo?
-- Qual será a estética visual (pixel art com paleta limitada, paleta ampla, estilo cartoon)?
 - O nome provisório Pino será mantido ou trocado antes da arte final?
 - A dificuldade será puramente cruel ou terá camadas de acessibilidade?
 - O jogo terá história ou será mais arcade?

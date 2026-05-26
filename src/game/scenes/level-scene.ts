@@ -176,18 +176,12 @@ export class LevelScene extends Phaser.Scene {
     });
     this.configureCamera();
 
+    this.input.keyboard?.on("keydown-ESC", this.pauseLevel, this);
+    this.input.keyboard?.on("keydown-M", this.toggleMute, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
 
   public override update(_time: number, delta: number): void {
-    if (this.actionInput?.wasPressed("pause")) {
-      this.pauseLevel();
-    }
-
-    if (this.actionInput?.wasPressed("mute")) {
-      this.toggleMute();
-    }
-
     if (this.actionInput?.wasPressed("restart")) {
       this.restartAtCheckpoint();
       return;
@@ -515,8 +509,24 @@ export class LevelScene extends Phaser.Scene {
 
     if (!this.hasCompletedLevel && isTouchingExit(playerHitbox, this.level)) {
       this.hasCompletedLevel = true;
-      gameStateStore.completeLevel(this.level.exit.nextLevelId);
+      this.completeLevel();
     }
+  }
+
+  private completeLevel(): void {
+    if (!this.level) {
+      return;
+    }
+
+    const { deathCount } = gameStateStore.getSnapshot();
+    const nextLevelId = this.level.exit.nextLevelId;
+
+    gameStateStore.completeLevel(nextLevelId);
+    this.scene.start(SCENE_KEYS.LEVEL_TRANSITION, {
+      completedLevelId: this.level.id,
+      nextLevelId,
+      deathCount,
+    });
   }
 
   private updatePlayerDeath(): boolean {
@@ -974,6 +984,8 @@ export class LevelScene extends Phaser.Scene {
   private cleanup(): void {
     this.clearRespawnTimer();
     this.clearRespawnRecoveryTimer();
+    this.input.keyboard?.off("keydown-ESC", this.pauseLevel, this);
+    this.input.keyboard?.off("keydown-M", this.toggleMute, this);
     this.actionInput?.destroy();
     this.actionInput = undefined;
     this.player?.destroy();

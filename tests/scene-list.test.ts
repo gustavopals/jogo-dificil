@@ -12,5 +12,8 @@ describe("scene list", () => {
     expect(GAME_SCENE_ORDER.indexOf(SCENE_KEYS.MENU)).toBeGreaterThan(
       GAME_SCENE_ORDER.indexOf(SCENE_KEYS.PRELOAD),
     );
+    expect(
+      GAME_SCENE_ORDER.indexOf(SCENE_KEYS.LEVEL_TRANSITION),
+    ).toBeGreaterThan(GAME_SCENE_ORDER.indexOf(SCENE_KEYS.LEVEL));
   });
 });

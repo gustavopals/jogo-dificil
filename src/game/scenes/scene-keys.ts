@@ -4,6 +4,7 @@ export const SCENE_KEYS = {
   PRELOAD: "preload",
   MENU: "menu",
   LEVEL: "level",
+  LEVEL_TRANSITION: "level-transition",
   HUD: "hud",
   PAUSE: "pause",
 } as const;

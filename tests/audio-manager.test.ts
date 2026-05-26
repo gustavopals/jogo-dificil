@@ -98,6 +98,21 @@ describe("audio manager", () => {
     expect(engine.handles[0]!.volumeHistory).toEqual([0.75, 0.375]);
   });
 
+  it("applies mute changes to active music and sound effects", () => {
+    const engine = new FakeAudioEngine();
+    const manager = new AudioManager(engine);
+
+    manager.registerAudio([MUSIC, SFX]);
+    manager.play(MUSIC.id);
+    manager.play(SFX.id);
+
+    manager.setMuted(true);
+    manager.setMuted(false);
+
+    expect(engine.handles[0]!.volumeHistory).toEqual([0.4, 0, 0.4]);
+    expect(engine.handles[1]!.volumeHistory).toEqual([0.75, 0, 0.75]);
+  });
+
   it("keeps music loops from restarting and replaces different tracks", () => {
     const engine = new FakeAudioEngine();
     const manager = new AudioManager(engine);

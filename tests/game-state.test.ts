@@ -4,6 +4,7 @@ import {
   clearAllGameEventListeners,
   GAME_EVENTS,
   onGameEvent,
+  type AudioMuteChangedEvent,
   type CheckpointActivatedEvent,
   type PlayerDiedEvent,
   type PlayerRespawnedEvent,
@@ -203,5 +204,74 @@ describe("game state", () => {
         isManualRestart: false,
       },
     ]);
+  });
+
+  it("toggles pause without changing level progress", () => {
+    gameStateStore.startLevel("level-02", {
+      x: 96,
+      y: 208,
+    });
+
+    gameStateStore.setPaused(true);
+
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      status: "paused",
+      currentLevelId: "level-02",
+      isPaused: true,
+      activeCheckpoint: {
+        id: "level-02-start",
+        levelId: "level-02",
+        x: 96,
+        y: 208,
+      },
+    });
+
+    gameStateStore.setPaused(false);
+
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      status: "playing",
+      currentLevelId: "level-02",
+      isPaused: false,
+    });
+  });
+
+  it("preserves death count when advancing to the next level", () => {
+    gameStateStore.startLevel("level-01");
+    gameStateStore.registerDeath("trap", { x: 128, y: 194 });
+    gameStateStore.respawnAtCheckpoint();
+
+    gameStateStore.startLevel("level-02", {
+      x: 96,
+      y: 208,
+    });
+
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      status: "playing",
+      currentLevelId: "level-02",
+      deathCount: 1,
+      activeCheckpoint: {
+        id: "level-02-start",
+        levelId: "level-02",
+        x: 96,
+        y: 208,
+      },
+    });
+  });
+
+  it("emits mute changes only when the audio state changes", () => {
+    const muteEvents: AudioMuteChangedEvent[] = [];
+
+    onGameEvent(GAME_EVENTS.AUDIO_MUTE_CHANGED, (payload) => {
+      muteEvents.push(payload);
+    });
+
+    expect(gameStateStore.toggleMuted()).toBe(true);
+    expect(gameStateStore.getSnapshot().isMuted).toBe(true);
+
+    gameStateStore.setMuted(true);
+
+    expect(gameStateStore.toggleMuted()).toBe(false);
+    expect(gameStateStore.getSnapshot().isMuted).toBe(false);
+    expect(muteEvents).toEqual([{ isMuted: true }, { isMuted: false }]);
   });
 });

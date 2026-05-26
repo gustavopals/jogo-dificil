@@ -2,6 +2,7 @@ import { AudioScene } from "./audio-scene";
 import { BootScene } from "./boot-scene";
 import { HudScene } from "./hud-scene";
 import { LevelScene } from "./level-scene";
+import { LevelTransitionScene } from "./level-transition-scene";
 import { MenuScene } from "./menu-scene";
 import { PauseScene } from "./pause-scene";
 import { PreloadScene } from "./preload-scene";
@@ -14,6 +15,7 @@ const GAME_SCENES_BY_KEY = {
   [SCENE_KEYS.PRELOAD]: PreloadScene,
   [SCENE_KEYS.MENU]: MenuScene,
   [SCENE_KEYS.LEVEL]: LevelScene,
+  [SCENE_KEYS.LEVEL_TRANSITION]: LevelTransitionScene,
   [SCENE_KEYS.HUD]: HudScene,
   [SCENE_KEYS.PAUSE]: PauseScene,
 } as const;

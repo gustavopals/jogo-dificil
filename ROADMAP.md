@@ -862,11 +862,11 @@ Pronto quando:
 
 ### Task 10.3 - Pausa E Mute
 
-- [ ] `Esc` pausa.
-- [ ] `Esc` retoma.
-- [ ] `M` muta.
-- [ ] Estado de pause congela gameplay.
-- [ ] Audio respeita mute.
+- [x] `Esc` pausa.
+- [x] `Esc` retoma.
+- [x] `M` muta.
+- [x] Estado de pause congela gameplay.
+- [x] Audio respeita mute.
 
 Pronto quando:
 
@@ -874,11 +874,11 @@ Pronto quando:
 
 ### Task 10.4 - Transicao Entre Fases
 
-- [ ] Detectar fim de fase.
-- [ ] Mostrar feedback curto.
-- [ ] Carregar proxima fase.
-- [ ] Preservar ou resetar contador conforme decisao.
-- [ ] Finalizar apos Fase 3 com tela simples.
+- [x] Detectar fim de fase.
+- [x] Mostrar feedback curto.
+- [x] Carregar proxima fase.
+- [x] Preservar ou resetar contador conforme decisao.
+- [x] Finalizar apos Fase 3 com tela simples.
 
 Pronto quando:
 
@@ -890,11 +890,11 @@ Objetivo: sair de placeholders ruins para uma direcao visual consistente.
 
 ### Task 11.1 - Definir Direcao Visual Inicial
 
-- [ ] Escolher pixel art, cartoon vetorial ou outro estilo.
-- [ ] Definir paleta inicial.
-- [ ] Definir tamanho de tile.
-- [ ] Definir tamanho final aproximado do personagem.
-- [ ] Registrar no `IDEIA.md`.
+- [x] Escolher pixel art, cartoon vetorial ou outro estilo.
+- [x] Definir paleta inicial.
+- [x] Definir tamanho de tile.
+- [x] Definir tamanho final aproximado do personagem.
+- [x] Registrar no `IDEIA.md`.
 
 Pronto quando:
 
@@ -1384,3 +1384,16 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `MUDO` apenas quando o audio esta mutado. O texto debug da fase foi removido
   para nao competir com o HUD, e os contratos ficam em `src/game/ui/hud.ts` e
   `tests/hud.test.ts`.
+- [x] Task 10.3 concluida: comandos de sistema agora usam eventos diretos de
+  teclado nas cenas ativas. `Esc` pausa e retoma via overlay, `M` alterna mute
+  durante jogo ou pausa, a cena da fase fica pausada sem processar gameplay e o
+  `AudioManager` zera/restaura volumes ativos ao receber mudancas de mute.
+- [x] Task 10.4 concluida: tocar a saida agora inicia `LevelTransitionScene`,
+  com feedback visual curto, audio de fim de fase, carregamento automatico da
+  proxima fase quando existe `nextLevelId` e tela final simples apos a Fase 3.
+  O contador de mortes foi preservado durante o run de 3 fases e resetado apenas
+  quando o jogador reinicia a partir da tela final.
+- [x] Task 11.1 concluida: direcao visual inicial definida como pixel art de
+  baixa resolucao em laboratorio hostil, com tile 16x16px, Pino em
+  aproximadamente 12x24px e paleta semantica registrada em
+  `src/data/art/visual-direction.ts`, `docs/visual-direction.md` e `IDEIA.md`.
