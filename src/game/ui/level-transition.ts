@@ -5,8 +5,8 @@ export const LEVEL_TRANSITION_DELAY_MS = 1100;
 
 export const LEVEL_TRANSITION_COPY = {
   completedTitle: "Fase concluida",
-  finalTitle: "MVP concluido",
-  finalDetail: "As 3 fases iniciais foram vencidas",
+  finalTitle: "Campanha concluida",
+  finalDetail: "As 6 fases atuais foram vencidas",
   restartPrompt: "ENTER reinicia",
 } as const;
 

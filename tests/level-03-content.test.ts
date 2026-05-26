@@ -7,7 +7,7 @@ const TILE_SIZE_PX = 16;
 const FLOOR_Y = 222;
 
 describe("level 03 content", () => {
-  it("defines point A, pre-cruel checkpoint and final point B in order", () => {
+  it("defines point A, pre-cruel checkpoint and block transition point B in order", () => {
     const checkpoint = LEVEL_03.checkpoints[0]!;
 
     expect(LEVEL_03.spawn).toEqual({
@@ -17,7 +17,7 @@ describe("level 03 content", () => {
     expect(checkpoint.id).toBe("level-03-before-cruel");
     expect(checkpoint.position.x).toBeGreaterThan(LEVEL_03.spawn.x);
     expect(LEVEL_03.exit.area.x).toBeGreaterThan(checkpoint.position.x);
-    expect("nextLevelId" in LEVEL_03.exit).toBe(false);
+    expect(LEVEL_03.exit.nextLevelId).toBe("level-04");
   });
 
   it("creates a short precise jump sequence before the checkpoint", () => {

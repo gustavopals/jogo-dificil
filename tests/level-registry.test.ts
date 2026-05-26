@@ -15,7 +15,7 @@ describe("level registry", () => {
     });
   });
 
-  it("exports the initial levels in campaign order", () => {
+  it("exports campaign levels in order", () => {
     expect(
       LEVEL_DEFINITIONS.map((level) => ({
         id: level.id,
@@ -37,6 +37,21 @@ describe("level registry", () => {
       {
         id: "level-03",
         order: 3,
+        nextLevelId: "level-04",
+      },
+      {
+        id: "level-04",
+        order: 4,
+        nextLevelId: "level-05",
+      },
+      {
+        id: "level-05",
+        order: 5,
+        nextLevelId: "level-06",
+      },
+      {
+        id: "level-06",
+        order: 6,
         nextLevelId: undefined,
       },
     ]);

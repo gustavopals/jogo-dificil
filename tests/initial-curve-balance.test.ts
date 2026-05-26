@@ -34,7 +34,7 @@ describe("initial curve balance", () => {
     ]);
     expect(LEVEL_01.exit.nextLevelId).toBe(LEVEL_02.id);
     expect(LEVEL_02.exit.nextLevelId).toBe(LEVEL_03.id);
-    expect("nextLevelId" in LEVEL_03.exit).toBe(false);
+    expect(LEVEL_03.exit.nextLevelId).toBe("level-04");
   });
 
   it("keeps level 01 difficult but introductory", () => {

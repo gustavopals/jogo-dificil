@@ -283,6 +283,15 @@ Pronto quando:
 - Testes de conteudo cobrem curva e conclusao logica.
 - Checklist manual valida que as fases sao dificeis, mas aprendiveis.
 
+Implementacao inicial:
+
+- `level-03` passa a apontar para `level-04`, mantendo campanha linear.
+- `level-04` ensina dash com gaps largos e sem traps novas.
+- `level-05` distorce o dash com `falling-platform`, `projectile` e
+  `spike-pop`.
+- `level-06` combina dash, chave, alavanca, porta, projetil e falso piso final.
+- O checklist manual fica em `docs/block-2-gameplay-checklist.md`.
+
 ### Task 15.7 - Ferramentas De QA Para Playtest
 
 Problema: quanto mais fases existirem, mais caro fica testar manualmente tudo.

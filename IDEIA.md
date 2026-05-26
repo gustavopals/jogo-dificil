@@ -788,11 +788,12 @@ Implementação inicial da transição entre fases:
 - A transição entre fases é curta e automática: mostra fase concluída, próxima
   fase e mortes acumuladas por cerca de 1 segundo antes de iniciar a próxima
   fase.
-- A decisão para o MVP é preservar o contador de mortes ao avançar entre as 3
-  fases, para medir o run inteiro; ele só é resetado quando o jogador reinicia a
-  partir da tela final.
-- Após a Fase 3, a mesma cena mostra uma tela final simples com mortes totais e
-  `ENTER reinicia`.
+- A decisão inicial do MVP era preservar o contador de mortes ao avançar entre
+  as 3 fases; no fluxo atual, a mesma regra vale para as 6 fases da campanha.
+  O contador só é resetado quando o jogador reinicia a partir da tela final.
+- A tela final simples com mortes totais e `ENTER reinicia` aparece ao concluir
+  a última fase da campanha atual; desde a Task 15.6, isso acontece em
+  `level-06`.
 - A vinheta de fim de fase continua sendo disparada por `AudioScene`; ao entrar
   na próxima fase, a transição pede o loop musical do MVP novamente.
 
@@ -984,6 +985,19 @@ Expansao pos-MVP e Fase 15:
     indicador de novo recorde ou melhor marca anterior.
   - Resetar a campanha nao apaga esses recordes locais; limpeza fica para um
     comando explicito futuro.
+- Implementacao inicial do Bloco 2 de fases:
+  - A campanha atual agora segue `level-01 -> level-02 -> level-03 ->
+    level-04 -> level-05 -> level-06`.
+  - `level-04`, `Impulso Medido`, ensina dash com gaps largos, checkpoint no
+    meio e sem traps novas.
+  - `level-05`, `O Impulso Mente`, distorce o dash com plataforma que cai,
+    projetil contrario e spike-pop no pouso de saida.
+  - `level-06`, `Memoria Em Movimento`, combina dash, chave, mecanismo,
+    alavanca, porta, projetil e falso piso final.
+  - A tela final atual aparece depois de `level-06`; selecao/continuacao de
+    fases desbloqueadas segue planejada para a Task 15.5.
+  - O checklist manual do bloco fica em
+    `docs/block-2-gameplay-checklist.md`.
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 

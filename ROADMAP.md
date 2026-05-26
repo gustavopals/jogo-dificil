@@ -1134,12 +1134,12 @@ Pronto quando:
 
 ### Task 15.6 - Planejar E Criar Bloco 2 De Fases
 
-- [ ] Planejar `level-04`, `level-05` e `level-06`.
-- [ ] Encadear campanha linear de `level-03` para `level-04`.
-- [ ] Introduzir dash em `level-04`.
-- [ ] Distorcer dash com traps conhecidas em `level-05`.
-- [ ] Combinar dash, interacao e memoria curta em `level-06`.
-- [ ] Criar testes de conteudo e checklist manual do bloco.
+- [x] Planejar `level-04`, `level-05` e `level-06`.
+- [x] Encadear campanha linear de `level-03` para `level-04`.
+- [x] Introduzir dash em `level-04`.
+- [x] Distorcer dash com traps conhecidas em `level-05`.
+- [x] Combinar dash, interacao e memoria curta em `level-06`.
+- [x] Criar testes de conteudo e checklist manual do bloco.
 
 Pronto quando:
 
@@ -1575,3 +1575,10 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `localStorage` e exibindo resumo compacto na `LevelTransitionScene`. Testes
   adicionados em `tests/level-results.test.ts` e transicao atualizada em
   `tests/level-transition.test.ts`.
+- [x] Task 15.6 concluida: Bloco 2 criado como campanha linear
+  `level-03 -> level-04 -> level-05 -> level-06`. As novas fases ficam em
+  `src/data/levels/level-04.ts`, `level-05.ts` e `level-06.ts`: a primeira
+  ensina dash com gaps largos, a segunda distorce o dash com traps conhecidas e
+  a terceira combina dash, chave, alavanca, porta, projetil e memoria curta.
+  Testes de conteudo foram adicionados em `tests/block-2-content.test.ts`, e o
+  checklist manual fica em `docs/block-2-gameplay-checklist.md`.

@@ -1,9 +1,9 @@
 # jogo-dificil
 
 Jogo de plataforma 2D de navegador, dificil, rapido de reiniciar e baseado em
-surpresa, precisao, tentativa e erro. O MVP tem 3 fases curtas, checkpoints,
-mortes rapidas, respawn automatico, reinicio manual, armadilhas, itens, audio
-basico e tela inicial.
+surpresa, precisao, tentativa e erro. A versao atual tem 6 fases curtas,
+checkpoints, mortes rapidas, respawn automatico, reinicio manual, dash,
+armadilhas, itens, audio basico, resultados locais por fase e tela inicial.
 
 ## Stack
 
@@ -84,11 +84,11 @@ npm run format
 - `Esc`: pausar/retomar.
 - `M`: mutar/desmutar audio.
 
-## Fluxo Do MVP
+## Fluxo Atual
 
 1. Abra o jogo.
 2. Na tela inicial, pressione `Enter`, `Espaco` ou clique/toque para iniciar.
-3. Complete as 3 fases iniciais em sequencia.
+3. Complete as 6 fases atuais em sequencia.
 4. Ao morrer, o jogador respawna rapidamente no checkpoint ativo.
 5. Use `R` para reiniciar manualmente do checkpoint sem contar morte.
 6. Ao concluir uma fase, a transicao mostra tempo, mortes da fase e recorde local.
@@ -100,6 +100,7 @@ npm run format
 - `ROADMAP.md`: fases, tasks e progresso.
 - `assets/ASSETS.md`: origem/licenca dos assets.
 - `docs/mvp-gameplay-checklist.md`: checklist manual do MVP.
+- `docs/block-2-gameplay-checklist.md`: plano e checklist manual das fases 4 a 6.
 - `docs/performance-stability-check.md`: medicao inicial de estabilidade.
 - `docs/mvp-release-checklist.md`: checklist do primeiro build jogavel.
 - `docs/phase-15-improvement-plan.md`: analise pos-MVP e plano de melhorias.
