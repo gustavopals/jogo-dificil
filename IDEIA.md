@@ -910,6 +910,14 @@ Smoke test inicial no navegador:
   para permitir validação e2e objetiva de cena e jogador sem afetar o build de
   produção.
 
+Checklist manual inicial do MVP:
+
+- O checklist da Task 12.3 fica registrado em
+  `docs/mvp-gameplay-checklist.md`.
+- Em 2026-05-26, o fluxo inicial cobriu as 3 fases, mortes principais, respawn
+  em cada checkpoint, `R`, pause, mute e preview de produção sem erro crítico no
+  console.
+
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 
 Status: Decidido.

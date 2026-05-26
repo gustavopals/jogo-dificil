@@ -970,15 +970,15 @@ Pronto quando:
 
 ### Task 12.3 - Checklist Manual De Gameplay
 
-- [ ] Testar Fase 1 do inicio ao fim.
-- [ ] Testar Fase 2 do inicio ao fim.
-- [ ] Testar Fase 3 do inicio ao fim.
-- [ ] Testar morte por cada tipo de perigo.
-- [ ] Testar respawn em cada checkpoint.
-- [ ] Testar `R`.
-- [ ] Testar pause.
-- [ ] Testar mute.
-- [ ] Testar build de producao.
+- [x] Testar Fase 1 do inicio ao fim.
+- [x] Testar Fase 2 do inicio ao fim.
+- [x] Testar Fase 3 do inicio ao fim.
+- [x] Testar morte por cada tipo de perigo.
+- [x] Testar respawn em cada checkpoint.
+- [x] Testar `R`.
+- [x] Testar pause.
+- [x] Testar mute.
+- [x] Testar build de producao.
 
 Pronto quando:
 
@@ -1419,3 +1419,6 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   iniciar a Fase 1, confirmar canvas visivel, validar existencia do Pino,
   simular movimento para a direita e falhar caso haja erro critico de console.
   `npm run test:e2e` gerencia o Vite local automaticamente.
+- [x] Task 12.3 concluida: checklist manual de gameplay registrado em
+  `docs/mvp-gameplay-checklist.md`, cobrindo as tres fases, mortes principais,
+  respawn em cada checkpoint, `R`, pausa, mute e build/preview de producao.
