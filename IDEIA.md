@@ -1956,6 +1956,9 @@ Direção pendente:
   laboratório de testes hostil, com tile 16x16px, Pino em aproximadamente
   12x24px e paleta semântica para fundo, UI, terreno, herói, perigo, saída e
   traps especiais.
+- Tileset placeholder inicial definido para mapas do MVP: bloco sólido,
+  plataforma, perigo de espinhos e fundo de painel escuro em 16x16px, todos
+  originais do projeto e renderizados como texturas repetíveis nas fases.
 - Trap Adventure 2 é referência de sensação, não fonte de cópia.
 - O projeto será estruturado desde o início, com planejamento de personagens, animações, mapas, músicas e ações.
 - Personagem principal provisório definido como Pino: criatura original compacta

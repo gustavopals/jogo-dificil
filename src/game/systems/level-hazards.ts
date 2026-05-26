@@ -1,5 +1,9 @@
 import type { DeathCause } from "./game-events";
 import type { HazardDefinition, RectLike } from "../../shared";
+import {
+  PLACEHOLDER_TILESET_ASSET_KEYS,
+  type PlaceholderTilesetAssetKey,
+} from "../../data/art";
 
 export type TouchedHazard = {
   readonly hazard: HazardDefinition;
@@ -7,10 +11,10 @@ export type TouchedHazard = {
 };
 
 const HAZARD_PLACEHOLDER_COLORS = {
-  spikes: 0xe76f51,
-  fall: 0x8b2635,
-  projectile: 0xf4d35e,
-  crusher: 0x9b5de5,
+  spikes: 0xe35d6a,
+  fall: 0xe35d6a,
+  projectile: 0x9b5de5,
+  crusher: 0xe76f51,
 } as const satisfies Record<HazardDefinition["kind"], number>;
 
 export function findTouchedDeadlyHazard(
@@ -42,6 +46,10 @@ export function getHazardPlaceholderColor(
   hazard: Pick<HazardDefinition, "kind">,
 ): number {
   return HAZARD_PLACEHOLDER_COLORS[hazard.kind];
+}
+
+export function getHazardPlaceholderTextureKey(): PlaceholderTilesetAssetKey {
+  return PLACEHOLDER_TILESET_ASSET_KEYS.HAZARD_SPIKES;
 }
 
 function rectsOverlap(a: RectLike, b: RectLike): boolean {

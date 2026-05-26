@@ -15,21 +15,46 @@ import playerPrimaryUrl from "../../assets/audio/sfx/player-primary.wav";
 import playerRespawnUrl from "../../assets/audio/sfx/player-respawn.wav";
 import playerSecondaryUrl from "../../assets/audio/sfx/player-secondary.wav";
 import playerPinoIdleUrl from "../../assets/sprites/player-pino-idle.png";
+import labBackgroundPanelUrl from "../../assets/tilesets/lab-background-panel.png";
+import labHazardSpikesUrl from "../../assets/tilesets/lab-hazard-spikes.png";
+import labPlatformUrl from "../../assets/tilesets/lab-platform.png";
+import labSolidBlockUrl from "../../assets/tilesets/lab-solid-block.png";
 import {
   LEVEL_AUDIO_DEFINITIONS,
   MUSIC_AUDIO_DEFINITIONS,
   PLAYER_AUDIO_DEFINITIONS,
 } from "../data/audio";
+import { PLACEHOLDER_TILESET_ASSET_KEYS } from "../data/art";
 import { PINO_TEXTURE_KEYS } from "../data/characters/pino-animations";
 
 export const ASSET_KEYS = {
   PLAYER_PINO_IDLE: PINO_TEXTURE_KEYS.IDLE,
+  TILESET_LAB_SOLID_BLOCK: PLACEHOLDER_TILESET_ASSET_KEYS.SOLID_BLOCK,
+  TILESET_LAB_PLATFORM: PLACEHOLDER_TILESET_ASSET_KEYS.PLATFORM,
+  TILESET_LAB_HAZARD_SPIKES: PLACEHOLDER_TILESET_ASSET_KEYS.HAZARD_SPIKES,
+  TILESET_LAB_BACKGROUND_PANEL: PLACEHOLDER_TILESET_ASSET_KEYS.BACKGROUND_PANEL,
 } as const;
 
 export const IMAGE_ASSETS = [
   {
     key: ASSET_KEYS.PLAYER_PINO_IDLE,
     url: playerPinoIdleUrl,
+  },
+  {
+    key: ASSET_KEYS.TILESET_LAB_SOLID_BLOCK,
+    url: labSolidBlockUrl,
+  },
+  {
+    key: ASSET_KEYS.TILESET_LAB_PLATFORM,
+    url: labPlatformUrl,
+  },
+  {
+    key: ASSET_KEYS.TILESET_LAB_HAZARD_SPIKES,
+    url: labHazardSpikesUrl,
+  },
+  {
+    key: ASSET_KEYS.TILESET_LAB_BACKGROUND_PANEL,
+    url: labBackgroundPanelUrl,
   },
 ] as const;
 

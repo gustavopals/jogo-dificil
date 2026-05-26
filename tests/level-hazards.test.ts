@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { PLACEHOLDER_TILESET_ASSET_KEYS } from "../src/data/art";
 import {
   findTouchedDeadlyHazard,
   getDeathCauseForHazard,
   getHazardPlaceholderColor,
+  getHazardPlaceholderTextureKey,
 } from "../src/game/systems/level-hazards";
 import type { HazardDefinition } from "../src/shared";
 
@@ -86,7 +88,13 @@ describe("level hazards", () => {
   });
 
   it("returns placeholder colors by hazard kind", () => {
-    expect(getHazardPlaceholderColor(SPIKES_HAZARD)).toBe(0xe76f51);
-    expect(getHazardPlaceholderColor(FALL_HAZARD)).toBe(0x8b2635);
+    expect(getHazardPlaceholderColor(SPIKES_HAZARD)).toBe(0xe35d6a);
+    expect(getHazardPlaceholderColor(FALL_HAZARD)).toBe(0xe35d6a);
+  });
+
+  it("uses the hazard spike tile for readable danger", () => {
+    expect(getHazardPlaceholderTextureKey()).toBe(
+      PLACEHOLDER_TILESET_ASSET_KEYS.HAZARD_SPIKES,
+    );
   });
 });

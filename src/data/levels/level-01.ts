@@ -1,3 +1,7 @@
+import {
+  PLACEHOLDER_LEVEL_TILESET_ASSET_KEYS,
+  PLACEHOLDER_TILESET_ASSET_KEYS,
+} from "../art";
 import { defineLevel } from "./schema";
 
 const TILE_SIZE_PX = 16;
@@ -5,7 +9,7 @@ const BASE_WIDTH_PX = 480;
 const BASE_HEIGHT_PX = 270;
 const LEVEL_WIDTH_PX = BASE_WIDTH_PX * 2;
 const FLOOR_Y = BASE_HEIGHT_PX - TILE_SIZE_PX * 3;
-const SOLID_TILESET_ID = "tileset-prototype-solid";
+const SOLID_TILESET_ID = PLACEHOLDER_TILESET_ASSET_KEYS.SOLID_BLOCK;
 const REQUIRED_CHIP_SPRITE_ID = "sprite-required-chip";
 const CHECKPOINT_SFX_ID = "sfx-level-01-checkpoint";
 const TRAP_POP_SFX_ID = "sfx-level-01-trap-pop";
@@ -234,7 +238,7 @@ export const LEVEL_01 = defineLevel({
     "Chegar ao primeiro checkpoint e entender o ritmo de tentativa.",
   assets: {
     sprites: [REQUIRED_CHIP_SPRITE_ID],
-    tilesets: [SOLID_TILESET_ID],
+    tilesets: PLACEHOLDER_LEVEL_TILESET_ASSET_KEYS,
     audio: [CHECKPOINT_SFX_ID, TRAP_POP_SFX_ID],
   },
 });

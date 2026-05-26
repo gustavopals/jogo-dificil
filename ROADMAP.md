@@ -902,11 +902,11 @@ Pronto quando:
 
 ### Task 11.2 - Tileset Placeholder Coerente
 
-- [ ] Criar bloco solido.
-- [ ] Criar plataforma.
-- [ ] Criar perigo visual.
-- [ ] Criar fundo simples.
-- [ ] Registrar origem/licenca.
+- [x] Criar bloco solido.
+- [x] Criar plataforma.
+- [x] Criar perigo visual.
+- [x] Criar fundo simples.
+- [x] Registrar origem/licenca.
 
 Pronto quando:
 
@@ -1397,3 +1397,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   baixa resolucao em laboratorio hostil, com tile 16x16px, Pino em
   aproximadamente 12x24px e paleta semantica registrada em
   `src/data/art/visual-direction.ts`, `docs/visual-direction.md` e `IDEIA.md`.
+- [x] Task 11.2 concluida: tileset placeholder coerente criado em
+  `assets/tilesets/`, com bloco solido, plataforma, perigo de espinhos e fundo
+  simples registrados em `assets/ASSETS.md`. `LevelScene` agora renderiza fundo,
+  terreno e hazards com texturas repetiveis sem alterar colisao ou dados de
+  gameplay.

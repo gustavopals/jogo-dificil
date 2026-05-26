@@ -4,6 +4,7 @@ import {
   getRequiredLevelDefinition,
   type LevelDefinition,
 } from "../../data/levels";
+import { PLACEHOLDER_TILESET_ASSET_KEYS } from "../../data/art";
 import type {
   CheckpointId,
   InteractiveObjectId,
@@ -34,6 +35,7 @@ import {
 import {
   findTouchedDeadlyHazard,
   getHazardPlaceholderColor,
+  getHazardPlaceholderTextureKey,
 } from "../systems/level-hazards";
 import {
   activateInteractiveObject,
@@ -66,7 +68,7 @@ import {
 } from "../systems/player-audio-feedback";
 import {
   getSolidTerrainAreas,
-  getTerrainPlaceholderColor,
+  getTerrainPlaceholderTextureKey,
 } from "../systems/level-terrain";
 import {
   findTriggeredPositionTraps,
@@ -159,6 +161,7 @@ export class LevelScene extends Phaser.Scene {
     this.refreshRoomSolids();
     this.hasCompletedLevel = false;
 
+    this.drawLevelBackground(this.level);
     this.drawTerrain(this.level);
     this.drawHazards(this.level);
     this.drawTraps(this.level, this.roomState);
@@ -279,14 +282,31 @@ export class LevelScene extends Phaser.Scene {
     level.terrain.forEach((terrain) => {
       const { area } = terrain;
 
-      this.add.rectangle(
-        area.x + area.width / 2,
-        area.y + area.height / 2,
-        area.width,
-        area.height,
-        getTerrainPlaceholderColor(terrain),
-      );
+      this.add
+        .tileSprite(
+          area.x + area.width / 2,
+          area.y + area.height / 2,
+          area.width,
+          area.height,
+          getTerrainPlaceholderTextureKey(terrain),
+        )
+        .setOrigin(0.5);
     });
+  }
+
+  private drawLevelBackground(level: LevelDefinition): void {
+    const { bounds } = level;
+
+    this.add
+      .tileSprite(
+        bounds.x + bounds.width / 2,
+        bounds.y + bounds.height / 2,
+        bounds.width,
+        bounds.height,
+        PLACEHOLDER_TILESET_ASSET_KEYS.BACKGROUND_PANEL,
+      )
+      .setOrigin(0.5)
+      .setDepth(-10);
   }
 
   private drawHazards(level: LevelDefinition): void {
@@ -295,7 +315,21 @@ export class LevelScene extends Phaser.Scene {
       const color = getHazardPlaceholderColor(hazard);
 
       if (hazard.kind === "spikes") {
-        this.drawSpikeHazard(area, color);
+        this.drawSpikeHazard(area, getHazardPlaceholderTextureKey());
+        return;
+      }
+
+      if (hazard.kind === "fall") {
+        this.add
+          .tileSprite(
+            area.x + area.width / 2,
+            area.y + area.height / 2,
+            area.width,
+            area.height,
+            getHazardPlaceholderTextureKey(),
+          )
+          .setOrigin(0.5)
+          .setAlpha(0.35);
         return;
       }
 
@@ -307,27 +341,20 @@ export class LevelScene extends Phaser.Scene {
           area.height,
           color,
         )
-        .setAlpha(hazard.kind === "fall" ? 0.28 : 0.7);
+        .setAlpha(0.7);
     });
   }
 
-  private drawSpikeHazard(area: RectLike, color: number): void {
-    const graphics = this.add.graphics();
-    const spikeWidth = TILE_SIZE_PX / 2;
-
-    graphics.fillStyle(color, 0.9);
+  private drawSpikeHazard(area: RectLike, textureKey: string): void {
+    const spikeWidth = TILE_SIZE_PX;
 
     for (let x = area.x; x < area.x + area.width; x += spikeWidth) {
       const width = Math.min(spikeWidth, area.x + area.width - x);
 
-      graphics.fillTriangle(
-        x,
-        area.y + area.height,
-        x + width / 2,
-        area.y,
-        x + width,
-        area.y + area.height,
-      );
+      this.add
+        .image(x + width / 2, area.y + area.height, textureKey)
+        .setOrigin(0.5, 1)
+        .setDisplaySize(width, area.height);
     }
   }
 

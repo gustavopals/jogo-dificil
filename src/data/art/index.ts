@@ -5,3 +5,11 @@ export {
   type VisualPaletteEntry,
   type VisualPaletteRole,
 } from "./visual-direction";
+export {
+  PLACEHOLDER_LEVEL_TILESET_ASSET_KEYS,
+  PLACEHOLDER_TILESET_ASSET_KEYS,
+  PLACEHOLDER_TILESET_ASSETS,
+  PLACEHOLDER_TILESET_TILE_SIZE_PX,
+  type PlaceholderTilesetAssetDefinition,
+  type PlaceholderTilesetAssetKey,
+} from "./placeholder-tileset";

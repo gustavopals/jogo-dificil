@@ -37,3 +37,15 @@ perigo saturados e poucos detalhes por sprite.
 - Manter perigos e objetivos mais claros que o fundo.
 - Preferir contorno duro de 1px, areas chapadas e poucos tons.
 - Evitar texturas que confundam plataforma, hazard, item ou saida.
+
+## Tileset Placeholder
+
+O primeiro tileset coerente fica em `assets/tilesets/` e usa tiles 16x16px:
+
+- `lab-solid-block.png`: massa solida para paredes e blocos grossos.
+- `lab-platform.png`: piso/plataforma fina para leitura imediata de salto.
+- `lab-hazard-spikes.png`: perigo visual vermelho para espinhos e pits.
+- `lab-background-panel.png`: painel escuro repetivel para fundo simples.
+
+Todos foram gerados no projeto com `magick`, usam licenca original do projeto e
+estao registrados em `assets/ASSETS.md`.

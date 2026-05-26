@@ -1,3 +1,7 @@
+import {
+  PLACEHOLDER_LEVEL_TILESET_ASSET_KEYS,
+  PLACEHOLDER_TILESET_ASSET_KEYS,
+} from "../art";
 import { defineLevel } from "./schema";
 
 const TILE_SIZE_PX = 16;
@@ -5,7 +9,7 @@ const BASE_WIDTH_PX = 480;
 const BASE_HEIGHT_PX = 270;
 const LEVEL_WIDTH_PX = BASE_WIDTH_PX * 2;
 const FLOOR_Y = BASE_HEIGHT_PX - TILE_SIZE_PX * 3;
-const SOLID_TILESET_ID = "tileset-prototype-solid";
+const SOLID_TILESET_ID = PLACEHOLDER_TILESET_ASSET_KEYS.SOLID_BLOCK;
 const MECHANISM_KEY_SPRITE_ID = "sprite-mechanism-key";
 const LEVER_SFX_ID = "sfx-level-02-lever";
 const PROJECTILE_SFX_ID = "sfx-level-02-projectile";
@@ -286,7 +290,7 @@ export const LEVEL_02 = defineLevel({
     "Abrir a porta final apos dominar a plataforma ativa e ler a pegadinha.",
   assets: {
     sprites: [MECHANISM_KEY_SPRITE_ID],
-    tilesets: [SOLID_TILESET_ID],
+    tilesets: PLACEHOLDER_LEVEL_TILESET_ASSET_KEYS,
     audio: [LEVER_SFX_ID, PROJECTILE_SFX_ID],
   },
 });

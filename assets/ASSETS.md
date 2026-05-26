@@ -31,6 +31,10 @@ jogo.
 | Arquivo                                           | Origem                         | Licenca             | Observacoes                                                         |
 | ------------------------------------------------- | ------------------------------ | ------------------- | ------------------------------------------------------------------- |
 | `assets/sprites/player-pino-idle.png`             | Gerado no projeto com `magick` | Original do projeto | Placeholder idle 12x24px do Pino, olhando para a direita, com alfa. |
+| `assets/tilesets/lab-solid-block.png`             | Gerado no projeto com `magick` | Original do projeto | Tile 16x16px de bloco solido industrial para paredes e massas.      |
+| `assets/tilesets/lab-platform.png`                | Gerado no projeto com `magick` | Original do projeto | Tile 16x16px de plataforma metalica para pisos finos.               |
+| `assets/tilesets/lab-hazard-spikes.png`           | Gerado no projeto com `magick` | Original do projeto | Tile 16x16px de perigo visual para espinhos e pits.                 |
+| `assets/tilesets/lab-background-panel.png`        | Gerado no projeto com `magick` | Original do projeto | Tile 16x16px de painel escuro repetivel para fundo simples.         |
 | `assets/audio/sfx/player-jump.wav`                | Gerado no projeto por script   | Original do projeto | Placeholder curto de pulo do Pino.                                  |
 | `assets/audio/sfx/player-land.wav`                | Gerado no projeto por script   | Original do projeto | Placeholder curto de aterrissagem do Pino.                          |
 | `assets/audio/sfx/player-death-01.wav`            | Gerado no projeto por script   | Original do projeto | Variação placeholder de morte do Pino.                              |
