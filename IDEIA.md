@@ -822,8 +822,8 @@ Implementação inicial da direção visual:
   sombra `#050608`, seguro/checkpoint `#80d7c2`, herói/item `#f4d35e`, perigo
   `#e35d6a`, saída/truque `#e76f51` e trap especial `#9b5de5`.
 - Tile base mantido em 16x16px.
-- Tamanho final aproximado do Pino mantido em 12x24px visual, com hitbox 10x22px
-  e proporção de 0,75 tile de largura por 1,5 tile de altura.
+- Tamanho visual atual do Pino revisado para 14x26px, com hitbox mantida em
+  10x22px e proporção de 0,875 tile de largura por 1,625 tile de altura.
 - Regras para novos assets: ler em 1x antes de detalhar, usar cor por
   significado, manter perigos/objetivos mais claros que o fundo, preferir
   contorno duro de 1px e evitar textura que confunda colisão.
@@ -1313,15 +1313,15 @@ Decisões de escala fechadas na Task 3.2:
 
 - Resolução base do jogo: 480x270.
 - Tamanho dos tiles: 16x16px.
-- Área visual do sprite: 12x24px.
-- Hitbox real inicial: 10x22px, centralizada dentro da área visual.
-- Margem entre sprite e hitbox: 1px em cada lado, topo e base. Antena, ponta
-  frontal e deformações visuais podem ocupar essa margem, mas não devem mudar a
-  colisão principal.
-- Pivô do personagem: centro inferior do sprite, equivalente a x=6px e y=24px
+- Área visual atual do sprite: 14x26px.
+- Hitbox real: 10x22px, centralizada dentro da área visual.
+- Margem entre sprite e hitbox: 2px nas laterais, 3px no topo e 1px na base.
+  Cabelo, aura e deformações visuais podem ocupar essa margem, mas não devem
+  mudar a colisão principal.
+- Pivô do personagem: centro inferior do sprite, equivalente a x=7px e y=26px
   dentro da área visual. Checkpoints e respawn devem usar esse ponto como
   posição de referência.
-- Relação com tile: sprite visual de 0,75 tile de largura por 1,5 tile de
+- Relação com tile: sprite visual de 0,875 tile de largura por 1,625 tile de
   altura; hitbox de 0,625 tile de largura por 1,375 tile de altura.
 - Leitura prática: Pino cabe visualmente em dois tiles de altura com folga e
   ocupa menos de um tile de largura, favorecendo plataformas estreitas e colisão
@@ -1336,15 +1336,17 @@ A hitbox deve favorecer precisão e justiça. O sprite pode ter detalhes externo
 Decisões de placeholder fechadas na Task 3.3:
 
 - Primeiro asset: `assets/sprites/player-pino-idle.png`.
-- Formato: PNG transparente, 12x24px, sem escala interna.
-- Pose: idle neutro, com corpo em cápsula e pés pequenos.
-- Direção: Pino olha para a direita por padrão; visor, ponta frontal e acento
-  coral ficam do lado direito para leitura imediata de direção.
-- Contraste: corpo amarelo-sinalização contra fundo escuro, contorno
-  azul-petróleo e visor ciano claro.
-- Uso: asset temporário de gameplay para leitura, posicionamento, escala e
-  animações futuras. Pode ser substituído pela arte final mantendo a mesma área
-  visual e pivô definidos na Task 3.2.
+- Formato atual: PNG transparente, 14x26px, sem escala interna.
+- Revisão visual posterior: Pino deixou de usar leitura de cápsula amarela para
+  evitar semelhança indesejada com personagens existentes. A direção atual é um
+  lutador shonen original de laboratório: cabelo espetado dourado, roupa
+  azul/índigo, faixa coral e aura ciano.
+- Direção: Pino olha para a direita por padrão; pose, olho, cabelo e faixa são
+  espelhados pelo Phaser para leitura imediata de direção.
+- Contraste: contorno quase preto, roupa azul escura, pele quente, cabelo
+  dourado e energia ciano contra fundo escuro.
+- Uso: asset atual de gameplay para leitura, posicionamento, escala e animação.
+  A hitbox continua sendo a referência de colisão, não os pixels de aura/cabelo.
 
 ### Dados De Animação
 
@@ -1353,17 +1355,22 @@ Decisões de animação fechadas na Task 3.4:
 - Arquivo declarativo inicial: `src/data/characters/pino-animations.ts`.
 - Animações esperadas para o Pino: `idle`, `run`, `jump`, `fall`, `death`,
   `respawn`, `primary-action` e `secondary-action`.
-- As animações centrais de movimento agora usam frames dedicados criados na
-  Fase 11.3. Ações principal e secundária ainda usam frames reaproveitados até
-  terem arte própria.
-- `idle` e `run` são animações em loop. `jump`, `fall`, `death`, `respawn`,
-  `primary-action` e `secondary-action` são animações de execução única no
-  placeholder.
-- A ação principal representa o dash. A ação secundária representa interação.
+- As animações centrais de movimento usam frames dedicados. A corrida tem três
+  frames, o pulo usa dois frames, a queda alterna ápice/queda e a ação principal
+  tem sprite próprio de dash. A ação secundária ainda pode reaproveitar idle até
+  ter arte dedicada.
+- `idle`, `run`, `jump` e `fall` podem rodar em loop curto para manter vida
+  visual. `death`, `respawn`, `primary-action` e `secondary-action` continuam
+  com execução curta.
+- A ação principal representa o dash, com pose horizontal e rastro. A ação
+  secundária representa interação.
 - A seleção de animação segue prioridade: respawn, morte, ação principal, ação
   secundária, ar subindo, ar caindo, corrida e idle.
 - A `LevelScene` registra as animações no Phaser e escolhe a animação inicial a
   partir do estado do personagem, em vez de fixar uma textura diretamente.
+- Efeitos visuais atuais de movimento: aura persistente, ghost de dash, faíscas
+  de corrida e bursts de pulo/aterrissagem. Todos são cosméticos e não alteram
+  física, colisão ou dano.
 
 ### Entidade Player
 
@@ -2089,25 +2096,25 @@ Direção pendente:
 - Canvas usa modo `FIT` do Phaser, com pixel art ativado, letterbox em aspect ratio diferente e 60 FPS alvo. Sem mobile/touch no MVP.
 - Direção visual inicial definida como pixel art de baixa resolução em
   laboratório de testes hostil, com tile 16x16px, Pino em aproximadamente
-  12x24px e paleta semântica para fundo, UI, terreno, herói, perigo, saída e
+  14x26px e paleta semântica para fundo, UI, terreno, herói, perigo, saída e
   traps especiais.
 - Tileset placeholder inicial definido para mapas do MVP: bloco sólido,
   plataforma, perigo de espinhos e fundo de painel escuro em 16x16px, todos
   originais do projeto e renderizados como texturas repetíveis nas fases.
 - Trap Adventure 2 é referência de sensação, não fonte de cópia.
 - O projeto será estruturado desde o início, com planejamento de personagens, animações, mapas, músicas e ações.
-- Personagem principal provisório definido como Pino: criatura original compacta
-  com corpo em cápsula, visor frontal, antena curta, pés pequenos e humor visual
-  desconfiado/desajeitado.
-- Escala inicial de Pino definida: sprite visual 12x24px, hitbox real 10x22px,
-  margem visual de 1px em todos os lados, pivô no centro inferior e relação de
-  0,75x1,5 tile para o sprite.
-- Placeholder visual inicial de Pino criado em
-  `assets/sprites/player-pino-idle.png`, com corpo amarelo, contorno
-  azul-petróleo, visor ciano e indicação de direção para a direita.
-- Arte inicial de movimento do Pino criada em sprites 12x24px para idle,
-  corrida em dois frames, pulo, queda, morte em dois frames e respawn em dois
-  frames. A hitbox continua 10x22px; a mudança é somente visual.
+- Personagem principal provisório definido como Pino: lutador original compacto
+  de laboratório, com cabelo espetado, roupa azul/índigo, faixa coral, aura
+  ciano e humor visual desconfiado/desajeitado.
+- Escala atual de Pino definida: sprite visual 14x26px, hitbox real 10x22px,
+  margens visuais de 2px nas laterais, 3px no topo e 1px na base, pivô no
+  centro inferior e relação de 0,875x1,625 tile para o sprite.
+- Arte visual atual de Pino criada em `assets/sprites/player-pino-idle.png`,
+  removendo a leitura de cápsula amarela e adotando silhueta shonen original.
+- Arte atual de movimento do Pino criada em sprites 14x26px para idle, corrida
+  em três frames, pulo em dois frames, queda, dash dedicado, morte em dois
+  frames e respawn em dois frames. A hitbox continua 10x22px; a mudança é
+  somente visual.
 - Arte inicial de traps, itens e marcadores criada para o MVP: espinhos,
   bloco falso, plataforma que cai, piso quebrável, projétil, chip obrigatório,
   chave, token opcional, checkpoint inativo/ativo e saída de fase. Todos são

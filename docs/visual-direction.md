@@ -10,7 +10,7 @@ perigo saturados e poucos detalhes por sprite.
 
 - Resolucao base: 480x270.
 - Tile base: 16x16px.
-- Pino: aproximadamente 12x24px.
+- Pino: aproximadamente 14x26px.
 - Hitbox do Pino: 10x22px.
 - Regra pratica: assets importantes precisam funcionar antes de qualquer escala
   de janela.
@@ -25,7 +25,7 @@ perigo saturados e poucos detalhes por sprite.
 | text        | `#f5f7fb` | Texto e pequenos brilhos.             |
 | shadow      | `#050608` | Contorno e separacao dura.            |
 | safe        | `#80d7c2` | Checkpoints, UI e bordas interativas. |
-| hero        | `#f4d35e` | Pino, itens e foco jogavel.           |
+| hero        | `#f4d35e` | Cabelo/energia do Pino, itens e foco. |
 | hazard      | `#e35d6a` | Espinhos, dano e morte imediata.      |
 | exit        | `#e76f51` | Saidas, truques e falsa seguranca.    |
 | specialTrap | `#9b5de5` | Projeteis e mecanismos incomuns.      |
@@ -52,17 +52,24 @@ estao registrados em `assets/ASSETS.md`.
 
 ## Sprite Do Pino
 
-Pino continua com sprite 12x24px e pivô no centro inferior. A primeira arte de
-personagem coerente cobre:
+Pino agora usa sprite 14x26px e pivô no centro inferior. A hitbox continua
+10x22px; os pixels extras ficam para cabelo, aura e deformações de animação sem
+mudar colisão. A revisão visual evita a leitura de cápsula amarela e move o
+personagem para um lutador shonen original de laboratório, sem copiar
+personagens existentes.
 
-- `idle`: capsula amarela neutra, visor ciano voltado para a direita.
-- `run`: dois frames com inclinacao e troca de apoio dos pes.
-- `jump`: silhueta vertical esticada para indicar subida.
-- `fall`: visor mais baixo e pes soltos para leitura de queda.
+- `idle`: lutador compacto com cabelo espetado, roupa azul e aura baixa.
+- `run`: tres frames com inclinacao, troca de apoio, faixa em atraso e energia
+  no calcanhar.
+- `jump`: dois frames, com joelho alto, cabelo vertical e aura ciano.
+- `fall`: braços abertos e cabelo puxado para cima para leitura de queda.
+- `dash`: pose horizontal dedicada com rastro de aura.
 - `death`: dois frames vermelhos, comprimidos, usando a cor de hazard.
 - `respawn`: dois frames ciano/hero, com varredura e reconstrucao do corpo.
 
-A hitbox permanece 10x22px; esses sprites mudam apenas leitura visual.
+Além dos sprites, `LevelScene` adiciona aura, ghost de dash, faíscas de corrida
+e bursts de pulo/aterrissagem. Esses efeitos são puramente visuais e não entram
+na hitbox.
 
 ## Traps, Itens E Marcadores
 
