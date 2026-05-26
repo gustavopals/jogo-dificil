@@ -4,9 +4,10 @@ import { GAME_TITLE } from "../src/game/constants";
 import { INITIAL_LEVEL_ID } from "../src/game/systems/game-state";
 import {
   START_SCREEN_COPY,
+  START_SCREEN_HUMOR_PHRASES,
   START_SCREEN_LAYOUT,
   START_SCREEN_LEVEL_ID,
-  START_SCREEN_TEXT_LINES,
+  pickRandomHumorPhrase,
 } from "../src/game/ui/start-screen";
 
 describe("start screen", () => {
@@ -17,11 +18,19 @@ describe("start screen", () => {
     expect(START_SCREEN_COPY.startCommand).toContain("ESPAÇO");
   });
 
-  it("keeps the first screen copy intentionally short", () => {
-    expect(START_SCREEN_TEXT_LINES).toHaveLength(2);
-    START_SCREEN_TEXT_LINES.forEach((line) => {
-      expect(line.length).toBeLessThanOrEqual(32);
-    });
+  it("includes studio credit and vibe tag", () => {
+    expect(START_SCREEN_COPY.subtitle).toContain("pals corp");
+    expect(START_SCREEN_COPY.vibeTag).toContain("vibe");
+  });
+
+  it("has humor phrases and picks one at random", () => {
+    expect(START_SCREEN_HUMOR_PHRASES.length).toBeGreaterThanOrEqual(5);
+    const phrase = pickRandomHumorPhrase();
+    expect(
+      START_SCREEN_HUMOR_PHRASES.includes(
+        phrase as (typeof START_SCREEN_HUMOR_PHRASES)[number],
+      ),
+    ).toBe(true);
   });
 
   it("starts from the first level and keeps visual anchors inside the viewport", () => {
