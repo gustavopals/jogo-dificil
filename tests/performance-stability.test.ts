@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { LEVEL_02 } from "../src/data/levels";
 import {
   AudioManager,
-  type AudioPlaybackConfig,
   type AudioPlaybackEngine,
   type AudioPlaybackHandle,
 } from "../src/game/systems/audio-manager";
@@ -162,10 +161,7 @@ class FakeAudioEngine implements AudioPlaybackEngine {
     return true;
   }
 
-  public play(
-    audio: AudioDefinition,
-    _config: AudioPlaybackConfig,
-  ): AudioPlaybackHandle {
+  public play(audio: AudioDefinition): AudioPlaybackHandle {
     const handle = new FakeAudioHandle(audio.id, audio.category);
 
     this.handles.push(handle);

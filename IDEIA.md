@@ -918,6 +918,23 @@ Checklist manual inicial do MVP:
   em cada checkpoint, `R`, pause, mute e preview de produção sem erro crítico no
   console.
 
+Estabilidade inicial do MVP:
+
+- A medição da Task 12.4 fica registrada em
+  `docs/performance-stability-check.md`.
+- Em 2026-05-26, o jogo manteve média de ~60 FPS em Chromium headless/Canvas,
+  suportou 30 mortes seguidas sem drift de objetos da cena, limpou traps e
+  projéteis no reset e manteve áudio repetido com contagem ativa limitada.
+
+Primeiro build jogavel:
+
+- `README.md` agora documenta descricao, stack, instalacao, comandos, controles,
+  fluxo do MVP e documentos uteis.
+- O checklist de release fica registrado em `docs/mvp-release-checklist.md`.
+- Em 2026-05-26, o MVP foi considerado apto como primeiro build jogavel: 3 fases
+  iniciais concluiveis, morte/respawn/checkpoints, `R`, HUD, audio basico,
+  pause/mute, smoke test, build de producao e estabilidade inicial validados.
+
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 
 Status: Decidido.

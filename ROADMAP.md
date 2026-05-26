@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-Ultima atualizacao: 2026-05-25
+Ultima atualizacao: 2026-05-26
 
 ## Objetivo
 
@@ -986,10 +986,10 @@ Pronto quando:
 
 ### Task 12.4 - Performance E Estabilidade
 
-- [ ] Verificar FPS em desktop.
-- [ ] Verificar que nao ha vazamento obvio ao morrer muitas vezes.
-- [ ] Verificar que projeteis e traps sao limpos no reset.
-- [ ] Verificar que audio nao acumula sobreposto.
+- [x] Verificar FPS em desktop.
+- [x] Verificar que nao ha vazamento obvio ao morrer muitas vezes.
+- [x] Verificar que projeteis e traps sao limpos no reset.
+- [x] Verificar que audio nao acumula sobreposto.
 
 Pronto quando:
 
@@ -1001,14 +1001,14 @@ Objetivo: deixar qualquer IA ou pessoa capaz de rodar, testar e continuar.
 
 ### Task 13.1 - README Do Projeto
 
-- [ ] Descrever o jogo.
-- [ ] Documentar stack.
-- [ ] Documentar instalacao.
-- [ ] Documentar `npm run dev`.
-- [ ] Documentar `npm run build`.
-- [ ] Documentar `npm run test`.
-- [ ] Documentar `npm run test:e2e`.
-- [ ] Documentar controles.
+- [x] Descrever o jogo.
+- [x] Documentar stack.
+- [x] Documentar instalacao.
+- [x] Documentar `npm run dev`.
+- [x] Documentar `npm run build`.
+- [x] Documentar `npm run test`.
+- [x] Documentar `npm run test:e2e`.
+- [x] Documentar controles.
 
 Pronto quando:
 
@@ -1016,13 +1016,13 @@ Pronto quando:
 
 ### Task 13.2 - Checklist De Release MVP
 
-- [ ] Rodar lint.
-- [ ] Rodar testes unitarios.
-- [ ] Rodar smoke tests.
-- [ ] Rodar build.
-- [ ] Validar 3 fases manualmente.
-- [ ] Atualizar `ROADMAP.md`.
-- [ ] Atualizar `IDEIA.md` se algo mudou.
+- [x] Rodar lint.
+- [x] Rodar testes unitarios.
+- [x] Rodar smoke tests.
+- [x] Rodar build.
+- [x] Validar 3 fases manualmente.
+- [x] Atualizar `ROADMAP.md`.
+- [x] Atualizar `IDEIA.md` se algo mudou.
 
 Pronto quando:
 
@@ -1085,27 +1085,27 @@ validado com placeholder antes de gastar tempo em arte final.
 
 O MVP estara pronto quando:
 
-- [ ] `npm run dev` abre o jogo.
-- [ ] `npm run build` funciona.
-- [ ] `npm run test` passa.
-- [ ] `npm run test:e2e` passa ou tem bloqueio documentado.
-- [ ] Nao ha erro critico no console.
-- [ ] Tela inicial aparece.
-- [ ] Personagem aparece no mapa.
-- [ ] Controles respondem.
-- [ ] Personagem anda, pula e colide.
-- [ ] As 3 fases iniciais existem.
-- [ ] As 3 fases iniciais podem ser concluidas.
-- [ ] Cada fase tem ponto A e ponto B.
-- [ ] Cada fase tem pelo menos uma armadilha ou obstaculo.
-- [ ] Morte funciona.
-- [ ] Respawn rapido funciona.
-- [ ] Checkpoint funciona.
-- [ ] `R` reinicia do checkpoint.
-- [ ] Contador de mortes funciona.
-- [ ] Audio basico funciona ou pode ser mutado.
-- [ ] `README.md` explica como rodar.
-- [ ] `IDEIA.md` reflete as decisoes finais do MVP.
+- [x] `npm run dev` abre o jogo.
+- [x] `npm run build` funciona.
+- [x] `npm run test` passa.
+- [x] `npm run test:e2e` passa ou tem bloqueio documentado.
+- [x] Nao ha erro critico no console.
+- [x] Tela inicial aparece.
+- [x] Personagem aparece no mapa.
+- [x] Controles respondem.
+- [x] Personagem anda, pula e colide.
+- [x] As 3 fases iniciais existem.
+- [x] As 3 fases iniciais podem ser concluidas.
+- [x] Cada fase tem ponto A e ponto B.
+- [x] Cada fase tem pelo menos uma armadilha ou obstaculo.
+- [x] Morte funciona.
+- [x] Respawn rapido funciona.
+- [x] Checkpoint funciona.
+- [x] `R` reinicia do checkpoint.
+- [x] Contador de mortes funciona.
+- [x] Audio basico funciona ou pode ser mutado.
+- [x] `README.md` explica como rodar.
+- [x] `IDEIA.md` reflete as decisoes finais do MVP.
 
 ## Log De Progresso
 
@@ -1422,3 +1422,13 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
 - [x] Task 12.3 concluida: checklist manual de gameplay registrado em
   `docs/mvp-gameplay-checklist.md`, cobrindo as tres fases, mortes principais,
   respawn em cada checkpoint, `R`, pausa, mute e build/preview de producao.
+- [x] Task 12.4 concluida: estabilidade inicial medida em
+  `docs/performance-stability-check.md`, com FPS medio de ~60, 30 mortes
+  seguidas sem drift de objetos, reset de traps/projeteis conferido e contrato
+  unitario para audio repetido sem acumulo progressivo.
+- [x] Task 13.1 concluida: `README.md` expandido com descricao do jogo, stack,
+  instalacao, comandos de desenvolvimento/build/testes, controles, fluxo do MVP
+  e documentos uteis para continuidade.
+- [x] Task 13.2 concluida: checklist de release registrado em
+  `docs/mvp-release-checklist.md`; lint, testes unitarios, smoke e build foram
+  validados, e a definicao global de pronto do MVP foi marcada como cumprida.
