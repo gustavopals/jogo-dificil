@@ -3,87 +3,100 @@ import type { RectLike, Vector2Like } from "./geometry";
 
 export type LevelId = string;
 export type CheckpointId = string;
+export type ExitId = string;
 export type TerrainId = string;
 export type HazardId = string;
 export type TrapId = string;
 export type ItemId = string;
 export type InteractiveObjectId = string;
+export type LevelAssetId = string;
 
-export type TerrainKind = "solid" | "one-way";
+export type TerrainKind = "solid";
 export type HazardKind = "spikes" | "fall" | "projectile" | "crusher";
+export type TrapKind =
+  | "false-block"
+  | "falling-platform"
+  | "spike-pop"
+  | "projectile"
+  | "breakable-floor";
 export type TrapTriggerKind = "area" | "touch" | "interaction";
 export type ItemKind = "required" | "optional" | "collectible" | "key";
 export type InteractiveObjectKind = "door" | "button" | "lever" | "mechanism";
+export type InteractiveObjectAction = "primary" | "secondary";
+export type TrapConfig = Readonly<Record<string, unknown>>;
 
-export type CheckpointDefinition = {
+export interface CheckpointDefinition {
   readonly id: CheckpointId;
   readonly position: Vector2Like;
   readonly area: RectLike;
-};
+}
 
-export type ExitDefinition = {
-  readonly id: string;
+export interface ExitDefinition {
+  readonly id: ExitId;
   readonly area: RectLike;
   readonly nextLevelId?: LevelId;
-};
+}
 
-export type TerrainDefinition = {
+export interface TerrainDefinition {
   readonly id: TerrainId;
   readonly kind: TerrainKind;
   readonly area: RectLike;
-  readonly assetId?: string;
-};
+  readonly assetId?: LevelAssetId;
+}
 
-export type HazardDefinition = {
+export interface HazardDefinition {
   readonly id: HazardId;
   readonly kind: HazardKind;
   readonly area: RectLike;
   readonly isInstantDeath: boolean;
-};
+}
 
-export type TrapTriggerDefinition = {
+export interface TrapTriggerDefinition {
   readonly kind: TrapTriggerKind;
   readonly area: RectLike;
-};
+}
 
-export type TrapDefinition = {
+export interface TrapDefinition {
   readonly id: TrapId;
-  readonly kind: string;
+  readonly kind: TrapKind;
   readonly trigger: TrapTriggerDefinition;
   readonly area?: RectLike;
   readonly resetOnRespawn: boolean;
-  readonly config?: Record<string, unknown>;
-};
+  readonly config?: TrapConfig;
+}
 
-export type ItemDefinition = {
+export interface ItemDefinition {
   readonly id: ItemId;
   readonly kind: ItemKind;
   readonly position: Vector2Like;
   readonly hitbox: RectLike;
   readonly persistsAfterDeath: boolean;
-  readonly assetId?: string;
-};
+  readonly activatesObjectId?: InteractiveObjectId;
+  readonly assetId?: LevelAssetId;
+}
 
-export type InteractiveObjectDefinition = {
+export interface InteractiveObjectDefinition {
   readonly id: InteractiveObjectId;
   readonly kind: InteractiveObjectKind;
   readonly area: RectLike;
   readonly startsActive: boolean;
   readonly resetOnRespawn: boolean;
-};
+  readonly action?: InteractiveObjectAction;
+  readonly targetObjectId?: InteractiveObjectId;
+}
 
-export type LevelAudioDefinition = {
+export interface LevelAudioDefinition {
   readonly musicId?: string;
   readonly sounds: readonly AudioDefinition[];
-};
+}
 
-export type LevelAssetsDefinition = {
-  readonly sprites: readonly string[];
-  readonly tilesets: readonly string[];
-  readonly audio: readonly string[];
-};
+export interface LevelAssetsDefinition {
+  readonly sprites: readonly LevelAssetId[];
+  readonly tilesets: readonly LevelAssetId[];
+  readonly audio: readonly LevelAssetId[];
+}
 
-export type LevelDefinition = {
+export interface LevelDefinition {
   readonly id: LevelId;
   readonly name: string;
   readonly order: number;
@@ -102,4 +115,4 @@ export type LevelDefinition = {
   readonly mainChallenge: string;
   readonly progressReward: string;
   readonly assets: LevelAssetsDefinition;
-};
+}

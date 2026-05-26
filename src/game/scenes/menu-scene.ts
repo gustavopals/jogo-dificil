@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 
+import { getRequiredLevelDefinition } from "../../data/levels";
 import { GAME_RESOLUTION, GAME_TITLE } from "../constants";
 import { gameStateStore, INITIAL_LEVEL_ID } from "../systems/game-state";
 import { SCENE_KEYS } from "./scene-keys";
@@ -37,7 +38,9 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private startLevel(): void {
-    gameStateStore.startLevel(INITIAL_LEVEL_ID);
+    const initialLevel = getRequiredLevelDefinition(INITIAL_LEVEL_ID);
+
+    gameStateStore.startLevel(initialLevel.id, initialLevel.spawn);
     this.scene.start(SCENE_KEYS.LEVEL);
   }
 }

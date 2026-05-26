@@ -8,6 +8,7 @@ export {
   createInitialJumpMovementState,
   DEFAULT_JUMP_MOVEMENT_CONFIG,
 } from "./jump-movement";
+export { getWorldHitbox, resolveKinematicCollisions } from "./solid-collision";
 export type {
   HorizontalDirection,
   HorizontalInputState,
@@ -20,3 +21,9 @@ export type {
   JumpMovementResult,
   JumpMovementState,
 } from "./jump-movement";
+export type {
+  CollisionBlockState,
+  KinematicBodyCollisionConfig,
+  KinematicCollisionInput,
+  KinematicCollisionResult,
+} from "./solid-collision";

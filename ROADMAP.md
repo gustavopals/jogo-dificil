@@ -481,11 +481,11 @@ Pronto quando:
 
 ### Task 4.4 - Implementar Colisao Basica
 
-- [ ] Colidir com chao.
-- [ ] Colidir com paredes.
-- [ ] Impedir atravessar terreno solido.
-- [ ] Evitar travar em cantos simples.
-- [ ] Manter plataformas atravessaveis fora do MVP.
+- [x] Colidir com chao.
+- [x] Colidir com paredes.
+- [x] Impedir atravessar terreno solido.
+- [x] Evitar travar em cantos simples.
+- [x] Manter plataformas atravessaveis fora do MVP.
 
 Pronto quando:
 
@@ -493,10 +493,10 @@ Pronto quando:
 
 ### Task 4.5 - Criar Camera Inicial
 
-- [ ] Camera segue o jogador.
-- [ ] Camera respeita limites do mapa.
-- [ ] Camera nao treme em movimento normal.
-- [ ] Camera permite ler obstaculos proximos.
+- [x] Camera segue o jogador.
+- [x] Camera respeita limites do mapa.
+- [x] Camera nao treme em movimento normal.
+- [x] Camera permite ler obstaculos proximos.
 
 Pronto quando:
 
@@ -504,10 +504,10 @@ Pronto quando:
 
 ### Task 4.6 - Testar Movimento
 
-- [ ] Criar testes de logica pura para buffer/coyote se viavel.
-- [ ] Criar checklist manual de movimento.
-- [ ] Validar no navegador.
-- [ ] Ajustar valores se necessario e registrar mudanca.
+- [x] Criar testes de logica pura para buffer/coyote se viavel.
+- [x] Criar checklist manual de movimento.
+- [x] Validar no navegador.
+- [x] Ajustar valores se necessario e registrar mudanca.
 
 Pronto quando:
 
@@ -519,13 +519,13 @@ Objetivo: transformar fases em dados editaveis e renderizaveis.
 
 ### Task 5.1 - Criar Schema De Fase
 
-- [ ] Criar interfaces para `LevelDefinition`.
-- [ ] Criar interfaces para `TerrainDefinition`.
-- [ ] Criar interfaces para `HazardDefinition`.
-- [ ] Criar interfaces para `TrapDefinition`.
-- [ ] Criar interfaces para `ItemDefinition`.
-- [ ] Criar interfaces para `CheckpointDefinition`.
-- [ ] Criar interfaces para `ExitDefinition`.
+- [x] Criar interfaces para `LevelDefinition`.
+- [x] Criar interfaces para `TerrainDefinition`.
+- [x] Criar interfaces para `HazardDefinition`.
+- [x] Criar interfaces para `TrapDefinition`.
+- [x] Criar interfaces para `ItemDefinition`.
+- [x] Criar interfaces para `CheckpointDefinition`.
+- [x] Criar interfaces para `ExitDefinition`.
 
 Pronto quando:
 
@@ -533,13 +533,13 @@ Pronto quando:
 
 ### Task 5.2 - Criar Validador De Fase
 
-- [ ] Validar `id` unico.
-- [ ] Validar spawn dentro dos limites.
-- [ ] Validar saida dentro dos limites.
-- [ ] Validar checkpoints dentro dos limites.
-- [ ] Validar retangulos de terreno.
-- [ ] Validar assets referenciados.
-- [ ] Criar testes unitarios para validacoes.
+- [x] Validar `id` unico.
+- [x] Validar spawn dentro dos limites.
+- [x] Validar saida dentro dos limites.
+- [x] Validar checkpoints dentro dos limites.
+- [x] Validar retangulos de terreno.
+- [x] Validar assets referenciados.
+- [x] Criar testes unitarios para validacoes.
 
 Pronto quando:
 
@@ -547,10 +547,10 @@ Pronto quando:
 
 ### Task 5.3 - Renderizar Terreno
 
-- [ ] Renderizar blocos solidos temporarios.
-- [ ] Aplicar colisao nos blocos.
-- [ ] Usar dados da fase, nao codigo fixo.
-- [ ] Permitir cores ou sprites placeholder por tipo.
+- [x] Renderizar blocos solidos temporarios.
+- [x] Aplicar colisao nos blocos.
+- [x] Usar dados da fase, nao codigo fixo.
+- [x] Permitir cores ou sprites placeholder por tipo.
 
 Pronto quando:
 
@@ -558,11 +558,11 @@ Pronto quando:
 
 ### Task 5.4 - Renderizar Spawn, Exit E Checkpoints
 
-- [ ] Posicionar jogador no spawn.
-- [ ] Renderizar saida.
-- [ ] Detectar contato com saida.
-- [ ] Renderizar checkpoints.
-- [ ] Ativar checkpoint ao contato.
+- [x] Posicionar jogador no spawn.
+- [x] Renderizar saida.
+- [x] Detectar contato com saida.
+- [x] Renderizar checkpoints.
+- [x] Ativar checkpoint ao contato.
 
 Pronto quando:
 
@@ -570,11 +570,11 @@ Pronto quando:
 
 ### Task 5.5 - Criar As 3 Fases Iniciais Em Dados
 
-- [ ] Criar `level-01.ts`.
-- [ ] Criar `level-02.ts`.
-- [ ] Criar `level-03.ts`.
-- [ ] Exportar lista ordenada de fases.
-- [ ] Garantir que todas usam ponto A e ponto B.
+- [x] Criar `level-01.ts`.
+- [x] Criar `level-02.ts`.
+- [x] Criar `level-03.ts`.
+- [x] Exportar lista ordenada de fases.
+- [x] Garantir que todas usam ponto A e ponto B.
 
 Pronto quando:
 
@@ -586,11 +586,11 @@ Objetivo: implementar o ciclo mais importante do jogo dificil.
 
 ### Task 6.1 - Implementar Sistema De Morte
 
-- [ ] Criar estado `alive`.
-- [ ] Criar estado `dead`.
-- [ ] Travar controle ao morrer.
-- [ ] Emitir evento de morte.
-- [ ] Incrementar contador.
+- [x] Criar estado `alive`.
+- [x] Criar estado `dead`.
+- [x] Travar controle ao morrer.
+- [x] Emitir evento de morte.
+- [x] Incrementar contador.
 
 Pronto quando:
 
@@ -598,11 +598,11 @@ Pronto quando:
 
 ### Task 6.2 - Implementar Respawn Automatico
 
-- [ ] Aguardar entre 300 ms e 600 ms.
-- [ ] Voltar ao checkpoint ativo.
-- [ ] Restaurar estado do jogador.
-- [ ] Retomar controle.
-- [ ] Manter musica tocando.
+- [x] Aguardar entre 300 ms e 600 ms.
+- [x] Voltar ao checkpoint ativo.
+- [x] Restaurar estado do jogador.
+- [x] Retomar controle.
+- [x] Manter musica tocando.
 
 Pronto quando:
 
@@ -610,10 +610,10 @@ Pronto quando:
 
 ### Task 6.3 - Implementar Reinicio Manual Com `R`
 
-- [ ] `R` reposiciona no checkpoint.
-- [ ] `R` reseta sala.
-- [ ] Decidir se `R` conta morte quando usado vivo.
-- [ ] Registrar decisao em `IDEIA.md`.
+- [x] `R` reposiciona no checkpoint.
+- [x] `R` reseta sala.
+- [x] Decidir se `R` conta morte quando usado vivo.
+- [x] Registrar decisao em `IDEIA.md`.
 
 Pronto quando:
 
@@ -621,11 +621,11 @@ Pronto quando:
 
 ### Task 6.4 - Resetar Sala
 
-- [ ] Resetar armadilhas.
-- [ ] Resetar projeteis.
-- [ ] Resetar plataformas moveis ou que caem.
-- [ ] Restaurar itens obrigatorios necessarios.
-- [ ] Preservar itens opcionais coletados quando fizer sentido.
+- [x] Resetar armadilhas.
+- [x] Resetar projeteis.
+- [x] Resetar plataformas moveis ou que caem.
+- [x] Restaurar itens obrigatorios necessarios.
+- [x] Preservar itens opcionais coletados quando fizer sentido.
 
 Pronto quando:
 
@@ -633,10 +633,10 @@ Pronto quando:
 
 ### Task 6.5 - HUD De Mortes
 
-- [ ] Mostrar contador de mortes.
-- [ ] Atualizar imediatamente apos morte.
-- [ ] Garantir legibilidade.
-- [ ] Nao ocupar area critica de gameplay.
+- [x] Mostrar contador de mortes.
+- [x] Atualizar imediatamente apos morte.
+- [x] Garantir legibilidade.
+- [x] Nao ocupar area critica de gameplay.
 
 Pronto quando:
 
@@ -648,10 +648,10 @@ Objetivo: criar os elementos que tornam os 3 mapas divertidos e dificeis.
 
 ### Task 7.1 - Criar Sistema Base De Hazard
 
-- [ ] Definir dano/morte por contato.
-- [ ] Criar espinho fixo.
-- [ ] Criar area de queda/morte.
-- [ ] Integrar com sistema de morte.
+- [x] Definir dano/morte por contato.
+- [x] Criar espinho fixo.
+- [x] Criar area de queda/morte.
+- [x] Integrar com sistema de morte.
 
 Pronto quando:
 
@@ -659,11 +659,11 @@ Pronto quando:
 
 ### Task 7.2 - Criar Sistema Base De Trap
 
-- [ ] Definir interface de trap.
-- [ ] Definir gatilho por posicao.
-- [ ] Definir reset por respawn.
-- [ ] Definir feedback visual basico.
-- [ ] Definir feedback sonoro futuro.
+- [x] Definir interface de trap.
+- [x] Definir gatilho por posicao.
+- [x] Definir reset por respawn.
+- [x] Definir feedback visual basico.
+- [x] Definir feedback sonoro futuro.
 
 Pronto quando:
 
@@ -671,11 +671,11 @@ Pronto quando:
 
 ### Task 7.3 - Implementar Traps Do MVP
 
-- [ ] Bloco falso.
-- [ ] Plataforma que cai.
-- [ ] Espinho que surge.
-- [ ] Projetil simples.
-- [ ] Chao quebravel.
+- [x] Bloco falso.
+- [x] Plataforma que cai.
+- [x] Espinho que surge.
+- [x] Projetil simples.
+- [x] Chao quebravel.
 
 Pronto quando:
 
@@ -683,11 +683,11 @@ Pronto quando:
 
 ### Task 7.4 - Implementar Itens
 
-- [ ] Coletavel opcional.
-- [ ] Item obrigatorio simples, se usado nas fases.
-- [ ] Item de ativacao de mecanismo.
-- [ ] Feedback visual de coleta.
-- [ ] Estado persistente ate respawn ou fim da fase conforme regra.
+- [x] Coletavel opcional.
+- [x] Item obrigatorio simples, se usado nas fases.
+- [x] Item de ativacao de mecanismo.
+- [x] Feedback visual de coleta.
+- [x] Estado persistente ate respawn ou fim da fase conforme regra.
 
 Pronto quando:
 
@@ -695,10 +695,10 @@ Pronto quando:
 
 ### Task 7.5 - Implementar Objetos Interativos
 
-- [ ] Porta simples.
-- [ ] Botao ou alavanca.
-- [ ] Mecanismo acionado por acao principal/secundaria.
-- [ ] Estado resetavel.
+- [x] Porta simples.
+- [x] Botao ou alavanca.
+- [x] Mecanismo acionado por acao principal/secundaria.
+- [x] Estado resetavel.
 
 Pronto quando:
 
@@ -706,10 +706,10 @@ Pronto quando:
 
 ### Task 7.6 - Revisar Justica Das Armadilhas
 
-- [ ] Cada trap deve ter causa compreensivel depois da morte.
-- [ ] Nenhuma trap deve causar softlock.
-- [ ] Nenhuma trap deve exigir espera longa apos erro.
-- [ ] Registrar riscos conhecidos por fase.
+- [x] Cada trap deve ter causa compreensivel depois da morte.
+- [x] Nenhuma trap deve causar softlock.
+- [x] Nenhuma trap deve exigir espera longa apos erro.
+- [x] Registrar riscos conhecidos por fase.
 
 Pronto quando:
 
@@ -721,15 +721,15 @@ Objetivo: criar as primeiras fases como conteudo jogavel.
 
 ### Task 8.1 - Fase 1: Entrada Cruel
 
-- [ ] Definir layout inicial.
-- [ ] Definir ponto A.
-- [ ] Definir ponto B.
-- [ ] Ensinar andar e pular.
-- [ ] Adicionar buracos pequenos.
-- [ ] Adicionar primeira armadilha surpresa.
-- [ ] Adicionar checkpoint se necessario.
-- [ ] Adicionar som minimo.
-- [ ] Testar conclusao da fase.
+- [x] Definir layout inicial.
+- [x] Definir ponto A.
+- [x] Definir ponto B.
+- [x] Ensinar andar e pular.
+- [x] Adicionar buracos pequenos.
+- [x] Adicionar primeira armadilha surpresa.
+- [x] Adicionar checkpoint se necessario.
+- [x] Adicionar som minimo.
+- [x] Testar conclusao da fase.
 
 Pronto quando:
 
@@ -737,15 +737,15 @@ Pronto quando:
 
 ### Task 8.2 - Fase 2: O Caminho Nao Confia Em Voce
 
-- [ ] Definir layout inicial.
-- [ ] Definir ponto A.
-- [ ] Definir ponto B.
-- [ ] Introduzir timing.
-- [ ] Adicionar obstaculo ativo simples.
-- [ ] Usar acao principal ou secundaria.
-- [ ] Adicionar checkpoint no meio.
-- [ ] Adicionar pegadinha visual na saida.
-- [ ] Testar conclusao da fase.
+- [x] Definir layout inicial.
+- [x] Definir ponto A.
+- [x] Definir ponto B.
+- [x] Introduzir timing.
+- [x] Adicionar obstaculo ativo simples.
+- [x] Usar acao principal ou secundaria.
+- [x] Adicionar checkpoint no meio.
+- [x] Adicionar pegadinha visual na saida.
+- [x] Testar conclusao da fase.
 
 Pronto quando:
 
@@ -753,15 +753,15 @@ Pronto quando:
 
 ### Task 8.3 - Fase 3: Quase Seguro
 
-- [ ] Definir layout inicial.
-- [ ] Definir ponto A.
-- [ ] Definir ponto B.
-- [ ] Criar sequencia curta de pulos precisos.
-- [ ] Adicionar bloco falso ou chao quebravel.
-- [ ] Adicionar item opcional de risco e recompensa.
-- [ ] Adicionar checkpoint antes da parte mais cruel.
-- [ ] Criar saida que testa desconfiança do jogador.
-- [ ] Testar conclusao da fase.
+- [x] Definir layout inicial.
+- [x] Definir ponto A.
+- [x] Definir ponto B.
+- [x] Criar sequencia curta de pulos precisos.
+- [x] Adicionar bloco falso ou chao quebravel.
+- [x] Adicionar item opcional de risco e recompensa.
+- [x] Adicionar checkpoint antes da parte mais cruel.
+- [x] Criar saida que testa desconfiança do jogador.
+- [x] Testar conclusao da fase.
 
 Pronto quando:
 
@@ -769,11 +769,11 @@ Pronto quando:
 
 ### Task 8.4 - Balancear Curva Inicial
 
-- [ ] Fase 1 deve ser dificil, mas introdutoria.
-- [ ] Fase 2 deve exigir timing e interacao.
-- [ ] Fase 3 deve exigir leitura, memoria curta e precisao.
-- [ ] Evitar repetir a mesma piada sem variacao.
-- [ ] Evitar longas caminhadas antes da parte dificil.
+- [x] Fase 1 deve ser dificil, mas introdutoria.
+- [x] Fase 2 deve exigir timing e interacao.
+- [x] Fase 3 deve exigir leitura, memoria curta e precisao.
+- [x] Evitar repetir a mesma piada sem variacao.
+- [x] Evitar longas caminhadas antes da parte dificil.
 
 Pronto quando:
 
@@ -1205,3 +1205,149 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   gravidade de 1200 px/s², corte de pulo para 45%, coyote time de 90 ms e jump
   buffer de 100 ms. `LevelScene` passou a consultar a acao `jump` e aplicar
   limite temporario de pouso no chao visual ate a colisao basica da Task 4.4.
+- [x] Task 4.4 concluida: colisao basica criada em
+  `src/game/physics/solid-collision.ts`, com resolvedor cinematico por eixo para
+  retangulos solidos, hitbox real do Pino, bloqueio de chao, paredes, topo e
+  parte inferior de plataformas solidas. `LevelScene` agora usa uma sala de
+  teste com chao, paredes laterais e plataformas solidas curtas. Testes
+  unitarios cobrem aterrissagem, paredes, quinas simples e passos grandes sem
+  atravessar blocos finos.
+- [x] Task 4.5 concluida: camera inicial configurada na `LevelScene`, com mapa
+  temporario de 960x270px, limites de camera, `startFollow` no sprite do Pino,
+  `roundPixels` e deadzone de 128x80px para reduzir tremor e manter obstaculos
+  proximos legiveis.
+- [x] Task 4.6 concluida: testes de movimento reforcados com casos de expiracao
+  de coyote time e jump buffer, checklist manual criado em
+  `docs/movement-checklist.md` e validacao automatica no navegador executada com
+  Chromium headless via Playwright. Como o WebGL headless do ambiente gerou
+  `Framebuffer Unsupported`, a validacao foi feita com WebGL desativado no
+  caminho Canvas; canvas abriu, respondeu a movimento/pulo e nao registrou erros
+  ou avisos. Nenhum valor de fisica foi ajustado nesta rodada.
+- [x] Task 5.1 concluida: schema declarativo de fases consolidado em
+  `src/shared/levels.ts` com interfaces para fase, terreno, hazards, traps,
+  itens, checkpoints e saida. Helper `defineLevel` criado em
+  `src/data/levels/schema.ts` para autoria com autocomplete e validacao
+  TypeScript. Teste `tests/level-schema.test.ts` cobre uma fase completa de
+  exemplo.
+- [x] Task 5.2 concluida: validador puro criado em
+  `src/data/levels/validation.ts`, com `validateLevel` para fase individual e
+  `validateLevels` para lista de fases. Regras iniciais cobrem ids duplicados,
+  spawn, saida, checkpoints, retangulos de terreno e assets referenciados.
+  Testes unitarios criados em `tests/level-validation.test.ts`.
+- [x] Task 5.3 concluida: terreno da `LevelScene` passou a vir dos dados da
+  fase. Registry criado em `src/data/levels/registry.ts`, helper
+  `src/game/systems/level-terrain.ts` extrai retangulos solidos para colisao e
+  define cores placeholder por tipo de terreno. Testes cobrem registry valido e
+  derivacao de terreno.
+- [x] Task 5.4 concluida: `MenuScene` inicia a fase usando `level.spawn`,
+  `LevelScene` renderiza marcador de spawn, saida e checkpoints, detecta contato
+  com checkpoint/saida pela hitbox real do Pino e aciona
+  `gameStateStore.setActiveCheckpoint` / `gameStateStore.completeLevel`.
+  Helper puro criado em `src/game/systems/level-progress.ts` e testes adicionados
+  em `tests/level-progress.test.ts`.
+- [x] Task 5.5 concluida: fases iniciais criadas em
+  `src/data/levels/level-01.ts`, `src/data/levels/level-02.ts` e
+  `src/data/levels/level-03.ts`. `LEVEL_DEFINITIONS` agora exporta a campanha
+  inicial na ordem 1, 2 e 3; todas as fases possuem `spawn` e `exit`, com
+  `level-01` apontando para `level-02` e `level-02` apontando para `level-03`.
+- [x] Task 6.1 concluida: estado de vida do jogador adicionado ao
+  `gameStateStore` como `alive`/`dead`. `registerDeath` agora troca para
+  `dead`, incrementa o contador uma unica vez por morte e emite
+  `player:died`; `respawnAtCheckpoint` volta para `alive`. `LevelScene` trava
+  movimento/progresso quando o jogador esta morto e dispara morte por queda ao
+  passar do limite inferior da fase. Helper puro criado em
+  `src/game/systems/player-death.ts` com testes em `tests/player-death.test.ts`.
+- [x] Task 6.2 concluida: `LevelScene` agenda respawn automatico de 450 ms apos
+  morte, chama `gameStateStore.respawnAtCheckpoint`, reposiciona/restaura o
+  `Player` no checkpoint ativo, reinicia o estado de pulo e libera controle sem
+  reiniciar a cena. Recuperacao visual curta configurada em
+  `src/game/systems/player-respawn.ts`, com testes em
+  `tests/player-respawn.test.ts`.
+- [x] Task 6.3 concluida: `LevelScene` agora escuta a acao `restart` mapeada em
+  `R`, cancela timers de respawn pendentes, reposiciona o `Player` no checkpoint
+  ativo com `gameStateStore.respawnAtCheckpoint(true)` e reseta estado
+  transitorio da sala atual. Decisao registrada: reinicio manual enquanto vivo
+  nao conta como morte.
+- [x] Task 6.4 concluida: infraestrutura de reset de sala criada em
+  `src/game/systems/room-state.ts`. O estado runtime cobre armadilhas,
+  projeteis, plataformas que caem, itens e objetos interativos. Respawn e
+  reinicio manual agora chamam `resetRoomStateForRespawn`; projeteis sao
+  limpos, traps/plataformas/objetos resetaveis voltam ao estado inicial, itens
+  obrigatorios retornam e itens opcionais coletados com `persistsAfterDeath`
+  continuam preservados. Testes adicionados em `tests/room-state.test.ts`.
+- [x] Task 6.5 concluida: HUD de mortes reforcado na `HudScene`, com contador
+  compacto no canto superior esquerdo, fundo escuro semitransparente e texto
+  monospace legivel. O contador continua inscrito no `gameStateStore`, entao
+  atualiza imediatamente quando `deathCount` muda. Helper testavel criado em
+  `src/game/ui/death-counter.ts`, com testes em `tests/death-counter.test.ts`.
+- [x] Task 7.1 concluida: sistema base de hazards criado em
+  `src/game/systems/level-hazards.ts`, com deteccao de contato mortal,
+  mapeamento de causa de morte e cores placeholder por tipo. `LevelScene` agora
+  renderiza hazards declarados, desenha espinhos fixos e mata o jogador ao tocar
+  hazards instantaneos ou areas de queda. `level-01` recebeu um espinho fixo
+  inicial e testes foram adicionados em `tests/level-hazards.test.ts`.
+- [x] Task 7.2 concluida: sistema base de traps criado em
+  `src/game/systems/level-traps.ts`, com deteccao de gatilhos por posicao,
+  feedback visual placeholder e metadados de audio futuro. `LevelScene` renderiza
+  areas de gatilho/corpo de traps, marca traps como acionadas no `roomState` e
+  atualiza o visual quando o jogador cruza a area. Reset por respawn continua via
+  `resetRoomStateForRespawn`. Testes adicionados em `tests/level-traps.test.ts`.
+- [x] Task 7.3 concluida: comportamento inicial das traps do MVP criado em
+  `src/game/systems/mvp-traps.ts`. Bloco falso e chao quebravel removem colisao
+  da sala, plataforma que cai desativa a plataforma runtime, espinho que surge
+  vira ameaca mortal apos gatilho e projetil simples nasce com velocidade
+  configuravel. `level-02` recebeu uma trap de projetil e `level-03` recebeu
+  chao quebravel, deixando os cinco tipos do MVP declarados nos dados iniciais.
+  Testes adicionados em `tests/mvp-traps.test.ts`.
+- [x] Task 7.4 concluida: sistema inicial de itens criado em
+  `src/game/systems/level-items.ts`, com deteccao de coleta por overlap,
+  feedback visual de item coletado, suporte a item que ativa objeto interativo
+  via `activatesObjectId` e preservacao/restauracao conforme
+  `persistsAfterDeath`. `level-01` recebeu um item obrigatorio simples,
+  `level-02` recebeu uma chave que ativa o mecanismo declarado e `level-03`
+  manteve o coletavel opcional persistente. Testes adicionados em
+  `tests/level-items.test.ts`.
+- [x] Task 7.5 concluida: sistema inicial de objetos interativos criado em
+  `src/game/systems/level-interactive-objects.ts`, com porta simples que bloqueia
+  colisao enquanto fechada, alavanca acionavel por acao secundaria, ativacao de
+  alvo via `targetObjectId`, feedback visual e reset via `roomState`.
+  `level-02` recebeu uma porta de saida; a Fase 8 manteve a alavanca como
+  abridor da porta e moveu a chave para um mecanismo visual separado. Testes
+  adicionados em `tests/level-interactive-objects.test.ts`.
+- [x] Task 7.6 concluida: revisao de justica das armadilhas registrada em
+  `docs/trap-fairness-review.md`, cobrindo causa esperada de morte, risco de
+  softlock, espera apos erro e riscos conhecidos por fase. Contratos de
+  seguranca adicionados em `tests/trap-fairness.test.ts` para manter traps
+  resetaveis, atrasos abaixo do respawn automatico e portas fechadas com pelo
+  menos um abridor declarado.
+- [x] Revisao da Fase 7 concluida: hazards, traps do MVP, itens e objetos
+  interativos foram conferidos em conjunto na `LevelScene`, no `roomState`, nos
+  dados das tres fases iniciais e nos testes. A fase ficou pronta para commit
+  com contratos cobrindo morte por contato, reset, projetil, remocao de colisao,
+  coleta, ativacao de porta/mecanismo e justica das armadilhas.
+- [x] Task 8.1 concluida: `level-01` foi ajustada como fase jogavel
+  introdutoria, com ponto A no spawn inicial, ponto B na saida para `level-02`,
+  chao segmentado, tres buracos pequenos, espinho fixo, primeira surpresa
+  `spike-pop`, checkpoint intermediario e metadados minimos de som para
+  checkpoint/trap. Testes de conteudo adicionados em
+  `tests/level-01-content.test.ts`.
+- [x] Task 8.2 concluida: `level-02` foi ajustada como fase jogavel de timing e
+  interacao, com ponto A no spawn inicial, ponto B na saida para `level-03`,
+  chao segmentado, dois gaps de queda, plataforma que cai, checkpoint
+  intermediario, porta de saida aberta por alavanca secundaria, chave como pista
+  de mecanismo e projetil lateral como pegadinha visual na saida. Testes de
+  conteudo adicionados em `tests/level-02-content.test.ts`.
+- [x] Task 8.3 concluida: `level-03` foi ajustada como fechamento jogavel do
+  MVP inicial, com ponto A no spawn inicial, ponto B na saida final, sequencia
+  curta de tres plataformas precisas, plataforma quebravel com token opcional de
+  risco e recompensa, checkpoint antes da secao cruel, piso falso na plataforma
+  da saida e metadados minimos de som para token/piso falso. Testes de conteudo
+  adicionados em `tests/level-03-content.test.ts`.
+- [x] Task 8.4 concluida: curva inicial balanceada e documentada em
+  `docs/initial-curve-balance.md`. Foram registrados os papeis das tres fases,
+  limites contra caminhadas longas, variacao de traps sem repetir a mesma piada
+  e contratos automatizados em `tests/initial-curve-balance.test.ts`.
+- [x] Revisao da Fase 8 concluida: as tres fases iniciais foram conferidas como
+  conteudo jogavel completo, com testes de conteudo por fase, contratos de
+  balanceamento da curva inicial, documentacao atualizada e pacote pronto para
+  commit.

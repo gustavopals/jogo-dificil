@@ -183,6 +183,10 @@ export class Player {
   }
 
   public updateMovement(update: PlayerMovementUpdate = {}): void {
+    if (!this.visualState.isAlive) {
+      return;
+    }
+
     const body = this.getBody();
 
     if (update.position) {

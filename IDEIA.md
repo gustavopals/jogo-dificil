@@ -203,8 +203,42 @@ Implementação inicial do pulo:
   restante é reduzida para 45%.
 - `coyote time`: 90 ms.
 - `jump buffer`: 100 ms.
-- Até a Task 4.4, o chão visual da `LevelScene` é usado como limite temporário
-  de pouso para validar sensação de pulo sem ainda implementar colisão geral.
+
+Implementação inicial de colisão básica:
+
+- Lógica pura criada em `src/game/physics/solid-collision.ts`.
+- `LevelScene` mantém uma sala de teste com chão, paredes laterais e
+  plataformas sólidas curtas, todos definidos como retângulos sólidos
+  temporários.
+- A colisão usa a hitbox real do Pino, com sprite visual 12x24px, hitbox 10x22px
+  e pivô no centro inferior.
+- O resolvedor cinemático aplica movimento por eixo, bloqueia chão, paredes,
+  topo e parte inferior de sólidos, e evita atravessar blocos finos mesmo em
+  passos maiores de simulação.
+- Plataformas atravessáveis continuam fora do MVP inicial; a plataforma de teste
+  atual é totalmente sólida.
+
+Implementação inicial da câmera:
+
+- `LevelScene` usa limites temporários de mapa com 960x270px, equivalente a duas
+  telas da resolução base.
+- A câmera principal do Phaser segue o sprite do Pino e respeita os limites do
+  mapa provisório.
+- A câmera usa `roundPixels` para manter leitura de pixel art e reduzir tremor
+  visual durante movimento normal.
+- Uma deadzone inicial de 128x80px evita microcorreções constantes e ainda
+  mantém obstáculos próximos legíveis no enquadramento.
+
+Validação inicial do movimento:
+
+- Testes unitários cobrem movimento horizontal, pulo variável, coyote time, jump
+  buffer e colisão sólida.
+- Checklist manual criado em `docs/movement-checklist.md`.
+- Validação automática no navegador passou em Chromium headless via Playwright,
+  usando fallback `PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64` e WebGL
+  desativado para evitar limitação de framebuffer do ambiente.
+- Nenhum valor de física foi ajustado nesta rodada; os valores atuais seguem
+  bons o suficiente para iniciar a estrutura de mapas.
 
 Observação:
 
@@ -282,6 +316,72 @@ Regras:
 - O reset da sala deve evitar softlocks e estados quebrados.
 - O reinício manual rápido não deve punir o jogador além de reposicioná-lo no checkpoint.
 
+Implementação inicial do sistema de morte:
+
+- O estado global do jogador usa `playerLifeState` com valores `alive` e
+  `dead`.
+- Ao registrar morte, o jogo trava o controle, troca para `dead`, incrementa o
+  contador e emite `player:died`.
+- A mesma morte não pode incrementar o contador mais de uma vez enquanto o
+  jogador continua morto.
+- Nesta etapa, a `LevelScene` só dispara morte automática por queda abaixo dos
+  limites da fase; morte por contato com hazards e traps fica para a Fase 7.
+- Na etapa 6.1, `respawnAtCheckpoint` já devolvia o estado para `alive`; a
+  etapa 6.2 conectou esse caminho ao respawn automático da `LevelScene`.
+
+Implementação inicial do respawn automático:
+
+- Após uma morte, a `LevelScene` agenda retorno automático em 450 ms, dentro da
+  janela decidida de 300 ms a 600 ms.
+- O jogador volta para o checkpoint ativo via `respawnAtCheckpoint`, preservando
+  contador de mortes e checkpoint atual.
+- O `Player` é restaurado com velocidade zerada, corpo físico reativado e estado
+  de pulo reiniciado.
+- O controle volta junto com o respawn; a animação de recuperação é curta e não
+  bloqueia input.
+- A cena não é reiniciada nesse fluxo, então a música futura poderá continuar
+  tocando sem resetar a cada morte.
+
+Implementação inicial do reinício manual:
+
+- `R` reposiciona imediatamente o jogador no checkpoint ativo usando o mesmo
+  caminho de restauração do respawn.
+- Reinício manual enquanto o jogador está vivo não conta como morte. A razão é
+  manter `R` como ferramenta de ritmo e correção rápida, não como punição.
+- Se `R` for pressionado enquanto o jogador está morto, ele cancela a espera do
+  respawn automático e volta ao checkpoint sem incrementar uma nova morte.
+- Na etapa 6.3, o reinício manual passou a limpar timers de respawn, estado de
+  pulo, recuperação visual e estado transitório de conclusão da fase. A etapa
+  6.4 conectou esse caminho ao reset lógico completo da sala.
+
+Implementação inicial do reset de sala:
+
+- O reset de sala agora possui estado runtime próprio em `room-state`, separado
+  da cena.
+- Armadilhas declaradas voltam ao estado não acionado quando `resetOnRespawn` é
+  verdadeiro.
+- Projéteis runtime são sempre limpos no reset para evitar mortes ou colisões
+  antigas após respawn.
+- Plataformas que caem voltam para a área declarada e deixam de estar em queda
+  ou desativadas quando são resetáveis.
+- Objetos interativos resetáveis voltam ao `startsActive` declarado.
+- Itens obrigatórios coletados são restaurados no respawn; itens opcionais
+  coletados podem permanecer coletados quando `persistsAfterDeath` é verdadeiro.
+- Nesta etapa o reset ainda é lógico. A Fase 7 vai conectar esse estado aos
+  comportamentos visuais reais de traps, projéteis, plataformas e itens.
+
+Implementação inicial do HUD de mortes:
+
+- O contador de mortes fica no canto superior esquerdo, em painel compacto e
+  semitransparente.
+- O texto usa monospace pequeno e alto contraste para continuar legível sobre o
+  placeholder visual das fases.
+- O HUD se atualiza pela assinatura do `gameStateStore`, então cada morte
+  registrada aparece imediatamente.
+- A área do contador é limitada para não cobrir o centro da tela nem trechos
+  críticos de plataforma.
+- A frase exibida é curta: `Mortes N`.
+
 ### Ponto 6 - Formato das Fases
 
 Status: Decidido.
@@ -331,6 +431,249 @@ Regras:
 - Os dados devem permitir reset da sala após morte.
 - A estrutura deve suportar os 3 mapas iniciais antes de crescer.
 - Se a estrutura começar a ficar difícil de editar, reavaliar uso de editor de mapas.
+
+Implementação inicial do schema de fases:
+
+- Interfaces de fase consolidadas em `src/shared/levels.ts`, cobrindo
+  `LevelDefinition`, `TerrainDefinition`, `HazardDefinition`, `TrapDefinition`,
+  `ItemDefinition`, `CheckpointDefinition` e `ExitDefinition`.
+- Helper de autoria criado em `src/data/levels/schema.ts` com `defineLevel`,
+  para escrever fases declarativas com autocomplete e validação TypeScript.
+- Terreno do MVP aceita apenas `solid`, mantendo plataformas atravessáveis fora
+  do escopo inicial.
+- Traps do schema inicial cobrem os tipos planejados para o MVP:
+  `false-block`, `falling-platform`, `spike-pop`, `projectile` e
+  `breakable-floor`.
+- Teste de schema criado em `tests/level-schema.test.ts` com uma fase completa
+  de exemplo validada por TypeScript.
+
+Implementação inicial do validador de fases:
+
+- Validador puro criado em `src/data/levels/validation.ts`.
+- `validateLevel` valida uma fase individual e retorna issues sem lançar
+  exceção.
+- `validateLevels` valida uma lista de fases e detecta `level.id` duplicado
+  entre arquivos.
+- Regras iniciais cobertas: IDs duplicados dentro da fase, spawn dentro dos
+  limites, saída dentro dos limites, checkpoints dentro dos limites, retângulos
+  de terreno válidos e dentro dos limites, e assets referenciados declarados em
+  `assets`.
+- API local de fases exposta por `src/data/levels/index.ts`.
+- Testes unitários criados em `tests/level-validation.test.ts`.
+
+Implementação inicial de renderização de terreno:
+
+- Registry inicial criado em `src/data/levels/registry.ts`, com
+  `LEVEL_DEFINITIONS`, `getLevelDefinition` e `getRequiredLevelDefinition`.
+- `LevelScene` deixou de declarar chão, paredes e plataformas em código fixo e
+  passou a carregar a fase atual pelo `currentLevelId`.
+- Terreno sólido agora vem de `level.terrain`, é desenhado como retângulos
+  placeholder e alimenta a colisão do jogador.
+- Helper puro criado em `src/game/systems/level-terrain.ts`, com extração de
+  retângulos sólidos e cor placeholder por tipo de terreno.
+
+Implementação inicial de spawn, saída e checkpoints:
+
+- `gameStateStore.startLevel` aceita uma posição de spawn definida pelos dados
+  da fase, mantendo o checkpoint inicial com id `${levelId}-start`.
+- `MenuScene` inicia `level-01` usando `level.spawn` vindo do registry.
+- `LevelScene` renderiza marcador de spawn, saída e checkpoints com retângulos
+  placeholder.
+- Contato com checkpoint é detectado pela hitbox real do Pino e ativa
+  `gameStateStore.setActiveCheckpoint` uma vez por checkpoint ativo.
+- Contato com a saída chama `gameStateStore.completeLevel`; transição visual e
+  carregamento da próxima fase continuam para a Task 10.4.
+- Helper puro criado em `src/game/systems/level-progress.ts` para checkpoint
+  inicial, overlap de checkpoint e overlap de saída.
+
+Implementação inicial das 3 fases em dados:
+
+- `src/data/levels/level-01.ts`: Fase 1, `Entrada Cruel`, introdutória, com
+  terreno simples, checkpoint, saída para `level-02`, perigo de queda e primeira
+  trap `spike-pop` declarada.
+- `src/data/levels/level-02.ts`: Fase 2, `O Caminho Nao Confia Em Voce`, com
+  terreno segmentado, gap, checkpoint, saída para `level-03`, alavanca
+  declarativa e trap `falling-platform`.
+- `src/data/levels/level-03.ts`: Fase 3, `Quase Seguro`, com sequência curta de
+  plataformas, checkpoint, saída final, item opcional e trap `false-block`.
+- `LEVEL_DEFINITIONS` exporta as fases na ordem `level-01`, `level-02`,
+  `level-03`.
+- Todas as fases têm ponto A (`spawn`) e ponto B (`exit`), validados pelo schema
+  e pelo registry.
+
+Implementação inicial do sistema base de hazards:
+
+- Hazards são perigos diretos declarados em `level.hazards` e podem matar por
+  contato quando `isInstantDeath` é verdadeiro.
+- `fall` usa causa de morte `fall`; demais hazards diretos usam causa `hazard`.
+- `LevelScene` desenha hazards com placeholder visual: espinhos como triângulos
+  fixos e áreas de queda como retângulos semitransparentes.
+- `level-01` recebeu um espinho fixo inicial para validar contato mortal sem
+  depender de traps.
+- As áreas de queda declaradas nas fases agora participam do sistema de morte;
+  o plano abaixo do limite da fase continua como fallback de segurança.
+
+Implementação inicial do sistema base de traps:
+
+- Traps continuam sendo conteúdo declarativo em `level.traps`, com `id`, `kind`,
+  `trigger`, área opcional, `resetOnRespawn` e `config`.
+- A base runtime usa `roomState.traps` para saber se cada trap está armada,
+  acionada ou resolvida.
+- Gatilhos por posição (`area` e `touch`) disparam quando a hitbox do jogador
+  sobrepõe `trap.trigger.area`; gatilhos `interaction` ficam reservados para os
+  objetos/ações da Task 7.5.
+- Ao cruzar um gatilho, a `LevelScene` marca a trap como acionada e atualiza o
+  placeholder visual.
+- O feedback visual inicial mostra a área de gatilho e, quando existir, a área
+  física/corpo da trap. Após acionamento, o marcador fica mais evidente.
+- O feedback sonoro futuro foi reservado como metadado `trap:<kind>:<event>`,
+  sem tocar áudio ainda.
+- Reset por respawn/reinício manual reutiliza `resetRoomStateForRespawn`, então
+  traps com `resetOnRespawn` voltam armadas.
+
+Implementação inicial das traps do MVP:
+
+- `false-block` e `breakable-floor` removem a área física da lista de sólidos da
+  sala após o gatilho, usando subtração de retângulos para preservar partes
+  restantes do terreno quando necessário.
+- `falling-platform` reutiliza o estado runtime de plataformas móveis e passa a
+  ficar `isFalling`/`isDisabled` quando acionada.
+- `spike-pop` fica mortal após o gatilho e mata por contato com causa `trap`.
+- `projectile` cria um projétil simples a partir da área da trap, com velocidade
+  configurável por `config.velocityX`/`config.velocityY`, e mata por contato.
+- `level-02` recebeu uma trap de projétil lateral e `level-03` recebeu chão
+  quebrável. As três fases iniciais agora declaram os cinco tipos de trap do
+  MVP: bloco falso, plataforma que cai, espinho que surge, projétil simples e
+  chão quebrável.
+
+Implementação inicial de itens:
+
+- Itens continuam declarativos em `level.items`, com `id`, `kind`, `position`,
+  `hitbox`, `persistsAfterDeath`, asset opcional e, quando necessário,
+  `activatesObjectId`.
+- `LevelScene` renderiza itens como marcadores placeholder, coleta por overlap
+  da hitbox real do Pino e reduz o alpha do marcador quando o item é coletado.
+- `optional` cobre coletáveis opcionais e pode persistir após morte quando
+  `persistsAfterDeath` é verdadeiro.
+- `required` cobre item obrigatório simples; no MVP inicial ele é restaurado no
+  respawn quando `persistsAfterDeath` é falso.
+- `key` cobre item de ativação de mecanismo. Ao coletar, o sistema ativa o
+  objeto interativo apontado por `activatesObjectId` no `roomState`.
+- O validador de fases agora denuncia `activatesObjectId` que não aponta para
+  nenhum objeto interativo declarado na mesma fase.
+- `level-01` recebeu um chip obrigatório simples, `level-02` recebeu uma chave
+  que ativa o mecanismo declarado e `level-03` mantém o token opcional
+  persistente.
+
+Implementação inicial de objetos interativos:
+
+- Objetos interativos continuam declarativos em `level.interactiveObjects`, com
+  `id`, `kind`, `area`, estado inicial, reset por respawn e, quando necessário,
+  `action`/`targetObjectId`.
+- `door` é uma porta simples: quando está inativa, entra na lista de sólidos da
+  sala e bloqueia o jogador; quando fica ativa, deixa de bloquear.
+- `lever`, `button` e `mechanism` são acionáveis por overlap com a hitbox do
+  Pino e ação configurada. A ação padrão é `secondary`, com suporte também a
+  `primary`.
+- Ao ativar um objeto com `targetObjectId`, o sistema ativa também o objeto
+  alvo, permitindo mecanismos simples como alavanca abrindo porta.
+- `LevelScene` renderiza objetos interativos com placeholder visual e atualiza o
+  alpha/contorno quando o estado muda.
+- O reset de sala reaproveita `resetRoomStateForRespawn`; objetos com
+  `resetOnRespawn` voltam ao estado inicial.
+- `level-02` recebeu uma porta simples de saída. A alavanca pode abrir a porta
+  com ação secundária; na Fase 8, a chave passou a ativar um mecanismo visual
+  separado para preservar a alavanca como solução da porta.
+- O validador de fases agora denuncia `targetObjectId` inexistente em objetos
+  interativos.
+
+Revisão inicial de justiça das armadilhas:
+
+- A revisão da Fase 7 está registrada em `docs/trap-fairness-review.md`.
+- Critérios usados: causa compreensível depois da morte, ausência de softlock,
+  nenhuma espera longa após erro e riscos conhecidos por fase.
+- Todas as traps atuais do MVP são resetáveis por respawn/reinício manual.
+- Configurações de atraso de trap ficam abaixo do tempo de respawn automático.
+- Portas fechadas precisam ser resetáveis e ter pelo menos um abridor declarado.
+- Riscos principais que seguem para fases futuras: trocar marcadores por
+  animações/som curtos, conferir a legibilidade do projetil lateral em playtest,
+  implementar feedback de queda da plataforma sem alongar a espera e validar o
+  salto depois do chão falso da `level-03` com arte final.
+
+Implementação inicial da Fase 1, `Entrada Cruel`:
+
+- A fase 1 passou a ser um percurso introdutório completo, com ponto A no spawn
+  inicial e ponto B na saída para `level-02`.
+- O chão foi segmentado em quatro trechos: início, pós-primeiro salto,
+  checkpoint e final.
+- Foram adicionados três buracos pequenos com hazards de queda para ensinar
+  pulo sem exigir precisão extrema.
+- O chip obrigatório simples fica antes do primeiro buraco, reforçando coleta
+  básica antes da parte hostil.
+- O espinho fixo introduz perigo visível e o `spike-pop` fica como primeira
+  armadilha surpresa antes do checkpoint.
+- O checkpoint intermediário fica depois da primeira surpresa, reduzindo
+  repetição inútil antes da seção final.
+- A fase declara metadados mínimos de som para checkpoint e trap; reprodução
+  real continua para a Fase 9, quando o Audio Manager existir.
+
+Implementação inicial da Fase 2, `O Caminho Nao Confia Em Voce`:
+
+- A fase 2 passou a ter ponto A no spawn inicial e ponto B na saída para
+  `level-03`.
+- O terreno foi segmentado em início, trecho intermediário e chegada, com dois
+  gaps de queda curtos para exigir leitura sem pedir perfeição excessiva.
+- A plataforma `level-02-step-timing` introduz timing com a trap
+  `level-02-falling-platform`.
+- A porta final fica fechada por padrão e exige a alavanca
+  `level-02-lever-exit` com ação secundária.
+- A chave `level-02-mechanism-key` ativa um mecanismo visual separado, mantendo
+  a alavanca como solução real da porta.
+- O checkpoint intermediário fica depois da primeira travessia, reduzindo
+  repetição antes da seção da saída.
+- A pegadinha visual da saída vem do projétil lateral
+  `level-02-side-projectile`, disparado depois do checkpoint.
+- A fase declara metadados mínimos de som para alavanca e projétil; reprodução
+  real continua para a Fase 9, quando o Audio Manager existir.
+
+Implementação inicial da Fase 3, `Quase Seguro`:
+
+- A fase 3 passou a fechar o MVP inicial, com ponto A no spawn inicial e ponto B
+  na saída final.
+- A primeira metade virou uma sequência curta de três plataformas estreitas para
+  exigir precisão sem alongar demais a tentativa.
+- A plataforma `level-03-platform-precision-02` é quebrável e sustenta o token
+  opcional `level-03-risk-token`, criando risco e recompensa sem bloquear a
+  conclusão.
+- O checkpoint `level-03-before-cruel` fica depois da sequência de precisão e
+  antes da seção mais cruel.
+- A saída fica sobre `level-03-exit-platform`, mas o trecho
+  `level-03-false-floor` remove parte do chão e testa desconfiança/memória curta
+  antes do fim.
+- Dois hazards de queda cobrem a sequência inicial e a seção cruel da saída.
+- A fase declara metadados mínimos de som para token e piso falso; reprodução
+  real continua para a Fase 9, quando o Audio Manager existir.
+
+Balanceamento inicial da curva das três primeiras fases:
+
+- A progressão ficou definida como: Fase 1 introduz crueldade básica, Fase 2
+  exige timing/interação e Fase 3 combina leitura, memória curta e precisão.
+- Cada fase inicial usa uma piada principal diferente: `spike-pop`,
+  `falling-platform`/projétil e `breakable-floor`/`false-block`.
+- O primeiro desafio relevante deve aparecer em até 14 tiles depois do spawn.
+- O primeiro desafio depois de um checkpoint deve aparecer em até 12 tiles, para
+  reduzir caminhada inútil antes de uma nova tentativa.
+- A decisão detalhada foi registrada em `docs/initial-curve-balance.md` e
+  protegida por `tests/initial-curve-balance.test.ts`.
+
+Revisão final da Fase 8:
+
+- As três fases iniciais agora têm ponto A, ponto B, checkpoint, perigos,
+  armadilhas e contratos de conclusão cobertos por testes de conteúdo.
+- A curva inicial foi revisada em conjunto para garantir progressão clara,
+  variedade de armadilhas e pouca caminhada antes das tentativas relevantes.
+- A Fase 8 ficou pronta para commit com validação automática e smoke test no
+  navegador.
 
 ### Ponto 7 - Pipeline de Assets
 

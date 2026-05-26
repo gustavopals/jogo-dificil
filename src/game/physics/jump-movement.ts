@@ -16,7 +16,7 @@ export type JumpMovementState = {
 export type JumpMovementInput = {
   readonly currentPositionY: number;
   readonly currentVelocityY: number;
-  readonly groundY: number;
+  readonly groundY?: number;
   readonly isGrounded: boolean;
   readonly isJumpDown: boolean;
   readonly wasJumpPressed: boolean;
@@ -84,13 +84,15 @@ export function calculateJumpMovement(
 
   let positionY = input.currentPositionY + velocityY * deltaSeconds;
 
-  if (positionY >= input.groundY && velocityY >= 0) {
-    positionY = input.groundY;
-    velocityY = 0;
-    isGrounded = true;
-    coyoteTimeRemainingMs = config.coyoteTimeMs;
-  } else {
-    isGrounded = false;
+  if (input.groundY !== undefined) {
+    if (positionY >= input.groundY && velocityY >= 0) {
+      positionY = input.groundY;
+      velocityY = 0;
+      isGrounded = true;
+      coyoteTimeRemainingMs = config.coyoteTimeMs;
+    } else {
+      isGrounded = false;
+    }
   }
 
   return {

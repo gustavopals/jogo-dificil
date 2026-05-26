@@ -88,6 +88,33 @@ describe("jump movement", () => {
     expect(coyoteResult.velocityY).toBe(-370);
   });
 
+  it("does not allow a coyote jump after the grace window expires", () => {
+    const groundedResult = calculateJumpMovement({
+      currentPositionY: GROUND_Y,
+      currentVelocityY: 0,
+      isGrounded: true,
+      isJumpDown: false,
+      wasJumpPressed: false,
+      wasJumpReleased: false,
+      deltaMs: 0,
+      state: createInitialJumpMovementState(),
+    });
+
+    const expiredResult = calculateJumpMovement({
+      currentPositionY: GROUND_Y - 12,
+      currentVelocityY: 0,
+      isGrounded: false,
+      isJumpDown: true,
+      wasJumpPressed: true,
+      wasJumpReleased: false,
+      deltaMs: 120,
+      state: groundedResult.state,
+    });
+
+    expect(expiredResult.didJump).toBe(false);
+    expect(expiredResult.velocityY).toBe(144);
+  });
+
   it("buffers jump input shortly before landing", () => {
     const bufferedResult = calculateJumpMovement({
       currentPositionY: 160,
@@ -120,7 +147,37 @@ describe("jump movement", () => {
     expect(landingResult.velocityY).toBe(-430);
   });
 
-  it("lands on the temporary ground limit", () => {
+  it("expires buffered jump input before a late landing", () => {
+    const bufferedResult = calculateJumpMovement({
+      currentPositionY: 160,
+      currentVelocityY: 120,
+      isGrounded: false,
+      isJumpDown: true,
+      wasJumpPressed: true,
+      wasJumpReleased: false,
+      deltaMs: 16,
+      state: createInitialJumpMovementState(),
+    });
+
+    expect(bufferedResult.didJump).toBe(false);
+    expect(bufferedResult.state.jumpBufferRemainingMs).toBe(100);
+
+    const landingResult = calculateJumpMovement({
+      currentPositionY: GROUND_Y,
+      currentVelocityY: 0,
+      isGrounded: true,
+      isJumpDown: true,
+      wasJumpPressed: false,
+      wasJumpReleased: false,
+      deltaMs: 120,
+      state: bufferedResult.state,
+    });
+
+    expect(landingResult.didJump).toBe(false);
+    expect(landingResult.state.jumpBufferRemainingMs).toBe(0);
+  });
+
+  it("clamps to an explicit ground limit when provided", () => {
     const result = calculateJumpMovement({
       currentPositionY: GROUND_Y - 2,
       currentVelocityY: 200,

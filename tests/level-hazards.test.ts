@@ -1,0 +1,92 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  findTouchedDeadlyHazard,
+  getDeathCauseForHazard,
+  getHazardPlaceholderColor,
+} from "../src/game/systems/level-hazards";
+import type { HazardDefinition } from "../src/shared";
+
+const SPIKES_HAZARD = {
+  id: "test-spikes",
+  kind: "spikes",
+  area: {
+    x: 32,
+    y: 48,
+    width: 16,
+    height: 8,
+  },
+  isInstantDeath: true,
+} as const satisfies HazardDefinition;
+
+const FALL_HAZARD = {
+  id: "test-fall-zone",
+  kind: "fall",
+  area: {
+    x: 64,
+    y: 220,
+    width: 48,
+    height: 48,
+  },
+  isInstantDeath: true,
+} as const satisfies HazardDefinition;
+
+describe("level hazards", () => {
+  it("detects contact with instant-death hazards", () => {
+    expect(
+      findTouchedDeadlyHazard(
+        {
+          x: 40,
+          y: 52,
+          width: 10,
+          height: 10,
+        },
+        [SPIKES_HAZARD],
+      ),
+    ).toEqual({
+      hazard: SPIKES_HAZARD,
+      cause: "hazard",
+    });
+  });
+
+  it("ignores non-overlapping and non-deadly hazards", () => {
+    expect(
+      findTouchedDeadlyHazard(
+        {
+          x: 0,
+          y: 0,
+          width: 10,
+          height: 10,
+        },
+        [SPIKES_HAZARD],
+      ),
+    ).toBeUndefined();
+
+    expect(
+      findTouchedDeadlyHazard(
+        {
+          x: 40,
+          y: 52,
+          width: 10,
+          height: 10,
+        },
+        [
+          {
+            ...SPIKES_HAZARD,
+            isInstantDeath: false,
+          },
+        ],
+      ),
+    ).toBeUndefined();
+  });
+
+  it("maps fall hazards to fall death and other hazards to generic hazard death", () => {
+    expect(getDeathCauseForHazard(FALL_HAZARD)).toBe("fall");
+    expect(getDeathCauseForHazard(SPIKES_HAZARD)).toBe("hazard");
+  });
+
+  it("returns placeholder colors by hazard kind", () => {
+    expect(getHazardPlaceholderColor(SPIKES_HAZARD)).toBe(0xe76f51);
+    expect(getHazardPlaceholderColor(FALL_HAZARD)).toBe(0x8b2635);
+  });
+});

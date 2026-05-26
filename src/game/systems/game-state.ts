@@ -7,6 +7,7 @@ export const INITIAL_CHECKPOINT_ID: CheckpointId =
   createInitialCheckpointId(INITIAL_LEVEL_ID);
 
 export type GameStatus = "booting" | "menu" | "playing" | "paused";
+export type PlayerLifeState = "alive" | "dead";
 
 export type ActiveCheckpoint = Vector2Like & {
   readonly id: CheckpointId;
@@ -16,6 +17,7 @@ export type ActiveCheckpoint = Vector2Like & {
 export type GameStateSnapshot = {
   status: GameStatus;
   currentLevelId: LevelId;
+  playerLifeState: PlayerLifeState;
   deathCount: number;
   activeCheckpoint: ActiveCheckpoint;
   isPaused: boolean;
@@ -32,12 +34,18 @@ function createInitialCheckpointId(levelId: LevelId): CheckpointId {
   return `${levelId}-start`;
 }
 
-function createInitialCheckpoint(levelId: LevelId): ActiveCheckpoint {
+function createInitialCheckpoint(
+  levelId: LevelId,
+  position: Vector2Like = {
+    x: INITIAL_PLAYER_PIVOT_X,
+    y: INITIAL_PLAYER_PIVOT_Y,
+  },
+): ActiveCheckpoint {
   return {
     id: createInitialCheckpointId(levelId),
     levelId,
-    x: INITIAL_PLAYER_PIVOT_X,
-    y: INITIAL_PLAYER_PIVOT_Y,
+    x: position.x,
+    y: position.y,
   };
 }
 
@@ -54,6 +62,7 @@ export function createInitialGameState(): GameStateSnapshot {
   return {
     status: "booting",
     currentLevelId: INITIAL_LEVEL_ID,
+    playerLifeState: "alive",
     deathCount: 0,
     activeCheckpoint: createInitialCheckpoint(INITIAL_LEVEL_ID),
     isPaused: false,
@@ -90,11 +99,15 @@ class GameStateStore {
     });
   }
 
-  public startLevel(levelId: LevelId = INITIAL_LEVEL_ID): void {
+  public startLevel(
+    levelId: LevelId = INITIAL_LEVEL_ID,
+    spawnPosition?: Vector2Like,
+  ): void {
     this.setState({
       status: "playing",
       currentLevelId: levelId,
-      activeCheckpoint: createInitialCheckpoint(levelId),
+      playerLifeState: "alive",
+      activeCheckpoint: createInitialCheckpoint(levelId, spawnPosition),
       isPaused: false,
     });
   }
@@ -119,8 +132,15 @@ class GameStateStore {
     cause: DeathCause = "unknown",
     position: Vector2Like = this.state.activeCheckpoint,
   ): number {
+    if (this.state.playerLifeState === "dead") {
+      return this.state.deathCount;
+    }
+
     const deathCount = this.state.deathCount + 1;
-    this.setState({ deathCount });
+    this.setState({
+      deathCount,
+      playerLifeState: "dead",
+    });
 
     emitGameEvent(GAME_EVENTS.PLAYER_DIED, {
       levelId: this.state.currentLevelId,
@@ -138,6 +158,12 @@ class GameStateStore {
 
   public respawnAtCheckpoint(isManualRestart = false): ActiveCheckpoint {
     const checkpoint = this.getSnapshot().activeCheckpoint;
+
+    this.setState({
+      status: "playing",
+      playerLifeState: "alive",
+      isPaused: false,
+    });
 
     emitGameEvent(GAME_EVENTS.PLAYER_RESPAWNED, {
       levelId: checkpoint.levelId,

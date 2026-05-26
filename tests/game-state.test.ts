@@ -51,6 +51,100 @@ describe("game state", () => {
     });
   });
 
+  it("can start a level at a data-defined spawn position", () => {
+    gameStateStore.startLevel("level-02", {
+      x: 96,
+      y: 208,
+    });
+
+    expect(gameStateStore.getSnapshot().activeCheckpoint).toMatchObject({
+      id: "level-02-start",
+      levelId: "level-02",
+      x: 96,
+      y: 208,
+    });
+  });
+
+  it("tracks alive and dead states without counting the same death twice", () => {
+    const deathEvents: PlayerDiedEvent[] = [];
+
+    onGameEvent(GAME_EVENTS.PLAYER_DIED, (payload) => {
+      deathEvents.push(payload);
+    });
+
+    gameStateStore.startLevel("level-01");
+
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      playerLifeState: "alive",
+      deathCount: 0,
+    });
+
+    expect(gameStateStore.registerDeath("fall", { x: 128, y: 320 })).toBe(1);
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      playerLifeState: "dead",
+      deathCount: 1,
+    });
+
+    expect(gameStateStore.registerDeath("fall", { x: 128, y: 320 })).toBe(1);
+    expect(deathEvents).toHaveLength(1);
+
+    const respawnCheckpoint = gameStateStore.respawnAtCheckpoint();
+
+    expect(respawnCheckpoint).toMatchObject({
+      id: "level-01-start",
+      levelId: "level-01",
+    });
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      status: "playing",
+      playerLifeState: "alive",
+      deathCount: 1,
+    });
+  });
+
+  it("treats manual restart as a checkpoint respawn without adding a death", () => {
+    const deathEvents: PlayerDiedEvent[] = [];
+    const respawnEvents: PlayerRespawnedEvent[] = [];
+
+    onGameEvent(GAME_EVENTS.PLAYER_DIED, (payload) => {
+      deathEvents.push(payload);
+    });
+    onGameEvent(GAME_EVENTS.PLAYER_RESPAWNED, (payload) => {
+      respawnEvents.push(payload);
+    });
+
+    gameStateStore.startLevel("level-01");
+    gameStateStore.setActiveCheckpoint({
+      id: "level-01-mid",
+      levelId: "level-01",
+      x: 128,
+      y: 192,
+    });
+
+    expect(gameStateStore.respawnAtCheckpoint(true)).toMatchObject({
+      id: "level-01-mid",
+      levelId: "level-01",
+      x: 128,
+      y: 192,
+    });
+
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      playerLifeState: "alive",
+      deathCount: 0,
+    });
+    expect(deathEvents).toEqual([]);
+    expect(respawnEvents).toEqual([
+      {
+        levelId: "level-01",
+        checkpointId: "level-01-mid",
+        position: {
+          x: 128,
+          y: 192,
+        },
+        isManualRestart: true,
+      },
+    ]);
+  });
+
   it("emits checkpoint, death and respawn events", () => {
     const checkpointEvents: CheckpointActivatedEvent[] = [];
     const deathEvents: PlayerDiedEvent[] = [];
