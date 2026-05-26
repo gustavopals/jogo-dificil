@@ -1,7 +1,7 @@
 import type { LevelDefinition } from "../../shared";
 import type { LevelCompletionResult } from "../systems/level-results";
 
-export const LEVEL_TRANSITION_DELAY_MS = 1100;
+export const LEVEL_TRANSITION_DELAY_MS = 3200;
 
 export const LEVEL_TRANSITION_COPY = {
   completedTitle: "Fase concluida",
