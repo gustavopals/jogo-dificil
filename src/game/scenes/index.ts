@@ -5,4 +5,6 @@ export { LevelScene } from "./level-scene";
 export { MenuScene } from "./menu-scene";
 export { PauseScene } from "./pause-scene";
 export { PreloadScene } from "./preload-scene";
+export { GAME_SCENES } from "./scene-list";
+export { GAME_SCENE_ORDER } from "./scene-order";
 export { SCENE_KEYS } from "./scene-keys";

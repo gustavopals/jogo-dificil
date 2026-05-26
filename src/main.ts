@@ -1,24 +1,6 @@
 import Phaser from "phaser";
 
 import { createGameConfig } from "./game/config";
-import {
-  AudioScene,
-  BootScene,
-  HudScene,
-  LevelScene,
-  MenuScene,
-  PauseScene,
-  PreloadScene,
-} from "./game/scenes";
+import { GAME_SCENES } from "./game/scenes";
 
-new Phaser.Game(
-  createGameConfig([
-    AudioScene,
-    BootScene,
-    PreloadScene,
-    MenuScene,
-    LevelScene,
-    HudScene,
-    PauseScene,
-  ]),
-);
+new Phaser.Game(createGameConfig([...GAME_SCENES]));

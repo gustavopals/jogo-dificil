@@ -17,6 +17,24 @@ const MUSIC: AudioDefinition = {
   loop: true,
 };
 
+const ALT_MUSIC: AudioDefinition = {
+  id: "music-alt-test",
+  category: "music",
+  assetKey: "music-alt-test-key",
+  path: "assets/audio/music/music-alt-test.ogg",
+  volume: 0.6,
+  loop: true,
+};
+
+const MUSIC_STING: AudioDefinition = {
+  id: "music-sting-test",
+  category: "music",
+  assetKey: "music-sting-test-key",
+  path: "assets/audio/music/music-sting-test.ogg",
+  volume: 0.7,
+  loop: false,
+};
+
 const SFX: AudioDefinition = {
   id: "sfx-test",
   category: "sfx",
@@ -80,17 +98,37 @@ describe("audio manager", () => {
     expect(engine.handles[0]!.volumeHistory).toEqual([0.75, 0.375]);
   });
 
-  it("keeps one active music track when new music starts", () => {
+  it("keeps music loops from restarting and replaces different tracks", () => {
     const engine = new FakeAudioEngine();
     const manager = new AudioManager(engine);
 
-    manager.registerAudio([MUSIC]);
+    manager.registerAudio([MUSIC, ALT_MUSIC]);
 
     expect(manager.play(MUSIC.id)).toBe("played");
-    expect(manager.play(MUSIC.id, { volume: 1 })).toBe("played");
+    expect(manager.play(MUSIC.id, { volume: 1 })).toBe("already-playing");
+
+    expect(engine.handles[0]!.wasStopped).toBe(false);
+    expect(engine.handles[0]!.volumeHistory).toEqual([0.4, 0.8]);
+
+    expect(manager.play(ALT_MUSIC.id)).toBe("played");
 
     expect(engine.handles[0]!.wasStopped).toBe(true);
-    expect(engine.handles[1]!.volumeHistory).toEqual([0.8]);
+    expect(engine.handles[1]!.volumeHistory).toEqual([0.48]);
+    expect(manager.getSnapshot().activeSoundCount).toBe(1);
+  });
+
+  it("allows non-loop music stings to be played again", () => {
+    const engine = new FakeAudioEngine();
+    const manager = new AudioManager(engine);
+
+    manager.registerAudio([MUSIC_STING]);
+
+    expect(manager.play(MUSIC_STING.id)).toBe("played");
+    expect(manager.play(MUSIC_STING.id)).toBe("played");
+
+    expect(engine.handles[0]!.wasStopped).toBe(true);
+    expect(engine.handles[1]!.volumeHistory).toHaveLength(1);
+    expect(engine.handles[1]!.volumeHistory[0]).toBeCloseTo(0.56);
     expect(manager.getSnapshot().activeSoundCount).toBe(1);
   });
 

@@ -31,6 +31,7 @@ export type AudioPlayOptions = {
 
 export type AudioPlayResult =
   | "played"
+  | "already-playing"
   | "queued-autoplay"
   | "missing-audio"
   | "engine-unavailable";
@@ -213,6 +214,16 @@ export class AudioManager {
     audio: AudioDefinition,
     options: AudioPlayOptions,
   ): AudioPlayResult {
+    const activeSound = this.activeSounds.get(audio.id);
+
+    if (audio.category === "music" && audio.loop && activeSound) {
+      activeSound.setVolume(
+        this.getEffectiveVolume(audio.category, options.volume ?? audio.volume),
+      );
+
+      return "already-playing";
+    }
+
     if (audio.category === "music") {
       this.stopCategory("music");
     } else {

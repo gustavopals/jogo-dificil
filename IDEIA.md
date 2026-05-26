@@ -705,6 +705,66 @@ Implementação inicial dos sons do personagem:
 - O som de aterrissagem só dispara depois de queda real acima de velocidade
   mínima, evitando ruído em microcolisões.
 
+Implementação inicial dos sons de fase:
+
+- Foram gerados placeholders originais em `.wav` para checkpoint, fim de fase,
+  coleta de item, armadilha ativada, plataforma caindo e projétil disparando.
+- Os metadados ficam em `src/data/audio/level-audio.ts`, mantendo os cues de
+  fase separados dos sons do personagem.
+- `AudioScene` escuta `checkpoint:activated` e `level:completed` para tocar os
+  sons de checkpoint e fim de fase a partir dos eventos globais existentes.
+- `LevelScene` emite cues de coleta de item e ativação de traps quando o estado
+  da sala muda, evitando som antes de uma interação realmente acontecer.
+- `level-audio-feedback.ts` reserva cues específicos para plataforma caindo e
+  projétil disparando, usando um som genérico curto para as demais traps do MVP.
+
+Implementação inicial da música do MVP:
+
+- O tema inicial se chama `Passos Tortos`: um loop discreto em 92 BPM com pulso
+  curto, acordes menores e volume baixo para sustentar tensão sem cansar em
+  repetição.
+- O loop temporário original fica em `assets/audio/music/mvp-loop.wav` e a
+  vinheta musical de fim de fase fica em
+  `assets/audio/music/mvp-level-complete-sting.wav`.
+- Os metadados ficam em `src/data/audio/music-audio.ts`, separados dos sons de
+  personagem e dos sons de fase.
+- `PreloadScene` pede o início do loop depois que os assets foram carregados;
+  se o navegador ainda bloquear autoplay, o `AudioManager` mantém o pedido na
+  fila até a primeira interação.
+- O loop não é disparado por morte ou respawn, e o `AudioManager` evita
+  reiniciar uma música que já esteja ativa com o mesmo id.
+- Ao completar a fase, `AudioScene` toca a vinheta curta de conclusão junto do
+  feedback de fim de fase já existente.
+
+Implementação inicial da tela inicial:
+
+- A tela de abertura usa `Jogo Difícil` como nome provisório e mantém apenas uma
+  linha de comando visível: `INICIAR FASE 1: ENTER / ESPAÇO`.
+- O visual deixa claro que é um jogo de plataforma: Pino aparece no chão, a
+  saída fica à direita e os hazards sugerem a crueldade da fase sem explicar o
+  jogo por texto.
+- `MenuScene` aceita Enter, Espaço e toque/click, mas todos passam por uma trava
+  simples para evitar iniciar a fase mais de uma vez.
+- A lista de cenas agora começa por `BootScene`; ela lança `AudioScene`, entra
+  no preload e só então chega ao menu, garantindo que a tela inicial realmente
+  apareça antes da fase.
+- O contrato de conteúdo e posicionamento base fica em
+  `src/game/ui/start-screen.ts`, com teste dedicado para garantir copy curta,
+  comando claro e início pela Fase 1.
+
+Implementação inicial do HUD:
+
+- O HUD fica como uma faixa superior mínima para reservar uma área previsível e
+  reduzir interferência no espaço principal de plataforma.
+- A esquerda mostra `Mortes N`; o centro mostra `Fase X: Nome`; a direita só
+  mostra `MUDO` quando o áudio estiver mutado.
+- A fase exibida vem do registry de fases, usando `order` e `name`, não o id
+  interno como `level-01`.
+- O texto debug antigo de `LevelScene` foi removido porque disputava espaço com
+  o HUD.
+- `src/game/ui/hud.ts` concentra layout, estilos e formatadores para manter a
+  cena Phaser fina e os contratos testáveis.
+
 ### Ponto 7 - Pipeline de Assets
 
 Status: Decidido.

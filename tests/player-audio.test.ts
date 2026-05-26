@@ -40,11 +40,10 @@ describe("player audio data", () => {
   });
 
   it("preloads every player audio asset key", () => {
-    expect(AUDIO_ASSETS.map((asset) => asset.key)).toEqual(
-      PLAYER_AUDIO_DEFINITIONS.map((audio) => audio.assetKey),
-    );
-    AUDIO_ASSETS.forEach((asset) => {
-      expect(asset.url).toBeTruthy();
+    const assetKeys = AUDIO_ASSETS.map((asset) => asset.key);
+
+    PLAYER_AUDIO_DEFINITIONS.forEach((audio) => {
+      expect(assetKeys).toContain(audio.assetKey);
     });
   });
 });

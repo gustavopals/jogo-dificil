@@ -811,12 +811,12 @@ Pronto quando:
 
 ### Task 9.3 - Sons De Fase
 
-- [ ] Checkpoint.
-- [ ] Fim de fase.
-- [ ] Coleta de item.
-- [ ] Armadilha ativada.
-- [ ] Plataforma caindo.
-- [ ] Projetil disparando.
+- [x] Checkpoint.
+- [x] Fim de fase.
+- [x] Coleta de item.
+- [x] Armadilha ativada.
+- [x] Plataforma caindo.
+- [x] Projetil disparando.
 
 Pronto quando:
 
@@ -824,11 +824,11 @@ Pronto quando:
 
 ### Task 9.4 - Musica Do MVP
 
-- [ ] Definir tema musical inicial.
-- [ ] Criar ou integrar loop temporario.
-- [ ] Garantir que a musica nao reinicia a cada morte.
-- [ ] Criar vinheta curta de fim de fase, se viavel.
-- [ ] Registrar origem/licenca.
+- [x] Definir tema musical inicial.
+- [x] Criar ou integrar loop temporario.
+- [x] Garantir que a musica nao reinicia a cada morte.
+- [x] Criar vinheta curta de fim de fase, se viavel.
+- [x] Registrar origem/licenca.
 
 Pronto quando:
 
@@ -840,10 +840,10 @@ Objetivo: criar interface minima para jogar, reiniciar, pausar e concluir fases.
 
 ### Task 10.1 - Tela Inicial
 
-- [ ] Mostrar nome provisório do jogo.
-- [ ] Mostrar comando para iniciar.
-- [ ] Evitar tela com excesso de texto.
-- [ ] Iniciar Fase 1.
+- [x] Mostrar nome provisório do jogo.
+- [x] Mostrar comando para iniciar.
+- [x] Evitar tela com excesso de texto.
+- [x] Iniciar Fase 1.
 
 Pronto quando:
 
@@ -851,10 +851,10 @@ Pronto quando:
 
 ### Task 10.2 - HUD
 
-- [ ] Mostrar contador de mortes.
-- [ ] Mostrar fase atual.
-- [ ] Mostrar estado de mute se necessario.
-- [ ] Evitar sobrepor gameplay.
+- [x] Mostrar contador de mortes.
+- [x] Mostrar fase atual.
+- [x] Mostrar estado de mute se necessario.
+- [x] Evitar sobrepor gameplay.
 
 Pronto quando:
 
@@ -1362,3 +1362,25 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   respawn, acao primaria e acao secundaria agora emitem cues de audio, com
   contratos em `tests/player-audio.test.ts` e
   `tests/player-audio-feedback.test.ts`.
+- [x] Task 9.3 concluida: sons placeholder originais de fase criados em
+  `assets/audio/sfx/`, metadados declarados em `src/data/audio/level-audio.ts`
+  e preload integrado. Checkpoint, fim de fase, coleta de item, armadilha
+  ativada, plataforma caindo e projetil disparando agora emitem cues de audio,
+  com contratos em `tests/level-audio.test.ts` e
+  `tests/level-audio-feedback.test.ts`.
+- [x] Task 9.4 concluida: tema inicial `Passos Tortos` definido em
+  `src/data/audio/music-audio.ts`, com loop temporario original e vinheta curta
+  de fim de fase em `assets/audio/music/`. O loop e iniciado apos o preload,
+  continua durante mortes/respawns e o `AudioManager` evita reiniciar a mesma
+  musica quando o mesmo id ja esta ativo.
+- [x] Task 10.1 concluida: `MenuScene` agora renderiza uma tela inicial curta,
+  com nome provisório, comando unico de inicio, visual simples de fase e entrada
+  direta na Fase 1 via Enter, Espaco ou toque/click. A ordem de cenas foi
+  consolidada para `BootScene` iniciar o fluxo e lancar audio/preload/menu. O
+  contrato de copy/layout fica em `src/game/ui/start-screen.ts` e
+  `tests/start-screen.test.ts`.
+- [x] Task 10.2 concluida: HUD compacto redesenhado como faixa superior minima,
+  com mortes a esquerda, fase atual centralizada pelo nome da fase e indicador
+  `MUDO` apenas quando o audio esta mutado. O texto debug da fase foi removido
+  para nao competir com o HUD, e os contratos ficam em `src/game/ui/hud.ts` e
+  `tests/hud.test.ts`.

@@ -42,6 +42,10 @@ import {
   getInteractiveObjectSolidAreas,
 } from "../systems/level-interactive-objects";
 import {
+  getItemCollectionAudioId,
+  getTrapActivationAudioId,
+} from "../systems/level-audio-feedback";
+import {
   collectLevelItem,
   findTouchedAvailableItems,
   getItemFeedback,
@@ -171,12 +175,6 @@ export class LevelScene extends Phaser.Scene {
       facing: "right",
     });
     this.configureCamera();
-
-    this.add.text(16, 16, "LevelScene placeholder", {
-      color: "#d5dae6",
-      fontFamily: "monospace",
-      fontSize: "10px",
-    });
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
@@ -584,6 +582,7 @@ export class LevelScene extends Phaser.Scene {
       this.refreshRoomSolids();
       this.syncProjectileMarkers();
       this.updateTrapMarker(trap.id);
+      this.playLevelSfx(getTrapActivationAudioId(trap.kind));
     });
   }
 
@@ -620,6 +619,7 @@ export class LevelScene extends Phaser.Scene {
       this.updateItemMarker(item.id);
       this.refreshRoomSolids();
       this.updateInteractiveObjectMarkers();
+      this.playLevelSfx(getItemCollectionAudioId(item.kind));
     });
   }
 
@@ -958,6 +958,13 @@ export class LevelScene extends Phaser.Scene {
   }
 
   private playPlayerSfx(audioId: string): void {
+    emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
+      audioId,
+      category: "sfx",
+    });
+  }
+
+  private playLevelSfx(audioId: string): void {
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
       audioId,
       category: "sfx",

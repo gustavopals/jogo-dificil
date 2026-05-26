@@ -1,0 +1,11 @@
+import { SCENE_KEYS } from "./scene-keys";
+
+export const GAME_SCENE_ORDER = [
+  SCENE_KEYS.BOOT,
+  SCENE_KEYS.AUDIO,
+  SCENE_KEYS.PRELOAD,
+  SCENE_KEYS.MENU,
+  SCENE_KEYS.LEVEL,
+  SCENE_KEYS.HUD,
+  SCENE_KEYS.PAUSE,
+] as const;

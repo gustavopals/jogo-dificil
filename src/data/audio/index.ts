@@ -1,3 +1,9 @@
+export { LEVEL_AUDIO_DEFINITIONS, LEVEL_AUDIO_IDS } from "./level-audio";
+export {
+  MUSIC_AUDIO_DEFINITIONS,
+  MUSIC_AUDIO_IDS,
+  MVP_MUSIC_THEME,
+} from "./music-audio";
 export {
   getPlayerDeathAudioId,
   PLAYER_AUDIO_DEFINITIONS,

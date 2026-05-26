@@ -1,7 +1,11 @@
 import Phaser from "phaser";
 
 import {
+  LEVEL_AUDIO_DEFINITIONS,
+  LEVEL_AUDIO_IDS,
   getPlayerDeathAudioId,
+  MUSIC_AUDIO_DEFINITIONS,
+  MUSIC_AUDIO_IDS,
   PLAYER_AUDIO_DEFINITIONS,
   PLAYER_AUDIO_IDS,
 } from "../../data/audio";
@@ -50,6 +54,13 @@ export class AudioScene extends Phaser.Scene {
       onGameEvent(GAME_EVENTS.PLAYER_RESPAWNED, () => {
         this.audioManager?.play(PLAYER_AUDIO_IDS.RESPAWN);
       }),
+      onGameEvent(GAME_EVENTS.CHECKPOINT_ACTIVATED, () => {
+        this.audioManager?.play(LEVEL_AUDIO_IDS.CHECKPOINT);
+      }),
+      onGameEvent(GAME_EVENTS.LEVEL_COMPLETED, () => {
+        this.audioManager?.play(LEVEL_AUDIO_IDS.COMPLETE);
+        this.audioManager?.play(MUSIC_AUDIO_IDS.LEVEL_COMPLETE_STING);
+      }),
     ];
 
     this.sound.on(Phaser.Sound.Events.UNLOCKED, this.unlockAudio, this);
@@ -92,7 +103,11 @@ export class AudioScene extends Phaser.Scene {
 }
 
 function getInitialAudioDefinitions(): readonly AudioDefinition[] {
-  const audioDefinitions: AudioDefinition[] = [...PLAYER_AUDIO_DEFINITIONS];
+  const audioDefinitions: AudioDefinition[] = [
+    ...PLAYER_AUDIO_DEFINITIONS,
+    ...LEVEL_AUDIO_DEFINITIONS,
+    ...MUSIC_AUDIO_DEFINITIONS,
+  ];
 
   LEVEL_DEFINITIONS.forEach((level) => {
     audioDefinitions.push(...level.audio.sounds);
