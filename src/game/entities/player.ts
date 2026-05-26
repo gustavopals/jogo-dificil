@@ -117,6 +117,7 @@ export class Player {
 
     this.applyHitbox();
     this.getBody().allowGravity = false;
+    this.getBody().moves = false;
 
     this.physicsState = {
       position: cloneVector(config.position),
