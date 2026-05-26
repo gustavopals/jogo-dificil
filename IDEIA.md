@@ -1028,6 +1028,48 @@ Expansao pos-MVP e Fase 15:
   - Audio continua como arquivos externos; sprites pequenos seguem inlinados
     pelo Vite porque o chunk do app ficou pequeno.
 
+Fase 16 - Poder de energia original:
+
+- O poder planejado se chama provisoriamente `Rajada Ciano`.
+- A referência é o arquétipo de golpe de energia carregado de anime shonen, mas
+  o jogo não deve copiar nome, pose, grito, composição visual ou identidade de
+  Dragon Ball ou de qualquer obra existente.
+- Função de gameplay: ferramenta de precisão para ativar alvos, quebrar blocos
+  específicos e criar timing de fase, não arma livre para resolver tudo.
+- Controle proposto: `K`/`X` continua como ação secundária. Toque curto perto de
+  objeto interage; segurar carrega a rajada; soltar após carga mínima dispara na
+  direção atual do Pino.
+- Valores iniciais para teste: carga mínima de 280 ms, cooldown de 700 ms,
+  velocidade de 360 px/s, alcance de 160 px, hitbox de cerca de 14x6 px e no
+  máximo um disparo ativo.
+- Movimento durante carga: Pino reduz deslocamento horizontal, mas continua
+  caindo e obedecendo gravidade. A rajada não cancela morte, queda ou colisão.
+- Tipos de alvo planejados: `energy-switch`, `energy-cracked-block`,
+  `energy-relay` e `energy-absorber`.
+- O Bloco 3 deve seguir a regra de expansão: `level-07` ensina a rajada,
+  `level-08` distorce com alvo falso/trap conhecida e `level-09` combina rajada,
+  dash e interação.
+- Documento completo: `docs/phase-16-energy-shot-plan.md`.
+
+Fase 17 - Primeiro boss:
+
+- O boss planejado se chama provisoriamente `Sentinela Prisma`.
+- Papel de gameplay: fechar o aprendizado de dash, interação e `Rajada Ciano`
+  em uma arena curta, com leitura clara e checkpoint antes da luta.
+- O boss deve se mover na arena, parar para telegrafar ataques e disparar
+  projéteis contra o Pino.
+- A `Rajada Ciano` deve ser a forma principal de causar dano no boss.
+- Valores iniciais para teste: 3 acertos de vida, tell de 450 ms, cooldown de
+  900 ms entre ataques, projéteis a 150-190 px/s, invulnerabilidade pós-hit de
+  500 ms e no máximo 3 projéteis ativos do boss.
+- Estados planejados: `idle`, `patrol`, `windup`, `shoot`, `recover`,
+  `stunned` e `defeated`.
+- O boss deve resetar junto da sala ao morrer, respawnar ou apertar `R`; os
+  projéteis do boss também devem ser limpos.
+- Arena proposta: `level-10`, depois do Bloco 3, com saída bloqueada até o boss
+  ser derrotado. Alternativa a decidir: inserir a arena no final de `level-09`.
+- Documento completo: `docs/phase-17-boss-plan.md`.
+
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 
 Status: Decidido.
@@ -2117,6 +2159,14 @@ Direção pendente:
   em três frames, pulo em dois frames, queda, dash dedicado, morte em dois
   frames e respawn em dois frames. A hitbox continua 10x22px; a mudança é
   somente visual.
+- Fase 16 planejada para adicionar `Rajada Ciano`, um poder original de energia
+  com carga, cooldown, disparo horizontal curto, alvos declarativos e integração
+  com a ação secundária sem copiar Dragon Ball.
+- Bloco 3 planejado como `level-07`, `level-08` e `level-09`, ensinando,
+  distorcendo e combinando a `Rajada Ciano` com dash e interação.
+- Fase 17 planejada para adicionar o primeiro boss, `Sentinela Prisma`, com
+  movimento em arena, projéteis contra o Pino, dano por `Rajada Ciano`, vida
+  simples e saída bloqueada até a derrota.
 - Arte inicial de traps, itens e marcadores criada para o MVP: espinhos,
   bloco falso, plataforma que cai, piso quebrável, projétil, chip obrigatório,
   chave, token opcional, checkpoint inativo/ativo e saída de fase. Todos são

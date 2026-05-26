@@ -1169,6 +1169,214 @@ Pronto quando:
 
 - O aviso e resolvido ou documentado como divida aceita com motivo claro.
 
+## Fase 16 - Poder De Energia E Bloco 3
+
+Objetivo: adicionar um poder original de energia para o Pino, com carga,
+disparo, cooldown, alvos declarativos e fases que ensinem a mecanica sem copiar
+nomes, poses ou efeitos de obras existentes.
+
+Documento de analise: `docs/phase-16-energy-shot-plan.md`.
+
+Nome provisório do poder: `Rajada Ciano`.
+
+### Task 16.1 - Definir Rajada Ciano
+
+- [ ] Fechar nome, papel de gameplay, custos e limites.
+- [ ] Definir se `K`/`X` fica como toque para interagir e segurar para carregar.
+- [ ] Documentar o que a rajada pode ativar, quebrar ou bloquear.
+- [ ] Registrar regra visual para evitar copia de referencias famosas.
+- [ ] Atualizar `IDEIA.md` com as decisões finais.
+
+Pronto quando:
+
+- A mecanica tem regra clara antes de qualquer implementação.
+
+### Task 16.2 - Sistema Base De Energia
+
+- [ ] Criar estado puro de carga, disparo, cooldown e reset.
+- [ ] Integrar leitura de `K`/`X` sem quebrar interações existentes.
+- [ ] Permitir cancelar carga ao morrer, pausar, respawnar ou reiniciar.
+- [ ] Limitar a um disparo ativo por vez.
+- [ ] Cobrir carga minima, cancelamento, direção e cooldown com testes.
+
+Pronto quando:
+
+- O poder existe como lógica previsível e testável, ainda sem depender de arte
+  final.
+
+### Task 16.3 - Projetil Do Jogador
+
+- [ ] Renderizar disparo horizontal da `Rajada Ciano`.
+- [ ] Mover projétil com velocidade e alcance máximo declarados.
+- [ ] Colidir com sólidos, alvos e limite de alcance.
+- [ ] Garantir que o disparo não atravessa paredes nem acumula entidades.
+- [ ] Resetar projéteis no reset de sala.
+
+Pronto quando:
+
+- O disparo aparece, anda, colide e some de forma determinística.
+
+### Task 16.4 - Alvos De Energia
+
+- [ ] Criar schema declarativo para alvos de energia.
+- [ ] Implementar `energy-switch`.
+- [ ] Implementar `energy-cracked-block`.
+- [ ] Implementar `energy-absorber` como alvo falso/controlado.
+- [ ] Integrar alvos ao estado runtime e ao reset de sala.
+- [ ] Cobrir validação e ativação com testes unitários.
+
+Pronto quando:
+
+- Fases conseguem declarar alvos de energia sem lógica improvisada na cena.
+
+### Task 16.5 - Feedback Visual E Audio
+
+- [ ] Criar efeito de carga da rajada no Pino.
+- [ ] Criar sprite/efeito do disparo e impacto.
+- [ ] Criar sons originais de carga, disparo e impacto.
+- [ ] Avaliar se o HUD precisa mostrar cooldown.
+- [ ] Garantir que efeitos não escondem hazards pequenos.
+
+Pronto quando:
+
+- O jogador entende carga, disparo, acerto, falha e cooldown pela leitura
+  audiovisual.
+
+### Task 16.6 - Criar Bloco 3 De Fases
+
+- [ ] Criar `level-07` para ensinar alvo de energia seguro.
+- [ ] Criar `level-08` para distorcer com alvo falso e trap conhecida.
+- [ ] Criar `level-09` para combinar rajada, dash e interação.
+- [ ] Encadear `level-06 -> level-07 -> level-08 -> level-09`.
+- [ ] Criar checklist manual do Bloco 3.
+
+Pronto quando:
+
+- A campanha tem um terceiro bloco curto que ensina, distorce e combina a
+  `Rajada Ciano`.
+
+### Task 16.7 - Testes E QA Da Rajada
+
+- [ ] Criar testes unitários de estado de energia.
+- [ ] Criar testes de colisão do projétil.
+- [ ] Criar testes de schema/validação dos alvos de energia.
+- [ ] Criar testes de conteúdo para `level-07`, `level-08` e `level-09`.
+- [ ] Atualizar smoke Playwright para disparar a rajada e ativar um alvo.
+- [ ] Rodar lint, testes, build e smoke.
+
+Pronto quando:
+
+- A mecânica e o Bloco 3 ficam prontos para commit com regressões cobertas.
+
+## Fase 17 - Boss Sentinela Prisma
+
+Objetivo: adicionar o primeiro boss do jogo, um inimigo original que se move,
+atira projéteis contra o Pino e fecha o aprendizado de dash, interação e
+`Rajada Ciano` em uma arena curta e justa.
+
+Documento de analise: `docs/phase-17-boss-plan.md`.
+
+Nome provisório do boss: `Sentinela Prisma`.
+
+### Task 17.1 - Definir Boss MVP
+
+- [ ] Fechar nome, visual, vida, arena e condição de vitória.
+- [ ] Decidir se o boss entra em `level-10` ou no final de `level-09`.
+- [ ] Definir quais mecânicas o boss testa: dash, pulo, Rajada Ciano e leitura
+      de projétil.
+- [ ] Definir limites de dificuldade, tempo de reação e reset.
+- [ ] Registrar decisões finais em `IDEIA.md`.
+
+Pronto quando:
+
+- O boss tem papel claro antes de implementar IA, dano ou arena.
+
+### Task 17.2 - Schema E Estado De Boss
+
+- [ ] Criar tipos declarativos para boss em fase.
+- [ ] Criar runtime state com vida, estado, timers, direção e projéteis.
+- [ ] Integrar boss ao reset de sala, morte e reinício manual.
+- [ ] Validar boss no schema de fase.
+- [ ] Cobrir estado inicial e reset com testes.
+
+Pronto quando:
+
+- Boss pode ser declarado por dados e resetado sem lógica improvisada.
+
+### Task 17.3 - Movimento Do Boss
+
+- [ ] Implementar patrulha horizontal ou movimento entre pontos.
+- [ ] Limitar boss dentro da arena.
+- [ ] Criar estados `idle`, `patrol`, `windup`, `shoot`, `recover`, `stunned` e
+      `defeated`.
+- [ ] Garantir transições determinísticas por timers e eventos.
+- [ ] Cobrir movimento e transições com testes unitários.
+
+Pronto quando:
+
+- O boss se move e alterna estados sem depender de renderização Phaser.
+
+### Task 17.4 - Ataques E Projéteis Do Boss
+
+- [ ] Criar projéteis do boss separados dos projéteis de trap.
+- [ ] Implementar tell visual antes do disparo.
+- [ ] Implementar limite de projéteis ativos.
+- [ ] Matar Pino por contato com projétil usando causa `projectile`.
+- [ ] Remover projéteis ao bater em sólido, sair da arena ou resetar a sala.
+
+Pronto quando:
+
+- O boss atira de forma legível, perigosa e resetável.
+
+### Task 17.5 - Dano, Vida E Vitória
+
+- [ ] Permitir dano no boss por `Rajada Ciano`.
+- [ ] Implementar invulnerabilidade pós-hit.
+- [ ] Mostrar feedback de hit e derrota.
+- [ ] Abrir saída ou remover bloqueio da arena quando o boss morrer.
+- [ ] Definir se a fase termina automaticamente ou exige tocar a saída.
+
+Pronto quando:
+
+- O boss pode ser derrotado com regra clara e sem softlock.
+
+### Task 17.6 - Criar Arena Do Boss
+
+- [ ] Criar `level-10` ou sala final equivalente.
+- [ ] Adicionar checkpoint imediatamente antes da arena.
+- [ ] Declarar boss, bloqueio de saída e plataformas de reação.
+- [ ] Balancear espaço, velocidade dos projéteis e janelas de ataque.
+- [ ] Criar checklist manual da arena.
+
+Pronto quando:
+
+- Existe uma arena curta, concluível e justa para testar o boss.
+
+### Task 17.7 - Arte, Audio E HUD Do Boss
+
+- [ ] Criar sprite placeholder do `Sentinela Prisma`.
+- [ ] Criar sprite/efeito de projétil do boss.
+- [ ] Criar sons originais de windup, disparo, hit e derrota.
+- [ ] Avaliar indicador de vida no corpo do boss antes de adicionar HUD novo.
+- [ ] Garantir que boss e projéteis não se confundem com traps comuns.
+
+Pronto quando:
+
+- O boss tem leitura audiovisual suficiente para playtest.
+
+### Task 17.8 - Testes E QA Do Boss
+
+- [ ] Criar testes unitários de estado do boss.
+- [ ] Criar testes de projéteis do boss.
+- [ ] Criar testes de dano por `Rajada Ciano`.
+- [ ] Criar teste de conteúdo da arena.
+- [ ] Atualizar smoke Playwright para validar boss/projétil sem erro.
+- [ ] Rodar lint, testes, build e checklist manual.
+
+Pronto quando:
+
+- O boss e a arena ficam prontos para commit com regressões cobertas.
+
 ## Ordem Recomendada De Execucao
 
 1. Fase 1: scaffold tecnico.
@@ -1186,6 +1394,8 @@ Pronto quando:
 13. Fase 13: primeiro build.
 14. Fase 14: expansao pos-MVP.
 15. Fase 15: incrementos de profundidade e retencao.
+16. Fase 16: poder de energia e Bloco 3.
+17. Fase 17: boss Sentinela Prisma.
 
 Observacao: Fase 3 e Fase 4 podem andar juntas, mas o movimento deve ser
 validado com placeholder antes de gastar tempo em arte final.
@@ -1606,3 +1816,11 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   espetado, roupa azul/indigo, faixa coral, aura ciano, dash dedicado, ghost de
   dash, faiscas de corrida e bursts de pulo/aterrissagem sem alterar a hitbox
   10x22px.
+- [x] Fase 16 planejada: `Rajada Ciano` definida como poder original de energia
+  com carga, cooldown, disparo horizontal curto e alvos declarativos. O plano
+  completo fica em `docs/phase-16-energy-shot-plan.md`, incluindo Bloco 3 com
+  `level-07`, `level-08` e `level-09`.
+- [x] Fase 17 planejada: primeiro boss definido como `Sentinela Prisma`, um
+  inimigo original de arena que se move, telegrafa ataques, dispara projéteis
+  contra o Pino e toma dano da `Rajada Ciano`. O plano fica em
+  `docs/phase-17-boss-plan.md`.
