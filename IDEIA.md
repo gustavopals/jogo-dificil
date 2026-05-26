@@ -935,6 +935,20 @@ Primeiro build jogavel:
   iniciais concluiveis, morte/respawn/checkpoints, `R`, HUD, audio basico,
   pause/mute, smoke test, build de producao e estabilidade inicial validados.
 
+Expansao pos-MVP e Fase 15:
+
+- A expansao depois das 3 fases iniciais sera linear em blocos curtos de 3
+  fases.
+- Hub jogavel, mundos separados e editor completo ficam para depois de haver
+  mais conteudo validado.
+- O segundo bloco deve seguir a regra: ensinar uma ideia, distorcer essa ideia e
+  combinar com mecanicas antigas.
+- Antes de criar muitas fases, o proximo ganho de qualidade e implementar a
+  acao principal como Dash real, melhorar feedback de morte, melhorar leitura
+  visual das traps e adicionar motivos locais para rejogar.
+- A analise completa e o backlog da Fase 15 ficam registrados em
+  `docs/phase-15-improvement-plan.md`.
+
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 
 Status: Decidido.
@@ -2039,7 +2053,6 @@ Direção pendente:
 - O nome provisório Pino será mantido ou trocado antes da arte final?
 - A dificuldade será puramente cruel ou terá camadas de acessibilidade?
 - O jogo terá história ou será mais arcade?
-- Depois das 3 fases iniciais, a expansão será por fases lineares, hub de seleção ou mundos separados?
 - Qual será o estilo musical principal do jogo?
 - A música será única para as 3 fases iniciais ou terá variações por fase?
 - Persistência: mortes e checkpoints sobrevivem ao fechar a aba (`localStorage`) ou resetam por sessão?

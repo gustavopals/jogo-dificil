@@ -101,3 +101,4 @@ npm run format
 - `docs/mvp-gameplay-checklist.md`: checklist manual do MVP.
 - `docs/performance-stability-check.md`: medicao inicial de estabilidade.
 - `docs/mvp-release-checklist.md`: checklist do primeiro build jogavel.
+- `docs/phase-15-improvement-plan.md`: analise pos-MVP e plano de melhorias.

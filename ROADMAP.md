@@ -1034,10 +1034,10 @@ Objetivo: listar ideias futuras sem contaminar o escopo inicial.
 
 ### Task 14.1 - Expansao De Fases
 
-- [ ] Avaliar novas fases depois das 3 iniciais.
-- [ ] Decidir se expansao sera linear, hub ou mundos separados.
-- [ ] Planejar novas mecânicas uma por vez.
-- [ ] Evitar aumentar dificuldade sem ensinar antes.
+- [x] Avaliar novas fases depois das 3 iniciais.
+- [x] Decidir se expansao sera linear, hub ou mundos separados.
+- [x] Planejar novas mecanicas uma por vez.
+- [x] Evitar aumentar dificuldade sem ensinar antes.
 
 ### Task 14.2 - Gamepad :backlog:
 
@@ -1061,6 +1061,114 @@ Objetivo: listar ideias futuras sem contaminar o escopo inicial.
 - [ ] Avaliar editor proprio simples.
 - [ ] Criar conversor para formato de fase se necessario.
 
+## Fase 15 - Incrementos De Profundidade E Retencao
+
+Objetivo: transformar o primeiro build jogavel em uma base pos-MVP mais
+repetivel, legivel e expansivel, priorizando mecanicas expressivas, feedback de
+aprendizado e motivos para rejogar antes de inflar o numero de fases.
+
+Documento de analise: `docs/phase-15-improvement-plan.md`.
+
+### Task 15.1 - Implementar Dash Controlado
+
+- [ ] Criar estado puro de dash com duracao, cooldown, direcao e reset.
+- [ ] Integrar `J`/`Z` ao movimento real do jogador.
+- [ ] Garantir que dash nao atravesse solidos.
+- [ ] Reproduzir audio/animacao somente quando o dash acontecer.
+- [ ] Resetar dash em morte, respawn e reinicio manual.
+- [ ] Cobrir duracao, cooldown, direcao e reset com testes unitarios.
+
+Pronto quando:
+
+- A acao principal tem uso jogavel previsivel e nao quebra as 3 fases atuais.
+
+### Task 15.2 - Feedback De Morte E Aprendizado
+
+- [ ] Registrar causa da morte.
+- [ ] Registrar fonte da morte quando houver id de hazard/trap/projetil.
+- [ ] Mostrar mensagem curta no HUD ou no respawn.
+- [ ] Emitir evento de morte com causa para testes e estatisticas futuras.
+- [ ] Cobrir formatacao e mapeamento de causas com testes.
+
+Pronto quando:
+
+- Cada morte principal do MVP informa uma causa curta sem atrasar o respawn.
+
+### Task 15.3 - Melhorar Leitura Visual Das Traps
+
+- [ ] Adicionar estado visual armado/acionado/resetado para traps.
+- [ ] Criar feedback curto de surgimento para `spike-pop`.
+- [ ] Criar rachadura visual para `breakable-floor`.
+- [ ] Criar rastro ou preparacao legivel para projetil.
+- [ ] Atualizar a revisao de justica das armadilhas.
+
+Pronto quando:
+
+- Traps continuam surpreendendo, mas a causa da morte fica mais clara apos a
+  primeira falha.
+
+### Task 15.4 - Resultados Locais Por Fase
+
+- [ ] Medir tempo por fase.
+- [ ] Medir mortes por fase.
+- [ ] Salvar melhor tempo e menor numero de mortes em `localStorage`.
+- [ ] Mostrar resultado compacto na transicao.
+- [ ] Cobrir normalizacao e persistencia com testes.
+
+Pronto quando:
+
+- Concluir uma fase gera uma marca local que incentiva repeticao sem depender de
+  ranking online.
+
+### Task 15.5 - Selecionar E Continuar Fases Desbloqueadas
+
+- [ ] Persistir maior fase desbloqueada localmente.
+- [ ] Adicionar opcao simples de continuar no menu.
+- [ ] Adicionar selecao compacta de fases desbloqueadas.
+- [ ] Resetar run atual ao selecionar fase sem apagar recordes locais.
+- [ ] Manter campanha linear como fluxo padrao.
+
+Pronto quando:
+
+- O jogador consegue voltar a fases ja desbloqueadas sem criar um hub jogavel.
+
+### Task 15.6 - Planejar E Criar Bloco 2 De Fases
+
+- [ ] Planejar `level-04`, `level-05` e `level-06`.
+- [ ] Encadear campanha linear de `level-03` para `level-04`.
+- [ ] Introduzir dash em `level-04`.
+- [ ] Distorcer dash com traps conhecidas em `level-05`.
+- [ ] Combinar dash, interacao e memoria curta em `level-06`.
+- [ ] Criar testes de conteudo e checklist manual do bloco.
+
+Pronto quando:
+
+- O segundo bloco tem 3 fases curtas, ensinaveis e concluiveis.
+
+### Task 15.7 - Ferramentas De QA Para Playtest
+
+- [ ] Criar modo dev para iniciar fase especifica.
+- [ ] Expor snapshot dev de fase, checkpoint, mortes, causa da ultima morte e
+  estado de traps.
+- [ ] Criar helpers internos para ir ao checkpoint e simular conclusao.
+- [ ] Documentar uso sem afetar build de producao.
+
+Pronto quando:
+
+- Novas fases podem ser testadas diretamente em dev sem repetir todo o jogo.
+
+### Task 15.8 - Otimizacao Inicial Do Build
+
+- [ ] Investigar o aviso de chunk grande do Vite.
+- [ ] Avaliar separacao de Phaser/codigo do jogo em chunks.
+- [ ] Conferir imports de audio e imagens.
+- [ ] Ajustar build apenas se houver ganho claro.
+- [ ] Rodar build e smoke test apos mudancas.
+
+Pronto quando:
+
+- O aviso e resolvido ou documentado como divida aceita com motivo claro.
+
 ## Ordem Recomendada De Execucao
 
 1. Fase 1: scaffold tecnico.
@@ -1077,6 +1185,7 @@ Objetivo: listar ideias futuras sem contaminar o escopo inicial.
 12. Fase 12: testes e QA.
 13. Fase 13: primeiro build.
 14. Fase 14: expansao pos-MVP.
+15. Fase 15: incrementos de profundidade e retencao.
 
 Observacao: Fase 3 e Fase 4 podem andar juntas, mas o movimento deve ser
 validado com placeholder antes de gastar tempo em arte final.
@@ -1432,3 +1541,14 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
 - [x] Task 13.2 concluida: checklist de release registrado em
   `docs/mvp-release-checklist.md`; lint, testes unitarios, smoke e build foram
   validados, e a definicao global de pronto do MVP foi marcada como cumprida.
+
+### 2026-05-26
+
+- [x] Task 14.1 concluida: expansao pos-MVP avaliada e decidida como campanha
+  linear em blocos de 3 fases. Hub, mundos separados e editor ficam para depois
+  de haver mais conteudo validado.
+- [x] Fase 15 planejada: analise profunda do estado atual registrada em
+  `docs/phase-15-improvement-plan.md`, com foco em dash controlado, feedback de
+  morte, leitura visual de traps, resultados locais, selecao/continuacao de
+  fases desbloqueadas, Bloco 2 de fases, ferramentas de QA e otimizacao de
+  build.
