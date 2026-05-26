@@ -894,6 +894,22 @@ Observação:
 
 O primeiro build não precisa ter arte final, trilha final, história completa, ranking, replay fantasma ou conquistas completas. Ele precisa provar que o ciclo principal do jogo funciona.
 
+Cobertura unitária inicial do primeiro build:
+
+- Os contratos unitários do MVP cobrem validação de fase, mapa de input, coyote
+  time, jump buffer, checkpoint ativo e contador de mortes.
+- Esses testes ficam como gate rápido antes dos smoke tests no navegador e do
+  checklist manual das três fases.
+
+Smoke test inicial no navegador:
+
+- `npm run test:e2e` abre o jogo com Playwright, inicia a Fase 1 pelo menu,
+  confirma canvas, existência do Pino, movimento básico e ausência de erro
+  crítico no console.
+- O jogo expõe `window.__JOGO_DIFICIL_GAME__` apenas em modo de desenvolvimento,
+  para permitir validação e2e objetiva de cena e jogador sem afetar o build de
+  produção.
+
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 
 Status: Decidido.

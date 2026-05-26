@@ -275,6 +275,98 @@ describe("level validation", () => {
     );
   });
 
+  it("validates hazards, traps, items and interactive object geometry", () => {
+    const invalidLevel = defineLevel({
+      ...BASE_LEVEL,
+      hazards: [
+        {
+          ...BASE_LEVEL.hazards[0]!,
+          area: {
+            x: 470,
+            y: 238,
+            width: 16,
+            height: 32,
+          },
+        },
+      ],
+      traps: [
+        {
+          ...BASE_LEVEL.traps[0]!,
+          trigger: {
+            ...BASE_LEVEL.traps[0]!.trigger,
+            area: {
+              x: 128,
+              y: 176,
+              width: -1,
+              height: 48,
+            },
+          },
+          area: {
+            x: 476,
+            y: 206,
+            width: 16,
+            height: 16,
+          },
+        },
+      ],
+      items: [
+        {
+          ...BASE_LEVEL.items[0]!,
+          position: {
+            x: 490,
+            y: 176,
+          },
+          hitbox: {
+            x: 216,
+            y: 168,
+            width: 0,
+            height: 16,
+          },
+        },
+      ],
+      interactiveObjects: [
+        {
+          ...BASE_LEVEL.interactiveObjects[0]!,
+          area: {
+            x: 470,
+            y: 198,
+            width: 24,
+            height: 24,
+          },
+        },
+      ],
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(invalidLevel).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "out-of-bounds",
+          path: "hazards[0].area",
+        }),
+        expect.objectContaining({
+          code: "invalid-rect",
+          path: "traps[0].trigger.area",
+        }),
+        expect.objectContaining({
+          code: "out-of-bounds",
+          path: "traps[0].area",
+        }),
+        expect.objectContaining({
+          code: "out-of-bounds",
+          path: "items[0].position",
+        }),
+        expect.objectContaining({
+          code: "invalid-rect",
+          path: "items[0].hitbox",
+        }),
+        expect.objectContaining({
+          code: "out-of-bounds",
+          path: "interactiveObjects[0].area",
+        }),
+      ]),
+    );
+  });
+
   it("validates referenced assets", () => {
     const invalidLevel = defineLevel({
       ...BASE_LEVEL,

@@ -945,11 +945,11 @@ Objetivo: garantir que o MVP funcione no navegador e seja jogavel.
 
 ### Task 12.1 - Testes Unitarios
 
-- [ ] Testar validacao de fase.
-- [ ] Testar input mapper, se isolavel.
-- [ ] Testar calculos de coyote time/jump buffer, se isolaveis.
-- [ ] Testar estado de checkpoint.
-- [ ] Testar contador de mortes.
+- [x] Testar validacao de fase.
+- [x] Testar input mapper, se isolavel.
+- [x] Testar calculos de coyote time/jump buffer, se isolaveis.
+- [x] Testar estado de checkpoint.
+- [x] Testar contador de mortes.
 
 Pronto quando:
 
@@ -957,12 +957,12 @@ Pronto quando:
 
 ### Task 12.2 - Smoke Tests Playwright
 
-- [ ] Abrir jogo.
-- [ ] Iniciar partida.
-- [ ] Confirmar canvas visivel.
-- [ ] Confirmar personagem existe.
-- [ ] Simular movimento basico.
-- [ ] Confirmar ausência de erro critico no console.
+- [x] Abrir jogo.
+- [x] Iniciar partida.
+- [x] Confirmar canvas visivel.
+- [x] Confirmar personagem existe.
+- [x] Simular movimento basico.
+- [x] Confirmar ausência de erro critico no console.
 
 Pronto quando:
 
@@ -1411,3 +1411,11 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   piso quebravel, projetil, chip, chave, token opcional, checkpoint ativo/
   inativo e saida. `LevelScene` renderiza esses assets mantendo as areas
   declarativas e os estados visuais de ativacao/coleta.
+- [x] Task 12.1 concluida: testes unitarios reforcados para validacao de fase,
+  input mapper, janelas de coyote time/jump buffer, estado de checkpoint e
+  contador de mortes. `npm run test` cobre esses contratos sem depender do
+  navegador.
+- [x] Task 12.2 concluida: smoke test Playwright criado para abrir o jogo,
+  iniciar a Fase 1, confirmar canvas visivel, validar existencia do Pino,
+  simular movimento para a direita e falhar caso haja erro critico de console.
+  `npm run test:e2e` gerencia o Vite local automaticamente.

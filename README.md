@@ -26,6 +26,3 @@ npm run dev
 - `npm run test:e2e`: roda smoke tests com Playwright.
 - `npm run lint`: roda ESLint com warnings tratados como erro.
 - `npm run format`: formata arquivos com Prettier.
-
-Observacao: `test:e2e` depende dos smoke tests que serao criados nas tasks de
-Playwright.

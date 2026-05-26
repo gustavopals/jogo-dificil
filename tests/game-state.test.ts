@@ -102,6 +102,47 @@ describe("game state", () => {
     });
   });
 
+  it("keeps checkpoint progress while counting each completed death", () => {
+    gameStateStore.startLevel("level-01");
+    gameStateStore.setActiveCheckpoint({
+      id: "level-01-mid",
+      levelId: "level-01",
+      x: 128,
+      y: 192,
+    });
+
+    expect(gameStateStore.registerDeath("trap", { x: 130, y: 194 })).toBe(1);
+    expect(gameStateStore.registerDeath("trap", { x: 130, y: 194 })).toBe(1);
+    expect(gameStateStore.respawnAtCheckpoint()).toMatchObject({
+      id: "level-01-mid",
+      levelId: "level-01",
+      x: 128,
+      y: 192,
+    });
+
+    expect(gameStateStore.registerDeath("hazard", { x: 132, y: 194 })).toBe(2);
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      playerLifeState: "dead",
+      deathCount: 2,
+      activeCheckpoint: {
+        id: "level-01-mid",
+        levelId: "level-01",
+      },
+    });
+
+    gameStateStore.resetRun();
+
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      currentLevelId: "level-01",
+      playerLifeState: "alive",
+      deathCount: 0,
+      activeCheckpoint: {
+        id: "level-01-start",
+        levelId: "level-01",
+      },
+    });
+  });
+
   it("treats manual restart as a checkpoint respawn without adding a death", () => {
     const deathEvents: PlayerDiedEvent[] = [];
     const respawnEvents: PlayerRespawnedEvent[] = [];

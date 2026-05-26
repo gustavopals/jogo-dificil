@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { InputAction } from "../src/shared";
+import type { InputAction, InputBinding } from "../src/shared";
 import {
   createInputState,
   DEFAULT_INPUT_BINDINGS,
@@ -41,6 +41,23 @@ describe("input bindings", () => {
       pause: false,
       mute: true,
     });
+  });
+
+  it("resolves custom binding maps without falling back to defaults", () => {
+    const customBindings = [
+      {
+        action: "jump",
+        keys: ["I"],
+      },
+      {
+        action: "restart",
+        keys: ["BACKSPACE"],
+      },
+    ] as const satisfies readonly InputBinding[];
+
+    expect(getKeysForAction("jump", customBindings)).toEqual(["I"]);
+    expect(getKeysForAction("restart", customBindings)).toEqual(["BACKSPACE"]);
+    expect(getKeysForAction("mute", customBindings)).toEqual([]);
   });
 
   it("identifies known input actions", () => {

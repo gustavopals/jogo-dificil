@@ -115,6 +115,53 @@ describe("jump movement", () => {
     expect(expiredResult.velocityY).toBe(144);
   });
 
+  it("uses isolated coyote and jump buffer timers from the supplied state", () => {
+    const config = {
+      jumpVelocity: -200,
+      gravity: 1000,
+      jumpCutMultiplier: 0.5,
+      coyoteTimeMs: 70,
+      jumpBufferMs: 80,
+    };
+
+    const bufferedResult = calculateJumpMovement({
+      currentPositionY: 100,
+      currentVelocityY: 0,
+      isGrounded: false,
+      isJumpDown: true,
+      wasJumpPressed: true,
+      wasJumpReleased: false,
+      deltaMs: 25,
+      state: createInitialJumpMovementState(),
+      config,
+    });
+
+    expect(bufferedResult.didJump).toBe(false);
+    expect(bufferedResult.state.jumpBufferRemainingMs).toBe(80);
+
+    const coyoteResult = calculateJumpMovement({
+      currentPositionY: bufferedResult.positionY,
+      currentVelocityY: 0,
+      isGrounded: false,
+      isJumpDown: true,
+      wasJumpPressed: false,
+      wasJumpReleased: false,
+      deltaMs: 30,
+      state: {
+        coyoteTimeRemainingMs: 70,
+        jumpBufferRemainingMs: bufferedResult.state.jumpBufferRemainingMs,
+      },
+      config,
+    });
+
+    expect(coyoteResult.didJump).toBe(true);
+    expect(coyoteResult.velocityY).toBe(-170);
+    expect(coyoteResult.state).toEqual({
+      coyoteTimeRemainingMs: 0,
+      jumpBufferRemainingMs: 0,
+    });
+  });
+
   it("buffers jump input shortly before landing", () => {
     const bufferedResult = calculateJumpMovement({
       currentPositionY: 160,
