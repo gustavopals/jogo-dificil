@@ -91,6 +91,7 @@ npm run format
 3. Complete as 3 fases iniciais em sequencia.
 4. Ao morrer, o jogador respawna rapidamente no checkpoint ativo.
 5. Use `R` para reiniciar manualmente do checkpoint sem contar morte.
+6. Ao concluir uma fase, a transicao mostra tempo, mortes da fase e recorde local.
 
 ## Documentos Uteis
 

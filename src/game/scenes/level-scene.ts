@@ -33,6 +33,10 @@ import {
 } from "../physics";
 import { gameStateStore } from "../systems/game-state";
 import {
+  recordLevelCompletion,
+  type LevelCompletionResult,
+} from "../systems/level-results";
+import {
   emitGameEvent,
   GAME_EVENTS,
   type DeathCause,
@@ -162,6 +166,8 @@ export class LevelScene extends Phaser.Scene {
   private respawnTimer?: Phaser.Time.TimerEvent;
   private respawnRecoveryTimer?: Phaser.Time.TimerEvent;
   private hasCompletedLevel = false;
+  private levelStartedAtMs = 0;
+  private levelStartDeathCount = 0;
 
   public constructor() {
     super(SCENE_KEYS.LEVEL);
@@ -175,11 +181,14 @@ export class LevelScene extends Phaser.Scene {
     this.jumpState = createInitialJumpMovementState();
     this.dashState = createInitialDashMovementState();
 
-    const { activeCheckpoint, currentLevelId } = gameStateStore.getSnapshot();
+    const snapshot = gameStateStore.getSnapshot();
+    const { activeCheckpoint, currentLevelId } = snapshot;
     this.level = getRequiredLevelDefinition(currentLevelId);
     this.roomState = createInitialRoomState(this.level);
     this.refreshRoomSolids();
     this.hasCompletedLevel = false;
+    this.levelStartedAtMs = this.time.now;
+    this.levelStartDeathCount = snapshot.deathCount;
 
     this.drawLevelBackground(this.level);
     this.drawTerrain(this.level);
@@ -650,12 +659,25 @@ export class LevelScene extends Phaser.Scene {
 
     const { deathCount } = gameStateStore.getSnapshot();
     const nextLevelId = this.level.exit.nextLevelId;
+    const levelResult = this.completeLevelResult(this.level, deathCount);
 
     gameStateStore.completeLevel(nextLevelId);
     this.scene.start(SCENE_KEYS.LEVEL_TRANSITION, {
       completedLevelId: this.level.id,
       nextLevelId,
       deathCount,
+      levelResult,
+    });
+  }
+
+  private completeLevelResult(
+    level: LevelDefinition,
+    deathCount: number,
+  ): LevelCompletionResult {
+    return recordLevelCompletion({
+      levelId: level.id,
+      elapsedMs: this.time.now - this.levelStartedAtMs,
+      deathCount: deathCount - this.levelStartDeathCount,
     });
   }
 
@@ -1229,6 +1251,8 @@ export class LevelScene extends Phaser.Scene {
     this.solids = [];
     this.jumpState = createInitialJumpMovementState();
     this.dashState = createInitialDashMovementState();
+    this.levelStartedAtMs = 0;
+    this.levelStartDeathCount = 0;
     this.checkpointMarkers.clear();
     this.trapMarkers.clear();
     this.itemMarkers.forEach((marker) => marker.destroy());

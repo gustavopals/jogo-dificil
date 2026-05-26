@@ -975,6 +975,15 @@ Expansao pos-MVP e Fase 15:
     claro ao disparar.
   - A melhoria nao muda hitboxes, colisao, dano, reset de sala ou dificuldade
     declarada das fases.
+- Implementacao inicial de resultados locais por fase:
+  - Ao concluir uma fase, o jogo mede tempo da tentativa e mortes acumuladas
+    apenas naquela fase.
+  - Melhor tempo e menor numero de mortes por fase ficam salvos em
+    `localStorage` com a chave `jogo-dificil-level-results-v1`.
+  - A transicao de fase mostra um resumo compacto com tempo, mortes da fase e
+    indicador de novo recorde ou melhor marca anterior.
+  - Resetar a campanha nao apaga esses recordes locais; limpeza fica para um
+    comando explicito futuro.
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 

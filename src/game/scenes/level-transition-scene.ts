@@ -6,6 +6,7 @@ import type { LevelId } from "../../shared";
 import { GAME_BACKGROUND_COLOR, GAME_RESOLUTION } from "../constants";
 import { emitGameEvent, GAME_EVENTS } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
+import type { LevelCompletionResult } from "../systems/level-results";
 import {
   createLevelTransitionLabels,
   LEVEL_TRANSITION_DELAY_MS,
@@ -17,6 +18,7 @@ export type LevelTransitionSceneData = {
   readonly completedLevelId: LevelId;
   readonly nextLevelId?: LevelId;
   readonly deathCount: number;
+  readonly levelResult?: LevelCompletionResult;
 };
 
 export class LevelTransitionScene extends Phaser.Scene {
@@ -36,6 +38,7 @@ export class LevelTransitionScene extends Phaser.Scene {
       completedLevel,
       nextLevel,
       normalizeTransitionDeathCount(data.deathCount),
+      data.levelResult ?? null,
     );
 
     this.nextLevelId = nextLevel?.id;
@@ -43,6 +46,7 @@ export class LevelTransitionScene extends Phaser.Scene {
     this.drawTransition(
       labels.title,
       labels.detail,
+      labels.result,
       labels.deaths,
       labels.prompt,
     );
@@ -64,11 +68,16 @@ export class LevelTransitionScene extends Phaser.Scene {
   private drawTransition(
     title: string,
     detail: string,
+    result: string,
     deaths: string,
     prompt: string,
   ): void {
     const centerX = GAME_RESOLUTION.width / 2;
     const centerY = GAME_RESOLUTION.height / 2;
+    const hasResult = result.length > 0;
+    const deathsY = hasResult ? centerY + 34 : centerY + 18;
+    const separatorY = hasResult ? centerY + 52 : centerY + 44;
+    const promptY = hasResult ? centerY + 64 : centerY + 56;
 
     this.add.rectangle(
       centerX,
@@ -80,7 +89,7 @@ export class LevelTransitionScene extends Phaser.Scene {
     );
     this.add.rectangle(
       centerX,
-      centerY + 44,
+      separatorY,
       GAME_RESOLUTION.width,
       2,
       0x80d7c2,
@@ -103,8 +112,16 @@ export class LevelTransitionScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setAlpha(0);
+    const resultText = this.add
+      .text(centerX, centerY + 14, result, {
+        color: "#f4d35e",
+        fontFamily: "monospace",
+        fontSize: "10px",
+      })
+      .setOrigin(0.5)
+      .setAlpha(0);
     const deathsText = this.add
-      .text(centerX, centerY + 18, deaths, {
+      .text(centerX, deathsY, deaths, {
         color: "#f5f7fb",
         fontFamily: "monospace",
         fontSize: "10px",
@@ -114,7 +131,7 @@ export class LevelTransitionScene extends Phaser.Scene {
 
     if (prompt) {
       this.add
-        .text(centerX, centerY + 56, prompt, {
+        .text(centerX, promptY, prompt, {
           color: "#80d7c2",
           fontFamily: "monospace",
           fontSize: "10px",
@@ -123,7 +140,7 @@ export class LevelTransitionScene extends Phaser.Scene {
     }
 
     this.tweens.add({
-      targets: [titleText, detailText, deathsText],
+      targets: [titleText, detailText, resultText, deathsText],
       alpha: 1,
       duration: 220,
       ease: "Sine.easeOut",

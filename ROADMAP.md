@@ -1109,11 +1109,11 @@ Pronto quando:
 
 ### Task 15.4 - Resultados Locais Por Fase
 
-- [ ] Medir tempo por fase.
-- [ ] Medir mortes por fase.
-- [ ] Salvar melhor tempo e menor numero de mortes em `localStorage`.
-- [ ] Mostrar resultado compacto na transicao.
-- [ ] Cobrir normalizacao e persistencia com testes.
+- [x] Medir tempo por fase.
+- [x] Medir mortes por fase.
+- [x] Salvar melhor tempo e menor numero de mortes em `localStorage`.
+- [x] Mostrar resultado compacto na transicao.
+- [x] Cobrir normalizacao e persistencia com testes.
 
 Pronto quando:
 
@@ -1569,3 +1569,9 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `spike-pop`, rachadura reforcada para `breakable-floor` e rastro roxo para
   projeteis. A revisao de justica foi atualizada em
   `docs/trap-fairness-review.md`.
+- [x] Task 15.4 concluida: resultados locais por fase implementados em
+  `src/game/systems/level-results.ts`, medindo tempo e mortes da tentativa ao
+  concluir cada fase, salvando melhor tempo e menor numero de mortes em
+  `localStorage` e exibindo resumo compacto na `LevelTransitionScene`. Testes
+  adicionados em `tests/level-results.test.ts` e transicao atualizada em
+  `tests/level-transition.test.ts`.
