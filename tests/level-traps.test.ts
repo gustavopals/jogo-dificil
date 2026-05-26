@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { LEVEL_01 } from "../src/data/levels";
+import { GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
+import { LEVEL_01, LEVEL_02, LEVEL_03 } from "../src/data/levels";
 import {
   findTriggeredPositionTraps,
+  getProjectileTextureKey,
+  getTrapBodyTextureKey,
   getTrapFeedback,
 } from "../src/game/systems/level-traps";
 import {
@@ -107,5 +110,42 @@ describe("level traps", () => {
       cueId: "trap:spike-pop:triggered",
       event: "triggered",
     });
+  });
+
+  it("maps MVP trap kinds to readable sprite art", () => {
+    const spikePop = LEVEL_01.traps.find(
+      (candidate) => candidate.kind === "spike-pop",
+    )!;
+    const fallingPlatform = LEVEL_02.traps.find(
+      (candidate) => candidate.kind === "falling-platform",
+    )!;
+    const projectile = LEVEL_02.traps.find(
+      (candidate) => candidate.kind === "projectile",
+    )!;
+    const falseBlock = LEVEL_03.traps.find(
+      (candidate) => candidate.kind === "false-block",
+    )!;
+    const breakableFloor = LEVEL_03.traps.find(
+      (candidate) => candidate.kind === "breakable-floor",
+    )!;
+
+    expect(getTrapBodyTextureKey(spikePop)).toBe(
+      GAMEPLAY_SPRITE_KEYS.TRAP_SPIKES,
+    );
+    expect(getTrapBodyTextureKey(fallingPlatform)).toBe(
+      GAMEPLAY_SPRITE_KEYS.TRAP_FALLING_PLATFORM,
+    );
+    expect(getTrapBodyTextureKey(projectile)).toBe(
+      GAMEPLAY_SPRITE_KEYS.TRAP_PROJECTILE,
+    );
+    expect(getTrapBodyTextureKey(falseBlock)).toBe(
+      GAMEPLAY_SPRITE_KEYS.TRAP_FALSE_BLOCK,
+    );
+    expect(getTrapBodyTextureKey(breakableFloor)).toBe(
+      GAMEPLAY_SPRITE_KEYS.TRAP_BREAKABLE_FLOOR,
+    );
+    expect(getProjectileTextureKey()).toBe(
+      GAMEPLAY_SPRITE_KEYS.TRAP_PROJECTILE,
+    );
   });
 });

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
 import { LEVEL_01, LEVEL_02, LEVEL_03 } from "../src/data/levels";
 import {
   collectLevelItem,
   findTouchedAvailableItems,
   getItemFeedback,
+  getItemTextureKey,
 } from "../src/game/systems/level-items";
 import {
   createInitialRoomState,
@@ -86,5 +88,27 @@ describe("level items", () => {
       isCollected: false,
       isAvailable: true,
     });
+  });
+
+  it("maps current item kinds to readable sprite art", () => {
+    const requiredItem = LEVEL_01.items.find(
+      (candidate) => candidate.kind === "required",
+    )!;
+    const keyItem = LEVEL_02.items.find(
+      (candidate) => candidate.kind === "key",
+    )!;
+    const optionalItem = LEVEL_03.items.find(
+      (candidate) => candidate.kind === "optional",
+    )!;
+
+    expect(getItemTextureKey(requiredItem)).toBe(
+      GAMEPLAY_SPRITE_KEYS.ITEM_REQUIRED_CHIP,
+    );
+    expect(getItemTextureKey(keyItem)).toBe(
+      GAMEPLAY_SPRITE_KEYS.ITEM_MECHANISM_KEY,
+    );
+    expect(getItemTextureKey(optionalItem)).toBe(
+      GAMEPLAY_SPRITE_KEYS.ITEM_OPTIONAL_TOKEN,
+    );
   });
 });

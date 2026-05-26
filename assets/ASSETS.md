@@ -39,6 +39,17 @@ jogo.
 | `assets/sprites/player-pino-death-02.png`         | Gerado no projeto com `magick` | Original do projeto | Frame 2 de morte do Pino, com corpo quebrado e baixo.             |
 | `assets/sprites/player-pino-respawn-01.png`       | Gerado no projeto com `magick` | Original do projeto | Frame 1 de respawn do Pino, com varredura ciano.                  |
 | `assets/sprites/player-pino-respawn-02.png`       | Gerado no projeto com `magick` | Original do projeto | Frame 2 de respawn do Pino, com corpo reconstruído.               |
+| `assets/sprites/trap-spikes.png`                  | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de espinhos e spike-pop.                           |
+| `assets/sprites/trap-false-block.png`             | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de bloco falso com indício roxo sutil.             |
+| `assets/sprites/trap-falling-platform.png`        | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de plataforma instável.                            |
+| `assets/sprites/trap-breakable-floor.png`         | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de piso quebrável com rachaduras.                  |
+| `assets/sprites/trap-projectile.png`              | Gerado no projeto com `magick` | Original do projeto | Sprite 8x8px de projétil roxo.                                    |
+| `assets/sprites/item-required-chip.png`           | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de chip obrigatório.                               |
+| `assets/sprites/item-mechanism-key.png`           | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de chave de mecanismo.                             |
+| `assets/sprites/item-optional-token.png`          | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de coletável opcional.                             |
+| `assets/sprites/marker-checkpoint-inactive.png`   | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de checkpoint inativo.                             |
+| `assets/sprites/marker-checkpoint-active.png`     | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de checkpoint ativo.                               |
+| `assets/sprites/marker-exit.png`                  | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px repetível de saída de fase.                        |
 | `assets/tilesets/lab-solid-block.png`             | Gerado no projeto com `magick` | Original do projeto | Tile 16x16px de bloco solido industrial para paredes e massas.    |
 | `assets/tilesets/lab-platform.png`                | Gerado no projeto com `magick` | Original do projeto | Tile 16x16px de plataforma metalica para pisos finos.             |
 | `assets/tilesets/lab-hazard-spikes.png`           | Gerado no projeto com `magick` | Original do projeto | Tile 16x16px de perigo visual para espinhos e pits.               |

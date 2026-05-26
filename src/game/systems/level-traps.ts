@@ -1,4 +1,5 @@
 import type { RectLike, TrapDefinition } from "../../shared";
+import { GAMEPLAY_SPRITE_KEYS, type GameplaySpriteKey } from "../../data/art";
 import type { RoomRuntimeState, TrapRuntimeState } from "./room-state";
 
 export type TriggeredTrap = {
@@ -32,6 +33,14 @@ const TRAP_BODY_COLORS = {
   projectile: 0x9b5de5,
   "breakable-floor": 0xf4a261,
 } as const satisfies Record<TrapDefinition["kind"], number>;
+
+const TRAP_BODY_TEXTURE_KEYS = {
+  "false-block": GAMEPLAY_SPRITE_KEYS.TRAP_FALSE_BLOCK,
+  "falling-platform": GAMEPLAY_SPRITE_KEYS.TRAP_FALLING_PLATFORM,
+  "spike-pop": GAMEPLAY_SPRITE_KEYS.TRAP_SPIKES,
+  projectile: GAMEPLAY_SPRITE_KEYS.TRAP_PROJECTILE,
+  "breakable-floor": GAMEPLAY_SPRITE_KEYS.TRAP_BREAKABLE_FLOOR,
+} as const satisfies Record<TrapDefinition["kind"], GameplaySpriteKey>;
 
 export function findTriggeredPositionTraps(
   playerHitbox: RectLike,
@@ -84,6 +93,16 @@ export function getTrapFeedback(
       event,
     },
   };
+}
+
+export function getTrapBodyTextureKey(
+  trap: Pick<TrapDefinition, "kind">,
+): GameplaySpriteKey {
+  return TRAP_BODY_TEXTURE_KEYS[trap.kind];
+}
+
+export function getProjectileTextureKey(): GameplaySpriteKey {
+  return GAMEPLAY_SPRITE_KEYS.TRAP_PROJECTILE;
 }
 
 function rectsOverlap(a: RectLike, b: RectLike): boolean {

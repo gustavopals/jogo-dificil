@@ -1974,6 +1974,10 @@ Direção pendente:
 - Arte inicial de movimento do Pino criada em sprites 12x24px para idle,
   corrida em dois frames, pulo, queda, morte em dois frames e respawn em dois
   frames. A hitbox continua 10x22px; a mudança é somente visual.
+- Arte inicial de traps, itens e marcadores criada para o MVP: espinhos,
+  bloco falso, plataforma que cai, piso quebrável, projétil, chip obrigatório,
+  chave, token opcional, checkpoint inativo/ativo e saída de fase. Todos são
+  sprites originais do projeto e usam as mesmas áreas declarativas de gameplay.
 - Dados declarativos de animação do Pino criados em
   `src/data/characters/pino-animations.ts`, cobrindo idle, run, jump, fall,
   death, respawn, ação principal e ação secundária com seleção por estado.

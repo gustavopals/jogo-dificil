@@ -1,4 +1,5 @@
 import type { ItemDefinition, RectLike } from "../../shared";
+import { GAMEPLAY_SPRITE_KEYS, type GameplaySpriteKey } from "../../data/art";
 import {
   collectRoomItem,
   setInteractiveObjectActive,
@@ -28,6 +29,13 @@ const ITEM_PLACEHOLDER_COLORS = {
   collectible: 0x9b5de5,
   key: 0xe76f51,
 } as const satisfies Record<ItemDefinition["kind"], number>;
+
+const ITEM_TEXTURE_KEYS = {
+  required: GAMEPLAY_SPRITE_KEYS.ITEM_REQUIRED_CHIP,
+  optional: GAMEPLAY_SPRITE_KEYS.ITEM_OPTIONAL_TOKEN,
+  collectible: GAMEPLAY_SPRITE_KEYS.ITEM_OPTIONAL_TOKEN,
+  key: GAMEPLAY_SPRITE_KEYS.ITEM_MECHANISM_KEY,
+} as const satisfies Record<ItemDefinition["kind"], GameplaySpriteKey>;
 
 export function findTouchedAvailableItems(
   playerHitbox: RectLike,
@@ -92,6 +100,12 @@ export function getItemFeedback(
       strokeAlpha: isCollected ? 0.22 : 0.85,
     },
   };
+}
+
+export function getItemTextureKey(
+  item: Pick<ItemDefinition, "kind">,
+): GameplaySpriteKey {
+  return ITEM_TEXTURE_KEYS[item.kind];
 }
 
 function rectsOverlap(a: RectLike, b: RectLike): boolean {

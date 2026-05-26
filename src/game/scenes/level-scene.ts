@@ -51,7 +51,12 @@ import {
   collectLevelItem,
   findTouchedAvailableItems,
   getItemFeedback,
+  getItemTextureKey,
 } from "../systems/level-items";
+import {
+  getCheckpointTextureKey,
+  getExitTextureKey,
+} from "../systems/level-markers";
 import {
   createLevelStartCheckpoint,
   findTouchedCheckpoint,
@@ -72,6 +77,8 @@ import {
 } from "../systems/level-terrain";
 import {
   findTriggeredPositionTraps,
+  getProjectileTextureKey,
+  getTrapBodyTextureKey,
   getTrapFeedback,
 } from "../systems/level-traps";
 import {
@@ -94,9 +101,6 @@ const CAMERA_DEADZONE_SIZE = {
 } as const;
 const MARKER_COLORS = {
   spawn: 0x80d7c2,
-  exit: 0xe76f51,
-  checkpointInactive: 0xf4d35e,
-  checkpointActive: 0x80d7c2,
 } as const;
 
 const PLAYER_COLLISION_BODY = {
@@ -113,7 +117,7 @@ const PLAYER_COLLISION_BODY = {
 
 type TrapMarker = {
   readonly trigger: Phaser.GameObjects.Rectangle;
-  readonly body?: Phaser.GameObjects.Rectangle;
+  readonly body?: Phaser.GameObjects.Image | Phaser.GameObjects.TileSprite;
 };
 
 export class LevelScene extends Phaser.Scene {
@@ -125,20 +129,17 @@ export class LevelScene extends Phaser.Scene {
   private solids: readonly RectLike[] = [];
   private readonly checkpointMarkers = new Map<
     CheckpointId,
-    Phaser.GameObjects.Rectangle
+    Phaser.GameObjects.TileSprite
   >();
   private readonly trapMarkers = new Map<TrapId, TrapMarker>();
-  private readonly itemMarkers = new Map<
-    ItemId,
-    Phaser.GameObjects.Rectangle
-  >();
+  private readonly itemMarkers = new Map<ItemId, Phaser.GameObjects.Image>();
   private readonly interactiveObjectMarkers = new Map<
     InteractiveObjectId,
     Phaser.GameObjects.Rectangle
   >();
   private readonly projectileMarkers = new Map<
     string,
-    Phaser.GameObjects.Rectangle
+    Phaser.GameObjects.Image
   >();
   private respawnTimer?: Phaser.Time.TimerEvent;
   private respawnRecoveryTimer?: Phaser.Time.TimerEvent;
@@ -383,24 +384,47 @@ export class LevelScene extends Phaser.Scene {
           feedback.visual.triggerStrokeAlpha,
         );
 
-      const bodyMarker = trap.area
-        ? this.add
-            .rectangle(
-              trap.area.x + trap.area.width / 2,
-              trap.area.y + trap.area.height / 2,
-              trap.area.width,
-              trap.area.height,
-              feedback.visual.bodyColor,
-              feedback.visual.bodyAlpha,
-            )
-            .setStrokeStyle(1, feedback.visual.bodyColor, 0.85)
-        : undefined;
+      const bodyMarker = this.createTrapBodyMarker(
+        trap,
+        feedback.visual.bodyAlpha,
+      );
 
       this.trapMarkers.set(trap.id, {
         trigger: triggerMarker,
         ...(bodyMarker ? { body: bodyMarker } : {}),
       });
     });
+  }
+
+  private createTrapBodyMarker(
+    trap: LevelDefinition["traps"][number],
+    alpha: number,
+  ): Phaser.GameObjects.Image | Phaser.GameObjects.TileSprite | undefined {
+    if (!trap.area) {
+      return undefined;
+    }
+
+    const { area } = trap;
+    const textureKey = getTrapBodyTextureKey(trap);
+
+    if (trap.kind === "projectile" || trap.kind === "spike-pop") {
+      return this.add
+        .image(area.x + area.width / 2, area.y + area.height / 2, textureKey)
+        .setOrigin(0.5)
+        .setDisplaySize(area.width, area.height)
+        .setAlpha(alpha);
+    }
+
+    return this.add
+      .tileSprite(
+        area.x + area.width / 2,
+        area.y + area.height / 2,
+        area.width,
+        area.height,
+        textureKey,
+      )
+      .setOrigin(0.5)
+      .setAlpha(alpha);
   }
 
   private drawItems(level: LevelDefinition, roomState: RoomRuntimeState): void {
@@ -414,19 +438,14 @@ export class LevelScene extends Phaser.Scene {
       const feedback = getItemFeedback(item, state);
       const { hitbox } = item;
       const marker = this.add
-        .rectangle(
+        .image(
           hitbox.x + hitbox.width / 2,
           hitbox.y + hitbox.height / 2,
-          hitbox.width,
-          hitbox.height,
-          feedback.visual.fillColor,
-          feedback.visual.fillAlpha,
+          getItemTextureKey(item),
         )
-        .setStrokeStyle(
-          1,
-          feedback.visual.strokeColor,
-          feedback.visual.strokeAlpha,
-        );
+        .setOrigin(0.5)
+        .setDisplaySize(hitbox.width, hitbox.height)
+        .setAlpha(feedback.visual.fillAlpha);
 
       this.itemMarkers.set(item.id, marker);
     });
@@ -481,25 +500,27 @@ export class LevelScene extends Phaser.Scene {
     const { area: exitArea } = level.exit;
 
     this.add
-      .rectangle(
+      .tileSprite(
         exitArea.x + exitArea.width / 2,
         exitArea.y + exitArea.height / 2,
         exitArea.width,
         exitArea.height,
-        MARKER_COLORS.exit,
+        getExitTextureKey(),
       )
-      .setAlpha(0.75);
+      .setOrigin(0.5)
+      .setAlpha(0.9);
 
     level.checkpoints.forEach((checkpoint) => {
       const { area } = checkpoint;
       const marker = this.add
-        .rectangle(
+        .tileSprite(
           area.x + area.width / 2,
           area.y + area.height / 2,
           area.width,
           area.height,
-          MARKER_COLORS.checkpointInactive,
+          getCheckpointTextureKey(false),
         )
+        .setOrigin(0.5)
         .setAlpha(0.65);
 
       this.checkpointMarkers.set(checkpoint.id, marker);
@@ -803,10 +824,7 @@ export class LevelScene extends Phaser.Scene {
         feedback.visual.triggerStrokeAlpha,
       );
 
-    marker.body?.setFillStyle(
-      feedback.visual.bodyColor,
-      feedback.visual.bodyAlpha,
-    );
+    marker.body?.setAlpha(feedback.visual.bodyAlpha);
   }
 
   private updateItemMarkers(): void {
@@ -830,13 +848,7 @@ export class LevelScene extends Phaser.Scene {
 
     const feedback = getItemFeedback(item, state);
 
-    marker
-      .setFillStyle(feedback.visual.fillColor, feedback.visual.fillAlpha)
-      .setStrokeStyle(
-        1,
-        feedback.visual.strokeColor,
-        feedback.visual.strokeAlpha,
-      );
+    marker.setAlpha(feedback.visual.fillAlpha);
   }
 
   private updateInteractiveObjectMarkers(): void {
@@ -908,20 +920,18 @@ export class LevelScene extends Phaser.Scene {
       const marker =
         this.projectileMarkers.get(projectile.id) ??
         this.add
-          .rectangle(
+          .image(
             hitbox.x + hitbox.width / 2,
             hitbox.y + hitbox.height / 2,
-            hitbox.width,
-            hitbox.height,
-            0xf4d35e,
-            0.9,
+            getProjectileTextureKey(),
           )
-          .setStrokeStyle(1, 0x050608, 0.85);
+          .setOrigin(0.5);
 
       marker.setPosition(
         hitbox.x + hitbox.width / 2,
         hitbox.y + hitbox.height / 2,
       );
+      marker.setDisplaySize(hitbox.width, hitbox.height);
       this.projectileMarkers.set(projectile.id, marker);
     });
 
@@ -958,11 +968,10 @@ export class LevelScene extends Phaser.Scene {
 
   private updateCheckpointMarkers(activeCheckpointId: CheckpointId): void {
     this.checkpointMarkers.forEach((marker, checkpointId) => {
-      marker.setFillStyle(
-        checkpointId === activeCheckpointId
-          ? MARKER_COLORS.checkpointActive
-          : MARKER_COLORS.checkpointInactive,
-      );
+      const isActive = checkpointId === activeCheckpointId;
+
+      marker.setTexture(getCheckpointTextureKey(isActive));
+      marker.setAlpha(isActive ? 0.95 : 0.65);
     });
   }
 

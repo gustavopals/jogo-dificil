@@ -63,3 +63,19 @@ personagem coerente cobre:
 - `respawn`: dois frames ciano/hero, com varredura e reconstrucao do corpo.
 
 A hitbox permanece 10x22px; esses sprites mudam apenas leitura visual.
+
+## Traps, Itens E Marcadores
+
+Os objetos de gameplay do MVP agora usam sprites dedicados:
+
+- Espinhos e `spike-pop`: `trap-spikes.png`, vermelho de hazard.
+- Bloco falso: `trap-false-block.png`, metal escuro com pista roxa discreta.
+- Plataforma que cai: `trap-falling-platform.png`, metal com borda ciano.
+- Piso quebravel: `trap-breakable-floor.png`, metal com rachaduras vermelhas.
+- Projetil: `trap-projectile.png`, losango roxo 8x8px.
+- Itens: chip obrigatorio amarelo, chave coral e token opcional ciano/amarelo.
+- Checkpoint: versoes inativa e ativa para feedback imediato.
+- Saida de fase: coluna coral repetivel dentro da area de saida.
+
+Os sprites sao renderizados sobre as areas declarativas existentes. Colisao,
+hitboxes, triggers e reset de sala continuam definidos pelos dados de fase.

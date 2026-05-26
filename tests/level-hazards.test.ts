@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PLACEHOLDER_TILESET_ASSET_KEYS } from "../src/data/art";
+import { GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
 import {
   findTouchedDeadlyHazard,
   getDeathCauseForHazard,
@@ -92,9 +92,9 @@ describe("level hazards", () => {
     expect(getHazardPlaceholderColor(FALL_HAZARD)).toBe(0xe35d6a);
   });
 
-  it("uses the hazard spike tile for readable danger", () => {
+  it("uses the hazard spike sprite for readable danger", () => {
     expect(getHazardPlaceholderTextureKey()).toBe(
-      PLACEHOLDER_TILESET_ASSET_KEYS.HAZARD_SPIKES,
+      GAMEPLAY_SPRITE_KEYS.TRAP_SPIKES,
     );
   });
 });

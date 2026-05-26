@@ -927,13 +927,13 @@ Pronto quando:
 
 ### Task 11.4 - Arte De Traps E Itens
 
-- [ ] Espinhos.
-- [ ] Bloco falso.
-- [ ] Plataforma que cai.
-- [ ] Projetil.
-- [ ] Checkpoint.
-- [ ] Saida de fase.
-- [ ] Coletavel opcional.
+- [x] Espinhos.
+- [x] Bloco falso.
+- [x] Plataforma que cai.
+- [x] Projetil.
+- [x] Checkpoint.
+- [x] Saida de fase.
+- [x] Coletavel opcional.
 
 Pronto quando:
 
@@ -1406,3 +1406,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   corrida em dois frames, pulo, queda, morte em dois frames e respawn em dois
   frames. `PINO_ANIMATIONS` agora usa esses frames nas animacoes centrais, o
   preload carrega todos os PNGs e a hitbox permaneceu 10x22px.
+- [x] Task 11.4 concluida: sprites de traps, itens e marcadores criados em
+  `assets/sprites/`, cobrindo espinhos, bloco falso, plataforma que cai,
+  piso quebravel, projetil, chip, chave, token opcional, checkpoint ativo/
+  inativo e saida. `LevelScene` renderiza esses assets mantendo as areas
+  declarativas e os estados visuais de ativacao/coleta.

@@ -13,3 +13,9 @@ export {
   type PlaceholderTilesetAssetDefinition,
   type PlaceholderTilesetAssetKey,
 } from "./placeholder-tileset";
+export {
+  GAMEPLAY_SPRITE_ASSETS,
+  GAMEPLAY_SPRITE_KEYS,
+  type GameplaySpriteAssetDefinition,
+  type GameplaySpriteKey,
+} from "./gameplay-sprites";
