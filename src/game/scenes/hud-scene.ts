@@ -13,6 +13,7 @@ import {
   formatHudLabels,
   HUD_ACCENT_TEXT_STYLE,
   HUD_LAYOUT,
+  HUD_MUSIC_BUTTON_STYLE,
   HUD_PANEL_STYLE,
   HUD_TEXT_STYLE,
 } from "../ui/hud";
@@ -74,6 +75,40 @@ export class HudScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(11);
 
+    const musicButton = this.add
+      .rectangle(
+        HUD_LAYOUT.musicButtonX,
+        HUD_LAYOUT.musicButtonY,
+        HUD_LAYOUT.musicButtonWidth,
+        HUD_LAYOUT.musicButtonHeight,
+        HUD_MUSIC_BUTTON_STYLE.fillColor,
+        HUD_MUSIC_BUTTON_STYLE.fillAlpha,
+      )
+      .setOrigin(0, 0)
+      .setStrokeStyle(
+        1,
+        HUD_MUSIC_BUTTON_STYLE.strokeColor,
+        HUD_MUSIC_BUTTON_STYLE.strokeAlpha,
+      )
+      .setScrollFactor(0)
+      .setDepth(11)
+      .setInteractive({ useHandCursor: true });
+
+    const musicButtonText = this.add
+      .text(
+        HUD_LAYOUT.musicButtonTextX,
+        HUD_LAYOUT.musicButtonTextY,
+        "",
+        HUD_TEXT_STYLE,
+      )
+      .setOrigin(0.5, 0.5)
+      .setScrollFactor(0)
+      .setDepth(12);
+
+    musicButton.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      gameStateStore.toggleMusicMuted();
+    });
+
     const deathFeedbackText = this.add
       .text(
         DEATH_FEEDBACK_LAYOUT.x,
@@ -95,6 +130,20 @@ export class HudScene extends Phaser.Scene {
 
       deathsText.setText(labels.deaths);
       levelText.setText(labels.level);
+      musicButtonText.setText(labels.music);
+      musicButtonText.setColor(
+        state.isMusicMuted
+          ? HUD_MUSIC_BUTTON_STYLE.mutedTextColor
+          : HUD_MUSIC_BUTTON_STYLE.textColor,
+      );
+      musicButton.setFillStyle(
+        state.isMusicMuted
+          ? HUD_MUSIC_BUTTON_STYLE.mutedFillColor
+          : HUD_MUSIC_BUTTON_STYLE.fillColor,
+        state.isMusicMuted
+          ? HUD_MUSIC_BUTTON_STYLE.mutedFillAlpha
+          : HUD_MUSIC_BUTTON_STYLE.fillAlpha,
+      );
       muteText.setText(labels.mute);
     });
     const unsubscribeDeathFeedback = onGameEvent(

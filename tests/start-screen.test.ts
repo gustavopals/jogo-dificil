@@ -7,6 +7,7 @@ import {
   START_SCREEN_HUMOR_PHRASES,
   START_SCREEN_LAYOUT,
   START_SCREEN_LEVEL_ID,
+  isPointInsideStartScreenMusicButton,
   pickRandomHumorPhrase,
 } from "../src/game/ui/start-screen";
 
@@ -40,5 +41,22 @@ describe("start screen", () => {
     expect(START_SCREEN_LAYOUT.groundY).toBeLessThan(
       START_SCREEN_LAYOUT.height,
     );
+    expect(START_SCREEN_LAYOUT.musicButtonX).toBeGreaterThan(0);
+    expect(
+      START_SCREEN_LAYOUT.musicButtonX + START_SCREEN_LAYOUT.musicButtonWidth,
+    ).toBeLessThanOrEqual(START_SCREEN_LAYOUT.width);
+    expect(
+      START_SCREEN_LAYOUT.musicButtonY + START_SCREEN_LAYOUT.musicButtonHeight,
+    ).toBeLessThanOrEqual(START_SCREEN_LAYOUT.height);
+  });
+
+  it("keeps menu music button clicks from starting the game", () => {
+    expect(
+      isPointInsideStartScreenMusicButton(
+        START_SCREEN_LAYOUT.musicButtonTextX,
+        START_SCREEN_LAYOUT.musicButtonTextY,
+      ),
+    ).toBe(true);
+    expect(isPointInsideStartScreenMusicButton(0, 0)).toBe(false);
   });
 });

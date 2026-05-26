@@ -1,5 +1,6 @@
 import mvpLevelCompleteStingUrl from "../../assets/audio/music/mvp-level-complete-sting.wav";
 import mvpLoopUrl from "../../assets/audio/music/mvp-loop.wav";
+import menuLoopUrl from "../../assets/audio/music/menu-loop.wav";
 import levelCheckpointUrl from "../../assets/audio/sfx/level-checkpoint.wav";
 import levelCompleteUrl from "../../assets/audio/sfx/level-complete.wav";
 import levelFallingPlatformUrl from "../../assets/audio/sfx/level-falling-platform.wav";
@@ -178,10 +179,14 @@ export const IMAGE_ASSETS = [
 export const AUDIO_ASSETS = [
   {
     key: MUSIC_AUDIO_DEFINITIONS[0].assetKey,
-    url: mvpLoopUrl,
+    url: menuLoopUrl,
   },
   {
     key: MUSIC_AUDIO_DEFINITIONS[1].assetKey,
+    url: mvpLoopUrl,
+  },
+  {
+    key: MUSIC_AUDIO_DEFINITIONS[2].assetKey,
     url: mvpLevelCompleteStingUrl,
   },
   {

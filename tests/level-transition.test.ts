@@ -33,9 +33,9 @@ describe("level transition UI", () => {
     });
   });
 
-  it("keeps transition timing short and death count safe", () => {
-    expect(LEVEL_TRANSITION_DELAY_MS).toBeGreaterThanOrEqual(700);
-    expect(LEVEL_TRANSITION_DELAY_MS).toBeLessThanOrEqual(1500);
+  it("keeps transition timing readable and death count safe", () => {
+    expect(LEVEL_TRANSITION_DELAY_MS).toBeGreaterThanOrEqual(2500);
+    expect(LEVEL_TRANSITION_DELAY_MS).toBeLessThanOrEqual(3500);
     expect(formatTransitionLevel(LEVEL_02)).toBe(
       "Fase 2: O Caminho Nao Confia Em Voce",
     );

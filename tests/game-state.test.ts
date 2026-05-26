@@ -4,6 +4,7 @@ import {
   clearAllGameEventListeners,
   GAME_EVENTS,
   onGameEvent,
+  type AudioMusicMuteChangedEvent,
   type AudioMuteChangedEvent,
   type CheckpointActivatedEvent,
   type PlayerDiedEvent,
@@ -319,5 +320,31 @@ describe("game state", () => {
     expect(gameStateStore.toggleMuted()).toBe(false);
     expect(gameStateStore.getSnapshot().isMuted).toBe(false);
     expect(muteEvents).toEqual([{ isMuted: true }, { isMuted: false }]);
+  });
+
+  it("emits music mute changes without changing global audio mute", () => {
+    const musicMuteEvents: AudioMusicMuteChangedEvent[] = [];
+
+    onGameEvent(GAME_EVENTS.AUDIO_MUSIC_MUTE_CHANGED, (payload) => {
+      musicMuteEvents.push(payload);
+    });
+
+    expect(gameStateStore.toggleMusicMuted()).toBe(true);
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      isMuted: false,
+      isMusicMuted: true,
+    });
+
+    gameStateStore.setMusicMuted(true);
+
+    expect(gameStateStore.toggleMusicMuted()).toBe(false);
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      isMuted: false,
+      isMusicMuted: false,
+    });
+    expect(musicMuteEvents).toEqual([
+      { isMusicMuted: true },
+      { isMusicMuted: false },
+    ]);
   });
 });

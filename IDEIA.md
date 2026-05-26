@@ -720,26 +720,34 @@ Implementação inicial dos sons de fase:
 
 Implementação inicial da música do MVP:
 
-- O tema inicial se chama `Passos Tortos`: um loop discreto em 92 BPM com pulso
-  curto, acordes menores e volume baixo para sustentar tensão sem cansar em
-  repetição.
-- O loop temporário original fica em `assets/audio/music/mvp-loop.wav` e a
-  vinheta musical de fim de fase fica em
+- A tela inicial tem o tema próprio `Entrada Pulante`, um loop original de 8s
+  em 120 BPM com arpejo leve e menos pressão que a trilha das fases.
+- O tema inicial se chama `Pulos de Azar`: um loop original simples em 96 BPM,
+  com pulso chiptune leve, melodia curta e clima divertido para sustentar
+  tentativas repetidas sem cansar.
+- O loop de menu fica em `assets/audio/music/menu-loop.wav`, o loop de gameplay
+  fica em `assets/audio/music/mvp-loop.wav` e a vinheta musical de fim de fase
+  fica em
   `assets/audio/music/mvp-level-complete-sting.wav`.
 - Os metadados ficam em `src/data/audio/music-audio.ts`, separados dos sons de
   personagem e dos sons de fase.
-- `PreloadScene` pede o início do loop depois que os assets foram carregados;
-  se o navegador ainda bloquear autoplay, o `AudioManager` mantém o pedido na
-  fila até a primeira interação.
+- `PreloadScene` só carrega os assets de áudio. Depois disso, `MenuScene` pede
+  a trilha de abertura e `LevelScene` pede a trilha de gameplay ao entrar; se o
+  navegador ainda bloquear autoplay, o `AudioManager` mantém os pedidos na fila
+  até a primeira interação.
 - O loop não é disparado por morte ou respawn, e o `AudioManager` evita
   reiniciar uma música que já esteja ativa com o mesmo id.
 - Ao completar a fase, `AudioScene` toca a vinheta curta de conclusão junto do
   feedback de fim de fase já existente.
+- A tela inicial e o HUD têm um botão `♪`/`OFF` para mutar apenas a música; o
+  mute global em `M` continua silenciando música e efeitos juntos.
 
 Implementação inicial da tela inicial:
 
 - A tela de abertura usa `Jogo Difícil` como nome provisório e mantém apenas uma
   linha de comando visível: `INICIAR FASE 1: ENTER / ESPAÇO`.
+- A tela inicial toca o loop `Entrada Pulante`; ao começar a fase, a música
+  troca para `Pulos de Azar` sem manter duas faixas ativas.
 - O visual deixa claro que é um jogo de plataforma: Pino aparece no chão, a
   saída fica à direita e os hazards sugerem a crueldade da fase sem explicar o
   jogo por texto.
@@ -757,7 +765,8 @@ Implementação inicial do HUD:
 - O HUD fica como uma faixa superior mínima para reservar uma área previsível e
   reduzir interferência no espaço principal de plataforma.
 - A esquerda mostra `Mortes N`; o centro mostra `Fase X: Nome`; a direita só
-  mostra `MUDO` quando o áudio estiver mutado.
+  mostra `MUDO` quando o áudio estiver mutado. Antes do indicador de mute há um
+  botão compacto de música, com `♪` ligado e `OFF` quando a música está mutada.
 - A fase exibida vem do registry de fases, usando `order` e `name`, não o id
   interno como `level-01`.
 - O texto debug antigo de `LevelScene` foi removido porque disputava espaço com
@@ -772,6 +781,9 @@ Implementação inicial de pausa e mute:
   sistema.
 - `M` alterna mute tanto durante a fase quanto na tela de pausa; o HUD e o
   overlay de pausa refletem o estado vindo de `gameStateStore`.
+- O botão de música na tela inicial e no HUD alterna `isMusicMuted` em
+  `gameStateStore` e emite `audio:music-mute-changed`; o `AudioScene` usa esse
+  evento para zerar apenas o volume da categoria de música.
 - Pausar usa `this.scene.pause()` na fase e lança `PauseScene`, então movimento,
   armadilhas, colisões e timers da fase deixam de avançar enquanto o overlay
   está ativo.

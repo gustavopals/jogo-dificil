@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MENU_MUSIC_THEME,
   MUSIC_AUDIO_DEFINITIONS,
   MUSIC_AUDIO_IDS,
   MVP_MUSIC_THEME,
@@ -9,19 +10,28 @@ import { AUDIO_ASSETS } from "../src/game/assets";
 
 describe("MVP music data", () => {
   it("defines the initial music theme and completion sting", () => {
+    expect(MENU_MUSIC_THEME).toMatchObject({
+      id: "entrada-pulante",
+      loopAudioId: MUSIC_AUDIO_IDS.MENU_LOOP,
+      tempoBpm: 120,
+    });
     expect(MVP_MUSIC_THEME).toMatchObject({
-      id: "passos-tortos",
+      id: "pulos-de-azar",
       loopAudioId: MUSIC_AUDIO_IDS.MVP_LOOP,
-      tempoBpm: 92,
+      tempoBpm: 96,
     });
 
     expect(MUSIC_AUDIO_DEFINITIONS.map((audio) => audio.id)).toEqual([
+      MUSIC_AUDIO_IDS.MENU_LOOP,
       MUSIC_AUDIO_IDS.MVP_LOOP,
       MUSIC_AUDIO_IDS.LEVEL_COMPLETE_STING,
     ]);
   });
 
-  it("keeps the main theme looped and the completion sting short-lived", () => {
+  it("keeps menu and gameplay themes looped and the completion sting short-lived", () => {
+    const menuLoop = MUSIC_AUDIO_DEFINITIONS.find(
+      (audio) => audio.id === MUSIC_AUDIO_IDS.MENU_LOOP,
+    );
     const mainLoop = MUSIC_AUDIO_DEFINITIONS.find(
       (audio) => audio.id === MUSIC_AUDIO_IDS.MVP_LOOP,
     );
@@ -29,6 +39,11 @@ describe("MVP music data", () => {
       (audio) => audio.id === MUSIC_AUDIO_IDS.LEVEL_COMPLETE_STING,
     );
 
+    expect(menuLoop).toMatchObject({
+      category: "music",
+      loop: true,
+      path: "assets/audio/music/menu-loop.wav",
+    });
     expect(mainLoop).toMatchObject({
       category: "music",
       loop: true,

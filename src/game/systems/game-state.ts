@@ -22,6 +22,7 @@ export type GameStateSnapshot = {
   activeCheckpoint: ActiveCheckpoint;
   isPaused: boolean;
   isMuted: boolean;
+  isMusicMuted: boolean;
 };
 
 type GameStateListener = (state: GameStateSnapshot) => void;
@@ -67,6 +68,7 @@ export function createInitialGameState(): GameStateSnapshot {
     activeCheckpoint: createInitialCheckpoint(INITIAL_LEVEL_ID),
     isPaused: false,
     isMuted: false,
+    isMusicMuted: false,
   };
 }
 
@@ -210,6 +212,23 @@ class GameStateStore {
     this.setMuted(isMuted);
 
     return isMuted;
+  }
+
+  public setMusicMuted(isMusicMuted: boolean): void {
+    if (this.state.isMusicMuted === isMusicMuted) {
+      return;
+    }
+
+    this.setState({ isMusicMuted });
+
+    emitGameEvent(GAME_EVENTS.AUDIO_MUSIC_MUTE_CHANGED, { isMusicMuted });
+  }
+
+  public toggleMusicMuted(): boolean {
+    const isMusicMuted = !this.state.isMusicMuted;
+    this.setMusicMuted(isMusicMuted);
+
+    return isMusicMuted;
   }
 
   private setState(patch: Partial<GameStateSnapshot>): void {

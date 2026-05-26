@@ -4,6 +4,7 @@ import { LEVEL_01 } from "../src/data/levels/level-01";
 import {
   formatHudLabels,
   formatHudLevel,
+  formatMusicMuteStatus,
   formatMuteStatus,
   isHudOutsideCriticalGameplayArea,
 } from "../src/game/ui/hud";
@@ -18,18 +19,25 @@ describe("HUD", () => {
     expect(formatMuteStatus(true)).toBe("MUDO");
   });
 
+  it("formats the music button state separately from global mute", () => {
+    expect(formatMusicMuteStatus(false)).toBe("♪");
+    expect(formatMusicMuteStatus(true)).toBe("OFF");
+  });
+
   it("combines essential gameplay status into compact labels", () => {
     expect(
       formatHudLabels(
         {
           deathCount: 3,
           isMuted: true,
+          isMusicMuted: false,
         },
         LEVEL_01,
       ),
     ).toEqual({
       deaths: "Mortes 3",
       level: "Fase 1: Entrada Cruel",
+      music: "♪",
       mute: "MUDO",
     });
   });

@@ -12,7 +12,7 @@ import type {
   RectLike,
   TrapId,
 } from "../../shared";
-import { PLAYER_AUDIO_IDS } from "../../data/audio";
+import { MUSIC_AUDIO_IDS, PLAYER_AUDIO_IDS } from "../../data/audio";
 import { PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
 import { Player } from "../entities";
 import { ActionInput } from "../input";
@@ -193,6 +193,7 @@ export class LevelScene extends Phaser.Scene {
     this.hasCompletedLevel = false;
     this.levelStartedAtMs = this.time.now;
     this.levelStartDeathCount = snapshot.deathCount;
+    this.playGameplayMusic();
 
     this.drawLevelBackground(this.level);
     this.drawTerrain(this.level);
@@ -1318,6 +1319,13 @@ export class LevelScene extends Phaser.Scene {
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
       audioId,
       category: "sfx",
+    });
+  }
+
+  private playGameplayMusic(): void {
+    emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
+      audioId: MUSIC_AUDIO_IDS.MVP_LOOP,
+      category: "music",
     });
   }
 

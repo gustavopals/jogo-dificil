@@ -54,4 +54,18 @@ describe("game events", () => {
 
     expect(eventCount).toBe(1);
   });
+
+  it("emits music mute payloads separately from global mute", () => {
+    const receivedPayloads: Array<{ readonly isMusicMuted: boolean }> = [];
+
+    onGameEvent(GAME_EVENTS.AUDIO_MUSIC_MUTE_CHANGED, (eventPayload) => {
+      receivedPayloads.push(eventPayload);
+    });
+
+    emitGameEvent(GAME_EVENTS.AUDIO_MUSIC_MUTE_CHANGED, {
+      isMusicMuted: true,
+    });
+
+    expect(receivedPayloads).toEqual([{ isMusicMuted: true }]);
+  });
 });

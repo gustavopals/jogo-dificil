@@ -68,5 +68,6 @@ jogo.
 | `assets/audio/sfx/level-trap.wav`                 | Gerado no projeto por script   | Original do projeto | Placeholder curto de armadilha ativada.                           |
 | `assets/audio/sfx/level-falling-platform.wav`     | Gerado no projeto por script   | Original do projeto | Placeholder curto de plataforma caindo.                           |
 | `assets/audio/sfx/level-projectile.wav`           | Gerado no projeto por script   | Original do projeto | Placeholder curto de projétil disparando.                         |
-| `assets/audio/music/mvp-loop.wav`                 | Gerado no projeto por script   | Original do projeto | Loop temporário original do tema `Passos Tortos`.                 |
+| `assets/audio/music/menu-loop.wav`                | Gerado no projeto por script   | Original do projeto | Loop original simples do tema `Entrada Pulante`.                  |
+| `assets/audio/music/mvp-loop.wav`                 | Gerado no projeto por script   | Original do projeto | Loop original simples do tema `Pulos de Azar`.                    |
 | `assets/audio/music/mvp-level-complete-sting.wav` | Gerado no projeto por script   | Original do projeto | Vinheta musical curta de fim de fase.                             |

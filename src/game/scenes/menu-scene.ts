@@ -4,23 +4,29 @@ import {
   PINO_TEXTURE_KEYS,
   PINO_ANIMATIONS,
 } from "../../data/characters/pino-animations";
+import { MUSIC_AUDIO_IDS } from "../../data/audio";
 import { getRequiredLevelDefinition } from "../../data/levels";
 import { GAME_BACKGROUND_COLOR, TILE_SIZE_PX } from "../constants";
+import { emitGameEvent, GAME_EVENTS } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
+import { formatMusicMuteStatus } from "../ui/hud";
 import {
   START_SCREEN_COPY,
   START_SCREEN_LAYOUT,
   START_SCREEN_LEVEL_ID,
+  START_SCREEN_MUSIC_BUTTON_STYLE,
   addDeathsToTotal,
   getTotalDeaths,
   getSessionAttempts,
   incrementSessionAttempts,
+  isPointInsideStartScreenMusicButton,
   pickRandomHumorPhrase,
 } from "../ui/start-screen";
 import { SCENE_KEYS } from "./scene-keys";
 
 export class MenuScene extends Phaser.Scene {
   private hasStarted = false;
+  private unsubscribeState?: () => void;
 
   public constructor() {
     super(SCENE_KEYS.MENU);
@@ -36,12 +42,15 @@ export class MenuScene extends Phaser.Scene {
     }
 
     gameStateStore.enterMenu();
+    this.playMenuMusic();
     this.cameras.main.setBackgroundColor(GAME_BACKGROUND_COLOR);
 
     this.drawBackdrop();
     this.drawParticles();
     this.drawStartScreen();
+    this.drawMusicButton();
     this.bindStartInput();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
 
   private drawBackdrop(): void {
@@ -232,6 +241,61 @@ export class MenuScene extends Phaser.Scene {
     this.playDanceLoop(player, playerX, groundY);
   }
 
+  private drawMusicButton(): void {
+    const button = this.add
+      .rectangle(
+        START_SCREEN_LAYOUT.musicButtonX,
+        START_SCREEN_LAYOUT.musicButtonY,
+        START_SCREEN_LAYOUT.musicButtonWidth,
+        START_SCREEN_LAYOUT.musicButtonHeight,
+        START_SCREEN_MUSIC_BUTTON_STYLE.fillColor,
+        START_SCREEN_MUSIC_BUTTON_STYLE.fillAlpha,
+      )
+      .setOrigin(0, 0)
+      .setStrokeStyle(
+        1,
+        START_SCREEN_MUSIC_BUTTON_STYLE.strokeColor,
+        START_SCREEN_MUSIC_BUTTON_STYLE.strokeAlpha,
+      )
+      .setDepth(20)
+      .setInteractive({ useHandCursor: true });
+
+    const buttonText = this.add
+      .text(
+        START_SCREEN_LAYOUT.musicButtonTextX,
+        START_SCREEN_LAYOUT.musicButtonTextY,
+        "",
+        {
+          color: START_SCREEN_MUSIC_BUTTON_STYLE.textColor,
+          fontFamily: "monospace",
+          fontSize: START_SCREEN_MUSIC_BUTTON_STYLE.fontSize,
+        },
+      )
+      .setOrigin(0.5)
+      .setDepth(21);
+
+    button.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      gameStateStore.toggleMusicMuted();
+    });
+
+    this.unsubscribeState = gameStateStore.subscribe((state) => {
+      buttonText.setText(formatMusicMuteStatus(state.isMusicMuted));
+      buttonText.setColor(
+        state.isMusicMuted
+          ? START_SCREEN_MUSIC_BUTTON_STYLE.mutedTextColor
+          : START_SCREEN_MUSIC_BUTTON_STYLE.textColor,
+      );
+      button.setFillStyle(
+        state.isMusicMuted
+          ? START_SCREEN_MUSIC_BUTTON_STYLE.mutedFillColor
+          : START_SCREEN_MUSIC_BUTTON_STYLE.fillColor,
+        state.isMusicMuted
+          ? START_SCREEN_MUSIC_BUTTON_STYLE.mutedFillAlpha
+          : START_SCREEN_MUSIC_BUTTON_STYLE.fillAlpha,
+      );
+    });
+  }
+
   private registerMenuAnimations(): void {
     PINO_ANIMATIONS.forEach((animation) => {
       if (this.anims.exists(animation.key)) {
@@ -417,7 +481,19 @@ export class MenuScene extends Phaser.Scene {
   private bindStartInput(): void {
     this.input.keyboard?.once("keydown-ENTER", this.startLevel, this);
     this.input.keyboard?.once("keydown-SPACE", this.startLevel, this);
-    this.input.once("pointerdown", this.startLevel, this);
+    this.input.on(
+      Phaser.Input.Events.POINTER_DOWN,
+      this.startLevelFromPointer,
+      this,
+    );
+  }
+
+  private startLevelFromPointer(pointer: Phaser.Input.Pointer): void {
+    if (isPointInsideStartScreenMusicButton(pointer.x, pointer.y)) {
+      return;
+    }
+
+    this.startLevel();
   }
 
   private startLevel(): void {
@@ -432,5 +508,24 @@ export class MenuScene extends Phaser.Scene {
 
     gameStateStore.startLevel(initialLevel.id, initialLevel.spawn);
     this.scene.start(SCENE_KEYS.LEVEL);
+  }
+
+  private playMenuMusic(): void {
+    emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
+      audioId: MUSIC_AUDIO_IDS.MENU_LOOP,
+      category: "music",
+    });
+  }
+
+  private cleanup(): void {
+    this.unsubscribeState?.();
+    this.unsubscribeState = undefined;
+    this.input.off(
+      Phaser.Input.Events.POINTER_DOWN,
+      this.startLevelFromPointer,
+      this,
+    );
+    this.input.keyboard?.off("keydown-ENTER", this.startLevel, this);
+    this.input.keyboard?.off("keydown-SPACE", this.startLevel, this);
   }
 }

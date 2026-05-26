@@ -13,6 +13,7 @@ export const GAME_EVENTS = {
   AUDIO_PLAY_REQUESTED: "audio:play-requested",
   AUDIO_STOP_REQUESTED: "audio:stop-requested",
   AUDIO_MUTE_CHANGED: "audio:mute-changed",
+  AUDIO_MUSIC_MUTE_CHANGED: "audio:music-mute-changed",
 } as const;
 
 export type DeathCause =
@@ -68,6 +69,10 @@ export type AudioMuteChangedEvent = {
   readonly isMuted: boolean;
 };
 
+export type AudioMusicMuteChangedEvent = {
+  readonly isMusicMuted: boolean;
+};
+
 export type GameEventPayloadMap = {
   readonly [GAME_EVENTS.PLAYER_DIED]: PlayerDiedEvent;
   readonly [GAME_EVENTS.PLAYER_RESPAWNED]: PlayerRespawnedEvent;
@@ -76,6 +81,7 @@ export type GameEventPayloadMap = {
   readonly [GAME_EVENTS.AUDIO_PLAY_REQUESTED]: AudioPlayRequestedEvent;
   readonly [GAME_EVENTS.AUDIO_STOP_REQUESTED]: AudioStopRequestedEvent;
   readonly [GAME_EVENTS.AUDIO_MUTE_CHANGED]: AudioMuteChangedEvent;
+  readonly [GAME_EVENTS.AUDIO_MUSIC_MUTE_CHANGED]: AudioMusicMuteChangedEvent;
 };
 
 export type GameEventName = keyof GameEventPayloadMap;

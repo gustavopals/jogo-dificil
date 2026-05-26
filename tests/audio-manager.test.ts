@@ -113,6 +113,22 @@ describe("audio manager", () => {
     expect(engine.handles[1]!.volumeHistory).toEqual([0.75, 0, 0.75]);
   });
 
+  it("allows music volume to be muted without silencing sound effects", () => {
+    const engine = new FakeAudioEngine();
+    const manager = new AudioManager(engine);
+
+    manager.registerAudio([MUSIC, SFX]);
+    manager.play(MUSIC.id);
+    manager.play(SFX.id);
+
+    manager.setMusicVolume(0);
+
+    expect(manager.getEffectiveVolume("music", MUSIC.volume)).toBe(0);
+    expect(manager.getEffectiveVolume("sfx", SFX.volume)).toBe(0.75);
+    expect(engine.handles[0]!.volumeHistory).toEqual([0.4, 0]);
+    expect(engine.handles[1]!.volumeHistory).toEqual([0.75, 0.75]);
+  });
+
   it("keeps music loops from restarting and replaces different tracks", () => {
     const engine = new FakeAudioEngine();
     const manager = new AudioManager(engine);

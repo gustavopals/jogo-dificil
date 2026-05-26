@@ -36,7 +36,11 @@ export class AudioScene extends Phaser.Scene {
       DEFAULT_AUDIO_SETTINGS,
     );
     this.audioManager.registerAudio(getInitialAudioDefinitions());
-    this.audioManager.setMuted(gameStateStore.getSnapshot().isMuted);
+    const initialAudioState = gameStateStore.getSnapshot();
+    this.audioManager.setMuted(initialAudioState.isMuted);
+    this.audioManager.setMusicVolume(
+      getMusicVolumeForMuteState(initialAudioState.isMusicMuted),
+    );
 
     this.unsubscribeEvents = [
       onGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, (payload) => {
@@ -47,6 +51,11 @@ export class AudioScene extends Phaser.Scene {
       }),
       onGameEvent(GAME_EVENTS.AUDIO_MUTE_CHANGED, ({ isMuted }) => {
         this.audioManager?.setMuted(isMuted);
+      }),
+      onGameEvent(GAME_EVENTS.AUDIO_MUSIC_MUTE_CHANGED, ({ isMusicMuted }) => {
+        this.audioManager?.setMusicVolume(
+          getMusicVolumeForMuteState(isMusicMuted),
+        );
       }),
       onGameEvent(GAME_EVENTS.PLAYER_DIED, ({ deathCount }) => {
         this.audioManager?.play(getPlayerDeathAudioId(deathCount));
@@ -114,4 +123,8 @@ function getInitialAudioDefinitions(): readonly AudioDefinition[] {
   });
 
   return audioDefinitions;
+}
+
+function getMusicVolumeForMuteState(isMusicMuted: boolean): number {
+  return isMusicMuted ? 0 : DEFAULT_AUDIO_SETTINGS.musicVolume;
 }

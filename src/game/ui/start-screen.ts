@@ -37,6 +37,24 @@ export const START_SCREEN_LAYOUT = {
   groundY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3,
   playerX: 104,
   exitX: GAME_RESOLUTION.width - 92,
+  musicButtonX: GAME_RESOLUTION.width - 38,
+  musicButtonY: 10,
+  musicButtonWidth: 28,
+  musicButtonHeight: 14,
+  musicButtonTextX: GAME_RESOLUTION.width - 24,
+  musicButtonTextY: 17,
+} as const;
+
+export const START_SCREEN_MUSIC_BUTTON_STYLE = {
+  fillColor: 0x80d7c2,
+  fillAlpha: 0.86,
+  mutedFillColor: 0x262b31,
+  mutedFillAlpha: 0.84,
+  strokeColor: 0xf5f7fb,
+  strokeAlpha: 0.42,
+  textColor: "#050608",
+  mutedTextColor: "#f5f7fb",
+  fontSize: "9px",
 } as const;
 
 const STORAGE_KEY = "jogo-dificil-stats";
@@ -106,4 +124,18 @@ export function incrementSessionAttempts(): number {
 
 export function getSessionAttempts(): number {
   return sessionAttempts;
+}
+
+export function isPointInsideStartScreenMusicButton(
+  x: number,
+  y: number,
+): boolean {
+  return (
+    x >= START_SCREEN_LAYOUT.musicButtonX &&
+    x <=
+      START_SCREEN_LAYOUT.musicButtonX + START_SCREEN_LAYOUT.musicButtonWidth &&
+    y >= START_SCREEN_LAYOUT.musicButtonY &&
+    y <=
+      START_SCREEN_LAYOUT.musicButtonY + START_SCREEN_LAYOUT.musicButtonHeight
+  );
 }

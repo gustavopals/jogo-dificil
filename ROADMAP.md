@@ -1477,9 +1477,9 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   ativada, plataforma caindo e projetil disparando agora emitem cues de audio,
   com contratos em `tests/level-audio.test.ts` e
   `tests/level-audio-feedback.test.ts`.
-- [x] Task 9.4 concluida: tema inicial `Passos Tortos` definido em
-  `src/data/audio/music-audio.ts`, com loop temporario original e vinheta curta
-  de fim de fase em `assets/audio/music/`. O loop e iniciado apos o preload,
+- [x] Task 9.4 concluida: tema inicial `Pulos de Azar` definido em
+  `src/data/audio/music-audio.ts`, com loop original simples e vinheta curta de
+  fim de fase em `assets/audio/music/`. O loop e iniciado apos o preload,
   continua durante mortes/respawns e o `AudioManager` evita reiniciar a mesma
   musica quando o mesmo id ja esta ativo.
 - [x] Task 10.1 concluida: `MenuScene` agora renderiza uma tela inicial curta,
@@ -1593,3 +1593,10 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   chunk principal caiu de ~1.303 kB para ~104 kB, o vendor do Phaser ficou
   cacheavel separadamente em ~1.199 kB e o aviso de chunk grande do Vite saiu
   do build. A decisao fica registrada em `docs/build-optimization.md`.
+- [x] Melhoria sonora pos-Fase 15 concluida: `assets/audio/music/mvp-loop.wav`
+  foi substituido por um loop original simples e divertido de 10s, e o HUD
+  ganhou um botao `♪`/`OFF` para mutar apenas a musica sem desligar efeitos.
+- [x] Musica da tela inicial adicionada: `assets/audio/music/menu-loop.wav`
+  define o tema original `Entrada Pulante`, diferente da trilha de gameplay. O
+  menu toca essa faixa, a `LevelScene` troca para `Pulos de Azar` ao iniciar a
+  fase e o botao `♪`/`OFF` tambem aparece na tela inicial.

@@ -83,6 +83,7 @@ npm run format
 - `R`: reiniciar do checkpoint ativo.
 - `Esc`: pausar/retomar.
 - `M`: mutar/desmutar audio.
+- Botao `♪` na tela inicial e no HUD: mutar/desmutar apenas a musica.
 
 ## Fluxo Atual
 
