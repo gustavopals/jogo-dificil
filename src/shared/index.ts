@@ -15,6 +15,10 @@ export type { RectLike, Vector2Like } from "./geometry";
 export type {
   CheckpointDefinition,
   CheckpointId,
+  EnergyPowerKind,
+  EnergyTargetDefinition,
+  EnergyTargetId,
+  EnergyTargetKind,
   ExitId,
   ExitDefinition,
   HazardDefinition,
@@ -50,3 +54,8 @@ export type {
   InputState,
   SystemAction,
 } from "./input";
+export {
+  DEFAULT_PLAYER_INITIAL_ENERGY,
+  PLAYER_ENERGY_MAX,
+  PLAYER_ENERGY_MIN,
+} from "./player-energy";

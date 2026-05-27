@@ -4,6 +4,9 @@ export { LEVEL_03 } from "./level-03";
 export { LEVEL_04 } from "./level-04";
 export { LEVEL_05 } from "./level-05";
 export { LEVEL_06 } from "./level-06";
+export { LEVEL_07 } from "./level-07";
+export { LEVEL_08 } from "./level-08";
+export { LEVEL_09 } from "./level-09";
 export {
   getLevelDefinition,
   getRequiredLevelDefinition,
@@ -12,6 +15,10 @@ export {
 export { defineLevel } from "./schema";
 export type {
   CheckpointDefinition,
+  EnergyPowerKind,
+  EnergyTargetDefinition,
+  EnergyTargetId,
+  EnergyTargetKind,
   ExitDefinition,
   HazardDefinition,
   InteractiveObjectAction,

@@ -34,6 +34,47 @@ type DevQaCommandResult = {
   readonly snapshot?: DevQaSnapshot;
 };
 
+type DevQaPlayerSnapshot = {
+  readonly position: DebugVector;
+  readonly velocity: DebugVector;
+  readonly isGrounded: boolean;
+  readonly isAlive: boolean;
+  readonly animationState: string;
+  readonly energy: number;
+  readonly energyActivity: string;
+};
+
+type DevQaInteractiveObjectSnapshot = {
+  readonly id: string;
+  readonly kind: string;
+  readonly isActive: boolean;
+  readonly resetOnRespawn: boolean;
+};
+
+type DevQaEnergyTargetSnapshot = {
+  readonly id: string;
+  readonly kind: string;
+  readonly hitPoints: number;
+  readonly hitPointsRemaining: number;
+  readonly activationRemainingMs: number;
+  readonly relayWindowRemainingMs: number;
+  readonly absorbedEnergyHits: number;
+  readonly isActive: boolean;
+  readonly isBroken: boolean;
+  readonly resetOnRespawn: boolean;
+};
+
+type DevQaEnergyStateSnapshot = {
+  readonly energy: number;
+  readonly activity: string;
+  readonly sparkCooldownRemainingMs: number;
+  readonly burstCooldownRemainingMs: number;
+  readonly burstPreparationRemainingMs: number;
+  readonly burstDurationRemainingMs: number;
+  readonly canUseCyanSpark: boolean;
+  readonly canPrepareCyanBurst: boolean;
+};
+
 type DevQaSnapshot = {
   readonly currentLevelId: string;
   readonly deathCount: number;
@@ -53,6 +94,9 @@ type DevQaSnapshot = {
       readonly isTriggered: boolean;
       readonly isResolved: boolean;
     }[];
+    readonly player: DevQaPlayerSnapshot | null;
+    readonly interactiveObjects: readonly DevQaInteractiveObjectSnapshot[];
+    readonly energyTargets: readonly DevQaEnergyTargetSnapshot[];
   } | null;
 };
 
@@ -61,6 +105,9 @@ type DevQaApi = {
   readonly startLevel?: (levelId: string) => DevQaCommandResult;
   readonly goToCheckpoint?: (checkpointId?: string) => DevQaCommandResult;
   readonly completeLevel?: () => DevQaCommandResult;
+  readonly fillEnergy?: () => DevQaCommandResult;
+  readonly clearEnergyCooldowns?: () => DevQaCommandResult;
+  readonly readEnergyState?: () => DevQaEnergyStateSnapshot | null;
 };
 
 type DebugGame = {
@@ -218,6 +265,185 @@ test("ferramentas dev de QA iniciam fase, pulam checkpoint e simulam conclusao",
     .toContain("level-transition");
 });
 
+test("energia ciano carrega, dispara centelha, solta rajada e ativa alvo", async ({
+  page,
+}) => {
+  const consoleErrors: string[] = [];
+  const pageErrors: string[] = [];
+
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      consoleErrors.push(message.text());
+    }
+  });
+  page.on("pageerror", (error) => {
+    pageErrors.push(error.message);
+  });
+
+  await page.goto("/");
+  await waitForQaTools(page);
+
+  await startLevelWithQa(page, "level-07");
+  await expect
+    .poll(() => readEnergyStateWithQa(page))
+    .toMatchObject({
+      energy: 20,
+      activity: "idle",
+      canUseCyanSpark: true,
+      canPrepareCyanBurst: false,
+    });
+  await expect
+    .poll(
+      async () => (await readRequiredQaSnapshot(page)).level?.player?.energy,
+    )
+    .toBe(20);
+
+  await tapKey(page, "KeyK");
+
+  await expect
+    .poll(
+      async () =>
+        findEnergyTargetSnapshot(
+          await readRequiredQaSnapshot(page),
+          "level-07-first-spark-switch",
+        )?.isActive,
+    )
+    .toBe(true);
+  await expect
+    .poll(
+      async () =>
+        findInteractiveObjectSnapshot(
+          await readRequiredQaSnapshot(page),
+          "level-07-training-door",
+        )?.isActive,
+    )
+    .toBe(true);
+  await expect
+    .poll(
+      async () => (await readRequiredQaSnapshot(page)).level?.player?.energy,
+    )
+    .toBe(10);
+
+  const fillEnergyResult = await page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.fillEnergy?.(),
+  );
+
+  expect(fillEnergyResult).toMatchObject({
+    ok: true,
+  });
+  await expect
+    .poll(() => readEnergyStateWithQa(page))
+    .toMatchObject({
+      energy: 100,
+      activity: "idle",
+      canPrepareCyanBurst: true,
+    });
+
+  await page.keyboard.down("KeyK");
+  await expect
+    .poll(async () => (await readEnergyStateWithQa(page))?.activity, {
+      timeout: 1_500,
+    })
+    .toBe("burst-preparing");
+
+  const clearCooldownsResult = await page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.clearEnergyCooldowns?.(),
+  );
+
+  expect(clearCooldownsResult).toMatchObject({
+    ok: true,
+  });
+  await page.keyboard.up("KeyK");
+  await expect
+    .poll(() => readEnergyStateWithQa(page))
+    .toMatchObject({
+      energy: 100,
+      activity: "idle",
+      sparkCooldownRemainingMs: 0,
+      burstCooldownRemainingMs: 0,
+      burstPreparationRemainingMs: 0,
+      burstDurationRemainingMs: 0,
+      canPrepareCyanBurst: true,
+    });
+
+  await startLevelWithQa(page, "level-08");
+  const checkpointResult = await page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.goToCheckpoint?.(
+      "level-08-before-cracked-block",
+    ),
+  );
+
+  expect(checkpointResult).toMatchObject({
+    ok: true,
+  });
+  await expect
+    .poll(() => readRequiredQaSnapshot(page))
+    .toMatchObject({
+      currentLevelId: "level-08",
+      activeCheckpoint: {
+        id: "level-08-before-cracked-block",
+      },
+    });
+
+  await page.keyboard.down("KeyL");
+  await expect
+    .poll(
+      async () => (await readRequiredQaSnapshot(page)).level?.player?.energy,
+      {
+        timeout: 3_000,
+      },
+    )
+    .toBe(100);
+  await page.keyboard.up("KeyL");
+  await expect
+    .poll(
+      async () =>
+        (await readRequiredQaSnapshot(page)).level?.player?.energyActivity,
+    )
+    .toBe("idle");
+
+  expect(
+    findEnergyTargetSnapshot(
+      await readRequiredQaSnapshot(page),
+      "level-08-cracked-block",
+    ),
+  ).toMatchObject({
+    isBroken: false,
+    hitPointsRemaining: 2,
+  });
+
+  await page.keyboard.down("KeyK");
+  await expect
+    .poll(
+      async () =>
+        (await readRequiredQaSnapshot(page)).level?.player?.energyActivity,
+      {
+        timeout: 1_500,
+      },
+    )
+    .toBe("burst-preparing");
+  await page.waitForTimeout(700);
+  await page.keyboard.up("KeyK");
+
+  await expect
+    .poll(
+      async () =>
+        findEnergyTargetSnapshot(
+          await readRequiredQaSnapshot(page),
+          "level-08-cracked-block",
+        )?.isBroken,
+    )
+    .toBe(true);
+  await expect
+    .poll(
+      async () => (await readRequiredQaSnapshot(page)).level?.player?.energy,
+    )
+    .toBe(0);
+
+  expect(pageErrors).toEqual([]);
+  expect(consoleErrors).toEqual([]);
+});
+
 async function readSmokeSnapshot(page: Page): Promise<SmokeSnapshot> {
   return page.evaluate(() => {
     const game = (window as DebugWindow).__JOGO_DIFICIL_GAME__;
@@ -266,7 +492,10 @@ async function waitForQaTools(page: Page): Promise<void> {
           qa?.readSnapshot &&
           qa.startLevel &&
           qa.goToCheckpoint &&
-          qa.completeLevel,
+          qa.completeLevel &&
+          qa.fillEnergy &&
+          qa.clearEnergyCooldowns &&
+          qa.readEnergyState,
         );
       }),
     )
@@ -289,4 +518,42 @@ async function readQaSnapshot(page: Page): Promise<DevQaSnapshot | undefined> {
   return page.evaluate(() =>
     (window as DebugWindow).__JOGO_DIFICIL_QA__?.readSnapshot?.(),
   );
+}
+
+async function readRequiredQaSnapshot(page: Page): Promise<DevQaSnapshot> {
+  const snapshot = await readQaSnapshot(page);
+
+  expect(snapshot).toBeDefined();
+
+  return snapshot!;
+}
+
+async function readEnergyStateWithQa(
+  page: Page,
+): Promise<DevQaEnergyStateSnapshot | null | undefined> {
+  return page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.readEnergyState?.(),
+  );
+}
+
+async function tapKey(page: Page, key: string): Promise<void> {
+  await page.keyboard.down(key);
+  await page.waitForTimeout(80);
+  await page.keyboard.up(key);
+}
+
+function findInteractiveObjectSnapshot(
+  snapshot: DevQaSnapshot,
+  objectId: string,
+): DevQaInteractiveObjectSnapshot | undefined {
+  return snapshot.level?.interactiveObjects.find(
+    (object) => object.id === objectId,
+  );
+}
+
+function findEnergyTargetSnapshot(
+  snapshot: DevQaSnapshot,
+  targetId: string,
+): DevQaEnergyTargetSnapshot | undefined {
+  return snapshot.level?.energyTargets.find((target) => target.id === targetId);
 }

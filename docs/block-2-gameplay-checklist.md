@@ -18,7 +18,7 @@ expandir a campanha linear depois do MVP inicial.
 - [x] `level-03` aponta para `level-04`.
 - [x] `level-04` aponta para `level-05`.
 - [x] `level-05` aponta para `level-06`.
-- [x] `level-06` encerra a campanha atual.
+- [x] `level-06` aponta para `level-07`, abrindo o Bloco 3.
 - [x] As 3 fases novas passam no validador de fase.
 - [x] Cada fase nova tem checkpoint, saida e contato de conclusao.
 - [x] Testes de conteudo cobrem a curva do Bloco 2.
@@ -38,7 +38,7 @@ expandir a campanha linear depois do MVP inicial.
 - [ ] `level-06`: reconhecer o falso piso final em segunda tentativa e concluir.
 - [ ] Concluir `level-04 -> level-05 -> level-06` sem voltar manualmente para o
       menu.
-- [ ] Conferir que a transicao final aparece apenas depois de `level-06`.
+- [ ] Conferir que `level-06` transiciona para `level-07`, nao para tela final.
 
 ## Criterio De Ajuste
 

@@ -9,6 +9,7 @@ import { getRequiredLevelDefinition } from "../../data/levels";
 import { GAME_BACKGROUND_COLOR, TILE_SIZE_PX } from "../constants";
 import { emitGameEvent, GAME_EVENTS } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
+import { resolveLevelInitialEnergy } from "../systems/level-progress";
 import { formatMusicMuteStatus } from "../ui/hud";
 import {
   START_SCREEN_COPY,
@@ -506,7 +507,11 @@ export class MenuScene extends Phaser.Scene {
 
     const initialLevel = getRequiredLevelDefinition(START_SCREEN_LEVEL_ID);
 
-    gameStateStore.startLevel(initialLevel.id, initialLevel.spawn);
+    gameStateStore.startLevel(
+      initialLevel.id,
+      initialLevel.spawn,
+      resolveLevelInitialEnergy(initialLevel),
+    );
     this.scene.start(SCENE_KEYS.LEVEL);
   }
 

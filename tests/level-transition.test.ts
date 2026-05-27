@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LEVEL_01, LEVEL_02, LEVEL_06 } from "../src/data/levels";
+import { LEVEL_01, LEVEL_02, LEVEL_09 } from "../src/data/levels";
 import {
   createLevelTransitionLabels,
   formatTransitionDeaths,
@@ -23,9 +23,9 @@ describe("level transition UI", () => {
   });
 
   it("formats the final campaign screen after the last phase", () => {
-    expect(createLevelTransitionLabels(LEVEL_06, undefined, 9)).toMatchObject({
+    expect(createLevelTransitionLabels(LEVEL_09, undefined, 9)).toMatchObject({
       title: "Campanha concluida",
-      detail: "As 6 fases atuais foram vencidas",
+      detail: "As 9 fases atuais foram vencidas",
       result: "",
       deaths: "Mortes 9",
       prompt: "ENTER reinicia",

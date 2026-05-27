@@ -6,6 +6,7 @@ import {
   type AudioPlaybackEngine,
   type AudioPlaybackHandle,
 } from "../src/game/systems/audio-manager";
+import { ENERGY_AUDIO_DEFINITIONS, ENERGY_AUDIO_IDS } from "../src/data/audio";
 import type { AudioDefinition, AudioCategory } from "../src/shared";
 
 const MUSIC: AudioDefinition = {
@@ -113,6 +114,33 @@ describe("audio manager", () => {
     expect(engine.handles[1]!.volumeHistory).toEqual([0.75, 0, 0.75]);
   });
 
+  it("applies global mute to the active Energia Ciano charge loop", () => {
+    const engine = new FakeAudioEngine();
+    const manager = new AudioManager(engine);
+    const chargeLoop = ENERGY_AUDIO_DEFINITIONS.find(
+      (audio) => audio.id === ENERGY_AUDIO_IDS.CHARGE_LOOP,
+    )!;
+
+    manager.registerAudio(ENERGY_AUDIO_DEFINITIONS);
+    expect(manager.play(ENERGY_AUDIO_IDS.CHARGE_LOOP)).toBe("played");
+
+    manager.setMuted(true);
+    manager.setMuted(false);
+
+    expect(engine.playedConfigs).toEqual([
+      {
+        audioId: ENERGY_AUDIO_IDS.CHARGE_LOOP,
+        volume: chargeLoop.volume,
+        loop: true,
+      },
+    ]);
+    expect(engine.handles[0]!.volumeHistory).toEqual([
+      chargeLoop.volume,
+      0,
+      chargeLoop.volume,
+    ]);
+  });
+
   it("allows music volume to be muted without silencing sound effects", () => {
     const engine = new FakeAudioEngine();
     const manager = new AudioManager(engine);
@@ -192,6 +220,27 @@ describe("audio manager", () => {
       pendingPlayCount: 0,
       activeSoundCount: 1,
     });
+  });
+
+  it("removes pending play requests when a sound is stopped before unlock", () => {
+    const engine = new FakeAudioEngine(false);
+    const manager = new AudioManager(engine);
+
+    manager.registerAudio(ENERGY_AUDIO_DEFINITIONS);
+
+    expect(manager.play(ENERGY_AUDIO_IDS.CHARGE_LOOP)).toBe("queued-autoplay");
+    manager.stop(ENERGY_AUDIO_IDS.CHARGE_LOOP);
+
+    expect(manager.getSnapshot()).toMatchObject({
+      isAutoplayBlocked: false,
+      pendingPlayCount: 0,
+      activeSoundCount: 0,
+    });
+
+    engine.isUnlocked = true;
+    manager.unlockPlayback();
+
+    expect(engine.playedConfigs).toEqual([]);
   });
 
   it("reports missing audio and missing engine without throwing", () => {

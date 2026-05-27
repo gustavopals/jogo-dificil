@@ -16,6 +16,7 @@ describe("input bindings", () => {
     expect(getKeysForAction("jump")).toEqual(["SPACE", "W", "UP"]);
     expect(getKeysForAction("primary")).toEqual(["J", "Z"]);
     expect(getKeysForAction("secondary")).toEqual(["K", "X"]);
+    expect(getKeysForAction("charge-energy")).toEqual(["L", "C"]);
     expect(getKeysForAction("restart")).toEqual(["R"]);
     expect(getKeysForAction("pause")).toEqual(["ESC"]);
     expect(getKeysForAction("mute")).toEqual(["M"]);
@@ -37,10 +38,30 @@ describe("input bindings", () => {
       jump: true,
       primary: false,
       secondary: false,
+      "charge-energy": false,
       restart: false,
       pause: false,
       mute: true,
     });
+  });
+
+  it("keeps charge-energy as a held gameplay action independent from secondary", () => {
+    expect(createInputState(["charge-energy"])).toMatchObject({
+      secondary: false,
+      "charge-energy": true,
+    });
+    expect(createInputState(["secondary"])).toMatchObject({
+      secondary: true,
+      "charge-energy": false,
+    });
+  });
+
+  it("keeps K/X secondary keys separate from L/C charge keys", () => {
+    const secondaryKeys = new Set(getKeysForAction("secondary"));
+    const chargeKeys = getKeysForAction("charge-energy");
+
+    expect(chargeKeys).toEqual(["L", "C"]);
+    expect(chargeKeys.every((key) => !secondaryKeys.has(key))).toBe(true);
   });
 
   it("resolves custom binding maps without falling back to defaults", () => {
@@ -62,6 +83,7 @@ describe("input bindings", () => {
 
   it("identifies known input actions", () => {
     expect(isInputAction("primary")).toBe(true);
+    expect(isInputAction("charge-energy")).toBe(true);
     expect(isInputAction("pause")).toBe(true);
     expect(isInputAction("enter")).toBe(false);
 

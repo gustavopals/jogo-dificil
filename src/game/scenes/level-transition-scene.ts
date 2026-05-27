@@ -6,6 +6,7 @@ import type { LevelId } from "../../shared";
 import { GAME_BACKGROUND_COLOR, GAME_RESOLUTION } from "../constants";
 import { emitGameEvent, GAME_EVENTS } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
+import { resolveLevelInitialEnergy } from "../systems/level-progress";
 import type { LevelCompletionResult } from "../systems/level-results";
 import {
   createLevelTransitionLabels,
@@ -160,7 +161,11 @@ export class LevelTransitionScene extends Phaser.Scene {
 
     const nextLevel = getRequiredLevelDefinition(this.nextLevelId);
 
-    gameStateStore.startLevel(nextLevel.id, nextLevel.spawn);
+    gameStateStore.startLevel(
+      nextLevel.id,
+      nextLevel.spawn,
+      resolveLevelInitialEnergy(nextLevel),
+    );
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
       audioId: MUSIC_AUDIO_IDS.MVP_LOOP,
       category: "music",

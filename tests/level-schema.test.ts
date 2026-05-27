@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { defineLevel, type LevelDefinition } from "../src/data/levels/schema";
+import {
+  defineLevel,
+  type EnergyPowerKind,
+  type EnergyTargetDefinition,
+  type EnergyTargetKind,
+  type LevelDefinition,
+} from "../src/data/levels/schema";
 
 const SAMPLE_LEVEL = defineLevel({
   id: "level-schema-test",
   name: "Sala de Schema",
   order: 99,
   theme: "test-lab",
+  initialEnergy: 55,
   bounds: {
     x: 0,
     y: 0,
@@ -29,6 +36,7 @@ const SAMPLE_LEVEL = defineLevel({
   checkpoints: [
     {
       id: "level-schema-test-start",
+      initialEnergy: 80,
       position: {
         x: 64,
         y: 222,
@@ -125,6 +133,95 @@ const SAMPLE_LEVEL = defineLevel({
       resetOnRespawn: true,
     },
   ],
+  energyTargets: [
+    {
+      id: "switch-test",
+      kind: "energy-switch",
+      area: {
+        x: 736,
+        y: 198,
+        width: 16,
+        height: 24,
+      },
+      acceptedPowers: ["cyan-spark", "cyan-burst"],
+      hitPoints: 1,
+      resetOnRespawn: true,
+      activatesObjectId: "lever-test",
+    },
+    {
+      id: "cracked-block-test",
+      kind: "energy-cracked-block",
+      area: {
+        x: 760,
+        y: 190,
+        width: 24,
+        height: 32,
+      },
+      acceptedPowers: ["cyan-burst"],
+      hitPoints: 2,
+      resetOnRespawn: true,
+      startsBroken: false,
+      blocksMovement: true,
+    },
+    {
+      id: "relay-test",
+      kind: "energy-relay",
+      area: {
+        x: 800,
+        y: 198,
+        width: 16,
+        height: 24,
+      },
+      acceptedPowers: ["cyan-spark"],
+      hitPoints: 3,
+      resetOnRespawn: true,
+      activatesObjectId: "lever-test",
+      relayWindowMs: 900,
+    },
+    {
+      id: "absorber-test",
+      kind: "energy-absorber",
+      area: {
+        x: 832,
+        y: 198,
+        width: 16,
+        height: 24,
+      },
+      acceptedPowers: ["cyan-spark", "cyan-burst"],
+      hitPoints: 1,
+      resetOnRespawn: true,
+      absorbsEnergy: true,
+    },
+    {
+      id: "core-test",
+      kind: "energy-core",
+      area: {
+        x: 864,
+        y: 174,
+        width: 24,
+        height: 48,
+      },
+      acceptedPowers: ["cyan-burst"],
+      hitPoints: 1,
+      resetOnRespawn: true,
+      activatesObjectId: "lever-test",
+      activationDurationMs: 1400,
+    },
+    {
+      id: "boss-hurtbox-test",
+      kind: "boss-hurtbox",
+      area: {
+        x: 704,
+        y: 164,
+        width: 24,
+        height: 58,
+      },
+      acceptedPowers: ["cyan-spark", "cyan-burst"],
+      hitPoints: 4,
+      resetOnRespawn: false,
+      hitGroupId: "boss-test",
+    },
+  ],
   audio: {
     musicId: "music-test-loop",
     sounds: [
@@ -152,6 +249,12 @@ describe("level schema", () => {
   it("accepts a complete declarative level definition", () => {
     expect(SAMPLE_LEVEL).toMatchObject({
       id: "level-schema-test",
+      initialEnergy: 55,
+      checkpoints: [
+        {
+          initialEnergy: 80,
+        },
+      ],
       terrain: [
         {
           id: "floor-main",
@@ -164,6 +267,67 @@ describe("level schema", () => {
           kind: "spike-pop",
         },
       ],
+      energyTargets: expect.arrayContaining([
+        expect.objectContaining({
+          id: "switch-test",
+          kind: "energy-switch",
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          activatesObjectId: "lever-test",
+        }),
+        expect.objectContaining({
+          id: "cracked-block-test",
+          kind: "energy-cracked-block",
+          acceptedPowers: ["cyan-burst"],
+        }),
+        expect.objectContaining({
+          id: "relay-test",
+          kind: "energy-relay",
+          acceptedPowers: ["cyan-spark"],
+          relayWindowMs: 900,
+        }),
+        expect.objectContaining({
+          id: "absorber-test",
+          kind: "energy-absorber",
+          absorbsEnergy: true,
+        }),
+        expect.objectContaining({
+          id: "core-test",
+          kind: "energy-core",
+          activationDurationMs: 1400,
+        }),
+        expect.objectContaining({
+          id: "boss-hurtbox-test",
+          kind: "boss-hurtbox",
+          hitGroupId: "boss-test",
+        }),
+      ]),
     });
+  });
+
+  it("exports the declarative energy target schema for every target kind", () => {
+    const energyTargets =
+      SAMPLE_LEVEL.energyTargets satisfies readonly EnergyTargetDefinition[];
+    const targetKinds: readonly EnergyTargetKind[] = energyTargets.map(
+      (target) => target.kind,
+    );
+    const acceptedPowers: readonly (readonly EnergyPowerKind[])[] =
+      energyTargets.map((target) => target.acceptedPowers);
+
+    expect(targetKinds).toEqual([
+      "energy-switch",
+      "energy-cracked-block",
+      "energy-relay",
+      "energy-absorber",
+      "energy-core",
+      "boss-hurtbox",
+    ]);
+    expect(acceptedPowers).toEqual([
+      ["cyan-spark", "cyan-burst"],
+      ["cyan-burst"],
+      ["cyan-spark"],
+      ["cyan-spark", "cyan-burst"],
+      ["cyan-burst"],
+      ["cyan-spark", "cyan-burst"],
+    ]);
   });
 });

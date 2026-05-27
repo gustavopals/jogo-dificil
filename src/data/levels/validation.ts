@@ -1,8 +1,17 @@
-import type { LevelDefinition } from "../../shared";
+import {
+  DEFAULT_PLAYER_INITIAL_ENERGY,
+  PLAYER_ENERGY_MAX,
+  PLAYER_ENERGY_MIN,
+  type EnergyPowerKind,
+  type EnergyTargetDefinition,
+  type LevelDefinition,
+} from "../../shared";
 import type { RectLike, Vector2Like } from "../../shared";
 
 export type LevelValidationCode =
   | "duplicate-id"
+  | "invalid-energy"
+  | "invalid-energy-target"
   | "invalid-rect"
   | "missing-reference"
   | "out-of-bounds"
@@ -25,10 +34,14 @@ type ValidationIssueDraft = {
   readonly message: string;
 };
 
+const CYAN_SPARK_POWER: EnergyPowerKind = "cyan-spark";
+const CYAN_BURST_POWER: EnergyPowerKind = "cyan-burst";
+
 export function validateLevel(level: LevelDefinition): LevelValidationResult {
   const issues: ValidationIssueDraft[] = [];
 
   validateRect("bounds", level.bounds, issues);
+  validateInitialEnergy("initialEnergy", level.initialEnergy, issues);
   validatePointInBounds("spawn", level.spawn, level.bounds, issues);
   validateRectInBounds("exit.area", level.exit.area, level.bounds, issues);
   validateUniqueLevelEntityIds(level, issues);
@@ -38,6 +51,7 @@ export function validateLevel(level: LevelDefinition): LevelValidationResult {
   validateTraps(level, issues);
   validateItems(level, issues);
   validateInteractiveObjects(level, issues);
+  validateEnergyTargets(level, issues);
   validateReferencedAssets(level, issues);
 
   return createResult(issues);
@@ -103,6 +117,10 @@ function validateUniqueLevelEntityIds(
       id: interactiveObject.id,
       path: `interactiveObjects[${index}].id`,
     })),
+    ...(level.energyTargets ?? []).map((energyTarget, index) => ({
+      id: energyTarget.id,
+      path: `energyTargets[${index}].id`,
+    })),
   ];
 
   const seenIds = new Map<string, string>();
@@ -141,7 +159,34 @@ function validateCheckpoints(
       level.bounds,
       issues,
     );
+    validateInitialEnergy(
+      `checkpoints[${index}].initialEnergy`,
+      checkpoint.initialEnergy,
+      issues,
+    );
   });
+}
+
+function validateInitialEnergy(
+  path: string,
+  initialEnergy: number | undefined,
+  issues: ValidationIssueDraft[],
+): void {
+  if (initialEnergy === undefined) {
+    return;
+  }
+
+  if (
+    !Number.isFinite(initialEnergy) ||
+    initialEnergy < PLAYER_ENERGY_MIN ||
+    initialEnergy > PLAYER_ENERGY_MAX
+  ) {
+    issues.push({
+      code: "invalid-energy",
+      path,
+      message: `Initial energy must be between ${PLAYER_ENERGY_MIN} and ${PLAYER_ENERGY_MAX}. Default is ${DEFAULT_PLAYER_INITIAL_ENERGY}.`,
+    });
+  }
 }
 
 function validateTerrain(
@@ -259,6 +304,50 @@ function validateInteractiveObjects(
   });
 }
 
+function validateEnergyTargets(
+  level: LevelDefinition,
+  issues: ValidationIssueDraft[],
+): void {
+  const interactiveObjectIds = new Set(
+    level.interactiveObjects.map((interactiveObject) => interactiveObject.id),
+  );
+
+  (level.energyTargets ?? []).forEach((energyTarget, index) => {
+    validateRectInBounds(
+      `energyTargets[${index}].area`,
+      energyTarget.area,
+      level.bounds,
+      issues,
+    );
+
+    if (
+      !Number.isInteger(energyTarget.hitPoints) ||
+      energyTarget.hitPoints <= 0
+    ) {
+      issues.push({
+        code: "invalid-energy-target",
+        path: `energyTargets[${index}].hitPoints`,
+        message: `Energy target "${energyTarget.id}" must have positive integer hitPoints.`,
+      });
+    }
+
+    validateEnergyTargetPowers(energyTarget, index, issues);
+    validateEnergyTargetTiming(energyTarget, index, issues);
+    validateEnergyTargetKindRules(energyTarget, index, issues);
+
+    if (
+      energyTarget.activatesObjectId &&
+      !interactiveObjectIds.has(energyTarget.activatesObjectId)
+    ) {
+      issues.push({
+        code: "missing-reference",
+        path: `energyTargets[${index}].activatesObjectId`,
+        message: `Energy target "${energyTarget.id}" activates missing interactive object "${energyTarget.activatesObjectId}".`,
+      });
+    }
+  });
+}
+
 function validateReferencedAssets(
   level: LevelDefinition,
   issues: ValidationIssueDraft[],
@@ -307,6 +396,134 @@ function validateReferencedAssets(
         issues,
       );
     }
+  });
+}
+
+function validateEnergyTargetPowers(
+  energyTarget: EnergyTargetDefinition,
+  index: number,
+  issues: ValidationIssueDraft[],
+): void {
+  if (energyTarget.acceptedPowers.length > 0) {
+    return;
+  }
+
+  issues.push({
+    code: "invalid-energy-target",
+    path: `energyTargets[${index}].acceptedPowers`,
+    message: `Energy target "${energyTarget.id}" must accept at least one energy power.`,
+  });
+}
+
+function validateEnergyTargetTiming(
+  energyTarget: EnergyTargetDefinition,
+  index: number,
+  issues: ValidationIssueDraft[],
+): void {
+  if (
+    energyTarget.activationDurationMs !== undefined &&
+    !isPositiveInteger(energyTarget.activationDurationMs)
+  ) {
+    issues.push({
+      code: "invalid-energy-target",
+      path: `energyTargets[${index}].activationDurationMs`,
+      message: `Energy target "${energyTarget.id}" must use a positive integer activationDurationMs.`,
+    });
+  }
+
+  if (
+    energyTarget.relayWindowMs !== undefined &&
+    !isPositiveInteger(energyTarget.relayWindowMs)
+  ) {
+    issues.push({
+      code: "invalid-energy-target",
+      path: `energyTargets[${index}].relayWindowMs`,
+      message: `Energy target "${energyTarget.id}" must use a positive integer relayWindowMs.`,
+    });
+  }
+}
+
+function validateEnergyTargetKindRules(
+  energyTarget: EnergyTargetDefinition,
+  index: number,
+  issues: ValidationIssueDraft[],
+): void {
+  if (
+    energyTarget.kind === "energy-cracked-block" &&
+    !acceptsOnlyPowers(energyTarget, [CYAN_BURST_POWER])
+  ) {
+    pushEnergyTargetRuleIssue(
+      index,
+      energyTarget,
+      "`energy-cracked-block` must accept only `cyan-burst`.",
+      issues,
+    );
+  }
+
+  if (
+    energyTarget.kind === "energy-core" &&
+    !acceptsOnlyPowers(energyTarget, [CYAN_BURST_POWER])
+  ) {
+    pushEnergyTargetRuleIssue(
+      index,
+      energyTarget,
+      "`energy-core` must accept only `cyan-burst`.",
+      issues,
+    );
+  }
+
+  if (
+    energyTarget.kind === "energy-relay" &&
+    (!acceptsOnlyPowers(energyTarget, [CYAN_SPARK_POWER]) ||
+      energyTarget.relayWindowMs === undefined)
+  ) {
+    pushEnergyTargetRuleIssue(
+      index,
+      energyTarget,
+      "`energy-relay` must accept only `cyan-spark` and declare `relayWindowMs`.",
+      issues,
+    );
+  }
+
+  if (energyTarget.kind === "energy-absorber") {
+    if (energyTarget.absorbsEnergy !== true) {
+      issues.push({
+        code: "invalid-energy-target",
+        path: `energyTargets[${index}].absorbsEnergy`,
+        message: `Energy target "${energyTarget.id}" must declare absorbsEnergy: true.`,
+      });
+    }
+
+    if (energyTarget.activatesObjectId !== undefined) {
+      issues.push({
+        code: "invalid-energy-target",
+        path: `energyTargets[${index}].activatesObjectId`,
+        message: `Energy target "${energyTarget.id}" is an absorber and cannot activate interactive objects.`,
+      });
+    }
+  }
+}
+
+function acceptsOnlyPowers(
+  energyTarget: EnergyTargetDefinition,
+  acceptedPowers: readonly EnergyPowerKind[],
+): boolean {
+  return (
+    energyTarget.acceptedPowers.length === acceptedPowers.length &&
+    acceptedPowers.every((power) => energyTarget.acceptedPowers.includes(power))
+  );
+}
+
+function pushEnergyTargetRuleIssue(
+  index: number,
+  energyTarget: EnergyTargetDefinition,
+  message: string,
+  issues: ValidationIssueDraft[],
+): void {
+  issues.push({
+    code: "invalid-energy-target",
+    path: `energyTargets[${index}].acceptedPowers`,
+    message: `Energy target "${energyTarget.id}" has invalid declarative rules: ${message}`,
   });
 }
 
@@ -404,4 +621,8 @@ function isRectInsideRect(rect: RectLike, bounds: RectLike): boolean {
 
 function isRectPositive(rect: RectLike): boolean {
   return rect.width > 0 && rect.height > 0;
+}
+
+function isPositiveInteger(value: number): boolean {
+  return Number.isInteger(value) && value > 0;
 }

@@ -4,9 +4,16 @@ import {
   getRequiredLevelDefinition,
   type LevelDefinition,
 } from "../../data/levels";
+import {
+  PINO_POWER_ANIMATION_MODES,
+  type PinoPowerAnimationMode,
+} from "../../data/characters/pino-animations";
 import { PLACEHOLDER_TILESET_ASSET_KEYS } from "../../data/art";
+import { PLAYER_ENERGY_MAX } from "../../shared";
 import type {
   CheckpointId,
+  EnergyTargetId,
+  FacingDirection,
   InteractiveObjectId,
   ItemId,
   RectLike,
@@ -15,26 +22,50 @@ import type {
 } from "../../shared";
 import { MUSIC_AUDIO_IDS, PLAYER_AUDIO_IDS } from "../../data/audio";
 import { PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
+import { ASSET_KEYS } from "../assets";
 import { Player } from "../entities";
-import { ActionInput } from "../input";
+import {
+  ActionInput,
+  createInitialSecondaryActionIntentState,
+  resolveSecondaryActionIntent,
+  type SecondaryActionIntentState,
+} from "../input";
 import {
   calculateDashMovement,
   calculateHorizontalVelocity,
   calculateJumpMovement,
+  canPrepareCyanBurst,
+  canSpawnCyanSparkProjectile,
+  canUseCyanSpark,
+  clearPlayerEnergyTemporaryState,
+  createCyanSparkProjectile,
   createInitialDashMovementState,
   createInitialJumpMovementState,
+  createInitialPlayerEnergyState,
+  getCyanSparkProjectileHitbox,
   getHorizontalDirection,
+  getPlayerEnergyMovementConstraint,
   getWorldHitbox,
   resetDashMovementState,
+  resetPlayerEnergyState,
+  resolveCyanBurstFacingLock,
+  resolveCyanBurstBeam,
   resolveKinematicCollisions,
+  updateCyanSparkProjectiles,
+  updatePlayerEnergy,
   type DashDirection,
   type DashMovementState,
   type JumpMovementState,
   type KinematicBodyCollisionConfig,
+  type CyanBurstBeamImpact,
+  type CyanSparkProjectileImpact,
+  type CyanSparkProjectileState,
+  type PlayerEnergyState,
 } from "../physics";
 import { gameStateStore } from "../systems/game-state";
 import type {
   DevQaDeathSnapshot,
+  DevQaEnergyStateSnapshot,
   DevQaLevelSnapshot,
 } from "../systems/dev-qa-tools";
 import {
@@ -62,16 +93,32 @@ import {
   getTrapActivationAudioId,
 } from "../systems/level-audio-feedback";
 import {
+  getCyanBurstImpactAudioCues,
+  getCyanSparkImpactAudioCues,
+  getPlayerEnergyAudioCues,
+  getPlayerEnergyRejectionAudioCues,
+  getStopPlayerEnergyAudioCues,
+  type EnergyAudioCue,
+} from "../systems/player-energy-audio-feedback";
+import {
   collectLevelItem,
   findTouchedAvailableItems,
   getItemFeedback,
   getItemTextureKey,
 } from "../systems/level-items";
 import {
+  getCyanBurstBeamCollisionTargets,
+  getCyanSparkCollisionTargets,
+  getEnergyTargetFeedback,
+  getEnergyTargetSolidAreas,
+  getLevelEnergyTargets,
+} from "../systems/level-energy-targets";
+import {
   getCheckpointTextureKey,
   getExitTextureKey,
 } from "../systems/level-markers";
 import {
+  createActiveCheckpointFromDefinition,
   createLevelStartCheckpoint,
   findTouchedCheckpoint,
   isTouchingExit,
@@ -86,7 +133,9 @@ import {
   PLAYER_EFFECT_DEPTHS,
   PLAYER_RUN_SPARK_INTERVAL_MS,
   PLAYER_RUN_SPARK_SPEED_THRESHOLD,
+  createCyanBurstPreparationParticles,
   createJumpBurstParticles,
+  createInsufficientEnergyParticles,
   createLandingBurstParticles,
   createRunSparkParticle,
   getDashGhostOffset,
@@ -94,6 +143,10 @@ import {
   resolvePlayerEnergyMode,
   shouldEmitTimedEffect,
 } from "../systems/player-visual-effects";
+import {
+  VISUAL_READABILITY_DEPTHS,
+  clampWideEffectAlpha,
+} from "../systems/visual-readability";
 import {
   getPlayerActionAudioId,
   shouldPlayLandingAudio,
@@ -117,8 +170,14 @@ import {
   updateTrapProjectiles,
 } from "../systems/mvp-traps";
 import {
+  absorbEnergyTarget,
+  activateEnergyCore,
+  activateEnergyRelay,
+  activateEnergySwitch,
   createInitialRoomState,
+  damageEnergyTarget,
   resetRoomStateForRespawn,
+  updateRoomEnergyTargets,
   type RoomRuntimeState,
 } from "../systems/room-state";
 import { SCENE_KEYS } from "./scene-keys";
@@ -130,6 +189,7 @@ const CAMERA_DEADZONE_SIZE = {
 const MARKER_COLORS = {
   spawn: 0x80d7c2,
 } as const;
+const CYAN_SPARK_PLAYER_ANIMATION_DURATION_MS = 140;
 
 const PLAYER_COLLISION_BODY = {
   visualWidth: PLAYER_SIZE.visualWidth,
@@ -150,6 +210,12 @@ type TrapMarker = {
   readonly crack?: Phaser.GameObjects.Graphics;
 };
 
+type EnergyTargetMarker = {
+  readonly base: Phaser.GameObjects.Rectangle;
+  readonly active: Phaser.GameObjects.TileSprite;
+  readonly broken: Phaser.GameObjects.TileSprite;
+};
+
 type PlayerDeathContext = {
   readonly cause: DeathCause;
   readonly sourceId?: string;
@@ -160,6 +226,11 @@ export class LevelScene extends Phaser.Scene {
   private actionInput?: ActionInput;
   private jumpState: JumpMovementState = createInitialJumpMovementState();
   private dashState: DashMovementState = createInitialDashMovementState();
+  private playerEnergyState: PlayerEnergyState =
+    createInitialPlayerEnergyState();
+  private secondaryActionIntentState: SecondaryActionIntentState =
+    createInitialSecondaryActionIntentState();
+  private cyanBurstLockedFacing?: FacingDirection;
   private level?: LevelDefinition;
   private roomState?: RoomRuntimeState;
   private solids: readonly RectLike[] = [];
@@ -173,6 +244,10 @@ export class LevelScene extends Phaser.Scene {
     InteractiveObjectId,
     Phaser.GameObjects.Rectangle
   >();
+  private readonly energyTargetMarkers = new Map<
+    EnergyTargetId,
+    EnergyTargetMarker
+  >();
   private readonly projectileMarkers = new Map<
     string,
     Phaser.GameObjects.Image
@@ -181,6 +256,15 @@ export class LevelScene extends Phaser.Scene {
     string,
     Phaser.GameObjects.Rectangle
   >();
+  private readonly cyanSparkProjectileMarkers = new Map<
+    string,
+    Phaser.GameObjects.Image
+  >();
+  private readonly cyanBurstHitBossIds = new Set<string>();
+  private cyanBurstBeamMarker?: Phaser.GameObjects.TileSprite;
+  private cyanSparkProjectiles: readonly CyanSparkProjectileState[] = [];
+  private cyanSparkProjectileSequence = 0;
+  private cyanSparkAnimationRemainingMs = 0;
   private respawnTimer?: Phaser.Time.TimerEvent;
   private respawnRecoveryTimer?: Phaser.Time.TimerEvent;
   private hasCompletedLevel = false;
@@ -201,10 +285,16 @@ export class LevelScene extends Phaser.Scene {
     this.actionInput = new ActionInput(this);
     this.jumpState = createInitialJumpMovementState();
     this.dashState = createInitialDashMovementState();
+    this.secondaryActionIntentState = createInitialSecondaryActionIntentState();
 
     const snapshot = gameStateStore.getSnapshot();
     const { activeCheckpoint, currentLevelId } = snapshot;
     this.level = getRequiredLevelDefinition(currentLevelId);
+    const startCheckpoint =
+      activeCheckpoint.levelId === this.level.id
+        ? activeCheckpoint
+        : createLevelStartCheckpoint(this.level);
+    this.resetPlayerEnergyForCheckpoint(startCheckpoint.initialEnergy);
     this.roomState = createInitialRoomState(this.level);
     this.refreshRoomSolids();
     this.hasCompletedLevel = false;
@@ -218,14 +308,12 @@ export class LevelScene extends Phaser.Scene {
     this.drawTraps(this.level, this.roomState);
     this.drawItems(this.level, this.roomState);
     this.drawInteractiveObjects(this.level, this.roomState);
+    this.drawEnergyTargets(this.level, this.roomState);
     this.drawLevelMarkers(this.level, activeCheckpoint.id);
 
     this.player = new Player(this, {
       id: "player-pino",
-      position:
-        activeCheckpoint.levelId === this.level.id
-          ? activeCheckpoint
-          : createLevelStartCheckpoint(this.level),
+      position: startCheckpoint,
       facing: "right",
     });
     this.player.getSprite().setDepth(PLAYER_EFFECT_DEPTHS.sprite);
@@ -250,7 +338,9 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
+    this.updateCyanSparkProjectileRuntime(delta);
     this.updateTrapRuntime(delta);
+    this.updatePinoPowerAnimationTimers(delta);
     this.updatePlayerMovement(delta);
     if (this.updatePlayerDeath()) {
       return;
@@ -262,7 +352,8 @@ export class LevelScene extends Phaser.Scene {
     }
 
     this.updateItemCollection();
-    this.updateInteractiveObjectActions();
+    this.updatePlayerEnergyRuntime(delta);
+    this.updateInteractiveObjectActions(delta);
     this.updateLevelProgress();
   }
 
@@ -292,6 +383,8 @@ export class LevelScene extends Phaser.Scene {
               isGrounded: physicsState.isGrounded,
               isAlive: visualState.isAlive,
               animationState: visualState.animationState,
+              energy: this.playerEnergyState.energy,
+              energyActivity: this.playerEnergyState.activity,
             }
           : null,
       traps: Object.values(this.roomState?.traps ?? {}),
@@ -300,7 +393,50 @@ export class LevelScene extends Phaser.Scene {
       interactiveObjects: Object.values(
         this.roomState?.interactiveObjects ?? {},
       ),
+      energyTargets: Object.values(this.roomState?.energyTargets ?? {}),
     };
+  }
+
+  public readDevQaEnergyState(): DevQaEnergyStateSnapshot | null {
+    if (!this.level) {
+      return null;
+    }
+
+    return {
+      energy: this.playerEnergyState.energy,
+      activity: this.playerEnergyState.activity,
+      sparkCooldownRemainingMs: this.playerEnergyState.sparkCooldownRemainingMs,
+      burstCooldownRemainingMs: this.playerEnergyState.burstCooldownRemainingMs,
+      burstPreparationRemainingMs:
+        this.playerEnergyState.burstPreparationRemainingMs,
+      burstDurationRemainingMs: this.playerEnergyState.burstDurationRemainingMs,
+      canUseCyanSpark: canUseCyanSpark(this.playerEnergyState),
+      canPrepareCyanBurst: canPrepareCyanBurst(this.playerEnergyState),
+    };
+  }
+
+  public fillDevQaEnergy(): boolean {
+    if (!this.level) {
+      return false;
+    }
+
+    this.setPlayerEnergyState({
+      ...this.playerEnergyState,
+      energy: PLAYER_ENERGY_MAX,
+    });
+    gameStateStore.triggerPlayerEnergyHudFeedback("full");
+
+    return true;
+  }
+
+  public clearDevQaEnergyCooldowns(): boolean {
+    if (!this.level) {
+      return false;
+    }
+
+    this.clearTemporaryEnergyState();
+
+    return true;
   }
 
   public goToDevQaCheckpoint(checkpointId?: CheckpointId): boolean {
@@ -318,12 +454,10 @@ export class LevelScene extends Phaser.Scene {
       return false;
     }
 
-    const activeCheckpoint = {
-      id: checkpoint.id,
-      levelId: this.level.id,
-      x: checkpoint.position.x,
-      y: checkpoint.position.y,
-    };
+    const activeCheckpoint = createActiveCheckpointFromDefinition(
+      this.level,
+      checkpoint,
+    );
 
     gameStateStore.setActiveCheckpoint(activeCheckpoint);
     this.clearRespawnTimer();
@@ -357,14 +491,26 @@ export class LevelScene extends Phaser.Scene {
       isMovingLeft: this.actionInput.isDown("move-left"),
       isMovingRight: this.actionInput.isDown("move-right"),
     });
-    const walkingVelocity = calculateHorizontalVelocity({
-      currentVelocityX: velocity.x,
-      direction,
+    const energyMovementConstraint = getPlayerEnergyMovementConstraint({
+      state: this.playerEnergyState,
+      isChargeHeld: this.actionInput.isDown("charge-energy"),
+      canCharge:
+        gameStateStore.getSnapshot().playerLifeState === "alive" &&
+        this.dashState.activeRemainingMs <= 0,
       isGrounded,
-      deltaMs: delta,
+      wasJumpPressed: this.actionInput.wasPressed("jump"),
     });
+    const walkingVelocity =
+      calculateHorizontalVelocity({
+        currentVelocityX: velocity.x,
+        direction,
+        isGrounded,
+        deltaMs: delta,
+      }) * energyMovementConstraint.horizontalSpeedScale;
     const dashMovement = calculateDashMovement({
-      wasDashPressed: this.actionInput.wasPressed("primary"),
+      wasDashPressed:
+        energyMovementConstraint.canDash &&
+        this.actionInput.wasPressed("primary"),
       direction,
       fallbackDirection: this.getPlayerFacingDirection(),
       deltaMs: delta,
@@ -406,14 +552,25 @@ export class LevelScene extends Phaser.Scene {
       velocityY: jumpMovement.velocityY,
     });
 
+    const requestedFacing =
+      direction !== 0 ? (direction === -1 ? "left" : "right") : undefined;
+    const facingLock = resolveCyanBurstFacingLock({
+      activity: this.playerEnergyState.activity,
+      currentFacing: this.player.getVisualState().facing,
+      ...(requestedFacing ? { requestedFacing } : {}),
+      ...(this.cyanBurstLockedFacing
+        ? { lockedFacing: this.cyanBurstLockedFacing }
+        : {}),
+    });
+
+    this.cyanBurstLockedFacing = facingLock.lockedFacing;
     this.player.updateMovement({
       position: collision.position,
       velocity: collision.velocity,
-      ...(direction !== 0
-        ? { facing: direction === -1 ? "left" : "right" }
-        : {}),
+      facing: facingLock.facing,
       isGrounded: collision.isGrounded,
       isUsingPrimaryAction: dashMovement.isDashing,
+      powerAnimationMode: this.getPinoPowerAnimationMode(),
     });
 
     this.updatePlayerEnergyAura(dashMovement.isDashing);
@@ -626,7 +783,8 @@ export class LevelScene extends Phaser.Scene {
             getHazardPlaceholderTextureKey(),
           )
           .setOrigin(0.5)
-          .setAlpha(0.35);
+          .setAlpha(0.35)
+          .setDepth(VISUAL_READABILITY_DEPTHS.directHazard);
         return;
       }
 
@@ -638,7 +796,8 @@ export class LevelScene extends Phaser.Scene {
           area.height,
           color,
         )
-        .setAlpha(0.7);
+        .setAlpha(0.7)
+        .setDepth(VISUAL_READABILITY_DEPTHS.directHazard);
     });
   }
 
@@ -651,7 +810,8 @@ export class LevelScene extends Phaser.Scene {
       this.add
         .image(x + width / 2, area.y + area.height, textureKey)
         .setOrigin(0.5, 1)
-        .setDisplaySize(width, area.height);
+        .setDisplaySize(width, area.height)
+        .setDepth(VISUAL_READABILITY_DEPTHS.directHazard);
     }
   }
 
@@ -713,7 +873,7 @@ export class LevelScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setDisplaySize(area.width, area.height)
         .setAlpha(alpha)
-        .setDepth(2);
+        .setDepth(VISUAL_READABILITY_DEPTHS.trapThreat);
     }
 
     return this.add
@@ -826,6 +986,68 @@ export class LevelScene extends Phaser.Scene {
     });
   }
 
+  private drawEnergyTargets(
+    level: LevelDefinition,
+    roomState: RoomRuntimeState,
+  ): void {
+    getLevelEnergyTargets(level).forEach((target) => {
+      const state = roomState.energyTargets[target.id];
+
+      if (!state) {
+        return;
+      }
+
+      const feedback = getEnergyTargetFeedback(target, state);
+      const { area } = target;
+      const base = this.add
+        .rectangle(
+          area.x + area.width / 2,
+          area.y + area.height / 2,
+          area.width,
+          area.height,
+          feedback.visual.fillColor,
+          feedback.visual.fillAlpha,
+        )
+        .setStrokeStyle(
+          1,
+          feedback.visual.strokeColor,
+          feedback.visual.strokeAlpha,
+        )
+        .setDepth(2);
+      const active = this.add
+        .tileSprite(
+          area.x + area.width / 2,
+          area.y + area.height / 2,
+          area.width,
+          area.height,
+          ASSET_KEYS.ENERGY_TARGET_ACTIVE,
+        )
+        .setOrigin(0.5)
+        .setAlpha(0)
+        .setVisible(false)
+        .setDepth(3);
+      const broken = this.add
+        .tileSprite(
+          area.x + area.width / 2,
+          area.y + area.height / 2,
+          area.width,
+          area.height,
+          ASSET_KEYS.ENERGY_CRACKED_BLOCK_BROKEN,
+        )
+        .setOrigin(0.5)
+        .setAlpha(0)
+        .setVisible(false)
+        .setDepth(3);
+
+      this.energyTargetMarkers.set(target.id, {
+        base,
+        active,
+        broken,
+      });
+      this.updateEnergyTargetMarker(target.id);
+    });
+  }
+
   private drawLevelMarkers(
     level: LevelDefinition,
     activeCheckpointId: CheckpointId,
@@ -889,12 +1111,9 @@ export class LevelScene extends Phaser.Scene {
     );
 
     if (touchedCheckpoint) {
-      gameStateStore.setActiveCheckpoint({
-        id: touchedCheckpoint.id,
-        levelId: this.level.id,
-        x: touchedCheckpoint.position.x,
-        y: touchedCheckpoint.position.y,
-      });
+      gameStateStore.setActiveCheckpoint(
+        createActiveCheckpointFromDefinition(this.level, touchedCheckpoint),
+      );
       this.updateCheckpointMarkers(touchedCheckpoint.id);
     }
 
@@ -1045,20 +1264,138 @@ export class LevelScene extends Phaser.Scene {
     });
   }
 
-  private updateInteractiveObjectActions(): void {
+  private updatePlayerEnergyRuntime(delta: number): void {
+    if (!this.player || !this.actionInput) {
+      return;
+    }
+
+    const physicsState = this.player.getPhysicsState();
+    const previousActivity = this.playerEnergyState.activity;
+    const energyResult = updatePlayerEnergy({
+      state: this.playerEnergyState,
+      deltaMs: delta,
+      isChargeHeld: this.actionInput.isDown("charge-energy"),
+      canCharge:
+        gameStateStore.getSnapshot().playerLifeState === "alive" &&
+        this.dashState.activeRemainingMs <= 0 &&
+        !this.actionInput.wasPressed("jump"),
+      isGrounded: physicsState.isGrounded,
+    });
+
+    this.setPlayerEnergyState(energyResult.state);
+    this.triggerPlayerEnergyHudFeedback(energyResult);
+    this.emitEnergyAudioCues(
+      getPlayerEnergyAudioCues({
+        previousActivity,
+        nextActivity: this.playerEnergyState.activity,
+        effects: energyResult.effects,
+      }),
+    );
+    if (energyResult.effects.includes("cyan-burst-finished")) {
+      this.cyanBurstLockedFacing = undefined;
+      this.cyanBurstHitBossIds.clear();
+    }
+    this.syncCyanBurstBeamMarker();
+  }
+
+  private updatePinoPowerAnimationTimers(delta: number): void {
+    this.cyanSparkAnimationRemainingMs = Math.max(
+      0,
+      this.cyanSparkAnimationRemainingMs - delta,
+    );
+  }
+
+  private getPinoPowerAnimationMode(): PinoPowerAnimationMode {
+    if (this.playerEnergyState.activity === "burst-firing") {
+      return PINO_POWER_ANIMATION_MODES.CYAN_BURST_FIRE;
+    }
+
+    if (this.playerEnergyState.activity === "burst-preparing") {
+      return PINO_POWER_ANIMATION_MODES.CYAN_BURST_PREPARE;
+    }
+
+    if (this.cyanSparkAnimationRemainingMs > 0) {
+      return PINO_POWER_ANIMATION_MODES.CYAN_SPARK;
+    }
+
+    if (this.playerEnergyState.activity === "charging") {
+      return PINO_POWER_ANIMATION_MODES.CYAN_CHARGE;
+    }
+
+    return PINO_POWER_ANIMATION_MODES.NONE;
+  }
+
+  private updateCyanSparkProjectileRuntime(delta: number): void {
+    this.updateEnergyTargetRuntime(delta);
+
+    const projectileUpdate = updateCyanSparkProjectiles({
+      projectiles: this.cyanSparkProjectiles,
+      deltaMs: delta,
+      solids: this.solids,
+      targets:
+        this.level && this.roomState
+          ? getCyanSparkCollisionTargets(
+              getLevelEnergyTargets(this.level),
+              this.roomState,
+            )
+          : [],
+    });
+
+    this.cyanSparkProjectiles = projectileUpdate.projectiles;
+    this.applyCyanSparkEnergyTargetHits(projectileUpdate.impacts);
+    this.emitEnergyAudioCues(
+      getCyanSparkImpactAudioCues(projectileUpdate.impacts),
+    );
+    this.syncCyanSparkProjectileMarkers();
+  }
+
+  private updateEnergyTargetRuntime(delta: number): void {
+    if (!this.level || !this.roomState) {
+      return;
+    }
+
+    const nextRoomState = updateRoomEnergyTargets(
+      this.roomState,
+      this.level,
+      delta,
+    );
+
+    if (nextRoomState === this.roomState) {
+      return;
+    }
+
+    this.roomState = nextRoomState;
+    this.refreshRoomSolids();
+    this.updateEnergyTargetMarkers();
+    this.updateInteractiveObjectMarkers();
+  }
+
+  private applyCyanSparkEnergyTargetHits(
+    impacts: readonly CyanSparkProjectileImpact[],
+  ): void {
+    const targetImpacts = impacts.filter(
+      (impact) => impact.kind === "target" && impact.targetId,
+    );
+
+    if (!this.level || !this.roomState || targetImpacts.length === 0) {
+      return;
+    }
+
+    targetImpacts.forEach((impact) => {
+      if (!this.roomState || !impact.targetId) {
+        return;
+      }
+
+      this.applyEnergySwitchHit(impact.targetId);
+      this.applyEnergyRelayHit(impact.targetId);
+      this.applyEnergyAbsorberHit(impact.targetId);
+    });
+  }
+
+  private updateInteractiveObjectActions(delta: number): void {
     if (!this.level || !this.player || !this.actionInput || !this.roomState) {
       return;
     }
-
-    const pressedAction = this.actionInput.wasPressed("secondary")
-      ? "secondary"
-      : undefined;
-
-    if (!pressedAction) {
-      return;
-    }
-
-    this.playPlayerSfx(getPlayerActionAudioId(pressedAction));
 
     const playerHitbox = getWorldHitbox(
       this.player.getPhysicsState().position,
@@ -1068,8 +1405,45 @@ export class LevelScene extends Phaser.Scene {
       playerHitbox,
       this.level.interactiveObjects,
       this.roomState,
-      pressedAction,
+      "secondary",
     );
+    const secondaryIntent = resolveSecondaryActionIntent({
+      isSecondaryDown: this.actionInput.isDown("secondary"),
+      wasSecondaryPressed: this.actionInput.wasPressed("secondary"),
+      wasSecondaryReleased: this.actionInput.wasReleased("secondary"),
+      hasNearbyInteraction: triggeredObjects.length > 0,
+      canPrepareSpecial: canPrepareCyanBurst(this.playerEnergyState),
+      deltaMs: delta,
+      state: this.secondaryActionIntentState,
+    });
+
+    this.secondaryActionIntentState = secondaryIntent.state;
+
+    if (secondaryIntent.intent === "special-charge-start") {
+      this.tryStartCyanBurstPreparation();
+      return;
+    }
+
+    if (secondaryIntent.intent === "special-fire") {
+      this.tryFireCyanBurst();
+      return;
+    }
+
+    if (secondaryIntent.intent === "special-cancel") {
+      this.cancelCyanBurstPreparation();
+      return;
+    }
+
+    if (secondaryIntent.intent === "quick-shot") {
+      this.trySpawnCyanSparkShot();
+      return;
+    }
+
+    if (secondaryIntent.intent !== "interact") {
+      return;
+    }
+
+    this.playPlayerSfx(getPlayerActionAudioId("secondary"));
 
     triggeredObjects.forEach(({ object }) => {
       if (!this.roomState) {
@@ -1079,6 +1453,432 @@ export class LevelScene extends Phaser.Scene {
       this.roomState = activateInteractiveObject(this.roomState, object);
       this.refreshRoomSolids();
       this.updateInteractiveObjectMarkers();
+    });
+  }
+
+  private trySpawnCyanSparkShot(): void {
+    if (!this.player) {
+      return;
+    }
+
+    if (!canSpawnCyanSparkProjectile(this.cyanSparkProjectiles)) {
+      return;
+    }
+
+    const previousActivity = this.playerEnergyState.activity;
+    const energyResult = updatePlayerEnergy({
+      state: this.playerEnergyState,
+      deltaMs: 0,
+      isChargeHeld: false,
+      canCharge: false,
+      isGrounded: this.player.getPhysicsState().isGrounded,
+      request: "cyan-spark",
+    });
+
+    this.setPlayerEnergyState(energyResult.state);
+    this.triggerPlayerEnergyHudFeedback(energyResult);
+    this.emitEnergyAudioCues([
+      ...getPlayerEnergyAudioCues({
+        previousActivity,
+        nextActivity: this.playerEnergyState.activity,
+        effects: energyResult.effects,
+      }),
+      ...getPlayerEnergyRejectionAudioCues(energyResult.rejections),
+    ]);
+
+    if (!energyResult.effects.includes("cyan-spark-fired")) {
+      if (this.hasCyanSparkInsufficientEnergyRejection(energyResult)) {
+        this.playInsufficientEnergyFeedback();
+      }
+
+      return;
+    }
+
+    this.cyanSparkAnimationRemainingMs =
+      CYAN_SPARK_PLAYER_ANIMATION_DURATION_MS;
+    this.cyanSparkProjectiles = [
+      ...this.cyanSparkProjectiles,
+      createCyanSparkProjectile({
+        id: `cyan-spark-${this.cyanSparkProjectileSequence}`,
+        origin: this.player.getPhysicsState().position,
+        facing: this.player.getVisualState().facing,
+      }),
+    ];
+    this.cyanSparkProjectileSequence += 1;
+    this.syncCyanSparkProjectileMarkers();
+  }
+
+  private tryStartCyanBurstPreparation(): void {
+    if (!this.player) {
+      return;
+    }
+
+    const lockedFacing = this.player.getVisualState().facing;
+    const previousActivity = this.playerEnergyState.activity;
+    const energyResult = updatePlayerEnergy({
+      state: this.playerEnergyState,
+      deltaMs: 0,
+      isChargeHeld: false,
+      canCharge: false,
+      isGrounded: this.player.getPhysicsState().isGrounded,
+      request: "cyan-burst-prepare",
+    });
+
+    this.setPlayerEnergyState(energyResult.state);
+    this.triggerPlayerEnergyHudFeedback(energyResult);
+    this.emitEnergyAudioCues([
+      ...getPlayerEnergyAudioCues({
+        previousActivity,
+        nextActivity: this.playerEnergyState.activity,
+        effects: energyResult.effects,
+      }),
+      ...getPlayerEnergyRejectionAudioCues(energyResult.rejections),
+    ]);
+
+    if (!energyResult.effects.includes("cyan-burst-preparation-started")) {
+      this.cyanBurstLockedFacing = undefined;
+      this.cyanBurstHitBossIds.clear();
+      return;
+    }
+
+    this.cyanBurstLockedFacing = lockedFacing;
+    this.cyanBurstHitBossIds.clear();
+    this.playCyanBurstPreparationFeedback(lockedFacing);
+  }
+
+  private tryFireCyanBurst(): void {
+    if (!this.player) {
+      return;
+    }
+
+    const firingFacing =
+      this.cyanBurstLockedFacing ?? this.player.getVisualState().facing;
+    const previousActivity = this.playerEnergyState.activity;
+    const energyResult = updatePlayerEnergy({
+      state: this.playerEnergyState,
+      deltaMs: 0,
+      isChargeHeld: false,
+      canCharge: false,
+      isGrounded: this.player.getPhysicsState().isGrounded,
+      request: "cyan-burst-fire",
+    });
+
+    this.setPlayerEnergyState(energyResult.state);
+    this.triggerPlayerEnergyHudFeedback(energyResult);
+    this.emitEnergyAudioCues([
+      ...getPlayerEnergyAudioCues({
+        previousActivity,
+        nextActivity: this.playerEnergyState.activity,
+        effects: energyResult.effects,
+      }),
+      ...getPlayerEnergyRejectionAudioCues(energyResult.rejections),
+    ]);
+
+    if (!energyResult.effects.includes("cyan-burst-fired")) {
+      this.cancelCyanBurstPreparation();
+      return;
+    }
+
+    this.cyanBurstLockedFacing = firingFacing;
+    this.applyCyanBurstBeamHits(firingFacing);
+    this.syncCyanBurstBeamMarker();
+  }
+
+  private applyCyanBurstBeamHits(facing: FacingDirection): void {
+    if (!this.level || !this.player || !this.roomState) {
+      return;
+    }
+
+    const beam = resolveCyanBurstBeam({
+      origin: this.player.getPhysicsState().position,
+      facing,
+      solids: this.getCyanBurstBlockingSolids(),
+      alreadyHitBossIds: [...this.cyanBurstHitBossIds],
+      targets: getCyanBurstBeamCollisionTargets(
+        getLevelEnergyTargets(this.level),
+        this.roomState,
+      ),
+    });
+
+    if (beam.impacts.length === 0) {
+      return;
+    }
+
+    beam.impacts.forEach((impact) => {
+      if (!this.roomState) {
+        return;
+      }
+
+      if (this.applyEnergySwitchHit(impact.targetId)) {
+        return;
+      }
+
+      if (this.applyEnergyAbsorberHit(impact.targetId)) {
+        return;
+      }
+
+      if (this.applyEnergyCoreHit(impact.targetId, impact.damage)) {
+        return;
+      }
+
+      this.roomState = damageEnergyTarget(
+        this.roomState,
+        impact.targetId,
+        impact.damage,
+      );
+
+      if (impact.kind === "boss") {
+        this.cyanBurstHitBossIds.add(impact.hitGroupId ?? impact.targetId);
+      }
+    });
+    this.refreshRoomSolids();
+    this.updateEnergyTargetMarkers();
+    this.playCyanBurstImpactFeedback(beam.impacts);
+    this.emitEnergyAudioCues(getCyanBurstImpactAudioCues(beam.impacts));
+  }
+
+  private applyEnergySwitchHit(targetId: string): boolean {
+    if (!this.level || !this.roomState) {
+      return false;
+    }
+
+    const target = getLevelEnergyTargets(this.level).find(
+      (candidate) => candidate.id === targetId,
+    );
+
+    if (!target || target.kind !== "energy-switch") {
+      return false;
+    }
+
+    this.roomState = activateEnergySwitch(this.roomState, target);
+    this.refreshRoomSolids();
+    this.updateEnergyTargetMarker(target.id);
+    this.updateInteractiveObjectMarkers();
+
+    return true;
+  }
+
+  private applyEnergyAbsorberHit(targetId: string): boolean {
+    if (!this.level || !this.roomState) {
+      return false;
+    }
+
+    const target = getLevelEnergyTargets(this.level).find(
+      (candidate) => candidate.id === targetId,
+    );
+
+    if (!target || target.kind !== "energy-absorber") {
+      return false;
+    }
+
+    this.roomState = absorbEnergyTarget(this.roomState, target);
+    this.updateEnergyTargetMarker(target.id);
+
+    return true;
+  }
+
+  private applyEnergyCoreHit(targetId: string, damage: number): boolean {
+    if (!this.level || !this.roomState) {
+      return false;
+    }
+
+    const target = getLevelEnergyTargets(this.level).find(
+      (candidate) => candidate.id === targetId,
+    );
+
+    if (!target || target.kind !== "energy-core") {
+      return false;
+    }
+
+    this.roomState = activateEnergyCore(this.roomState, target, damage);
+    this.refreshRoomSolids();
+    this.updateEnergyTargetMarker(target.id);
+    this.updateInteractiveObjectMarkers();
+
+    return true;
+  }
+
+  private applyEnergyRelayHit(targetId: string): boolean {
+    if (!this.level || !this.roomState) {
+      return false;
+    }
+
+    const target = getLevelEnergyTargets(this.level).find(
+      (candidate) => candidate.id === targetId,
+    );
+
+    if (!target || target.kind !== "energy-relay") {
+      return false;
+    }
+
+    this.roomState = activateEnergyRelay(this.roomState, target);
+    this.refreshRoomSolids();
+    this.updateEnergyTargetMarker(target.id);
+    this.updateInteractiveObjectMarkers();
+
+    return true;
+  }
+
+  private cancelCyanBurstPreparation(): void {
+    const previousActivity = this.playerEnergyState.activity;
+    const energyResult = updatePlayerEnergy({
+      state: this.playerEnergyState,
+      deltaMs: 0,
+      isChargeHeld: false,
+      canCharge: false,
+      isGrounded: this.player?.getPhysicsState().isGrounded ?? true,
+      request: "cyan-burst-cancel",
+    });
+
+    this.setPlayerEnergyState(energyResult.state);
+    this.emitEnergyAudioCues(
+      getPlayerEnergyAudioCues({
+        previousActivity,
+        nextActivity: this.playerEnergyState.activity,
+        effects: energyResult.effects,
+      }),
+    );
+    this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstHitBossIds.clear();
+    this.clearCyanBurstBeamMarker();
+  }
+
+  private playCyanBurstPreparationFeedback(facing: FacingDirection): void {
+    if (!this.player) {
+      return;
+    }
+
+    const physicsState = this.player.getPhysicsState();
+
+    this.emitBurstParticles(
+      createCyanBurstPreparationParticles(physicsState.position, facing),
+    );
+
+    const pulse = this.add
+      .ellipse(
+        physicsState.position.x,
+        physicsState.position.y - 14,
+        18,
+        28,
+        0x80d7c2,
+        0.24,
+      )
+      .setStrokeStyle(1, 0xf5f7fb, 0.52)
+      .setDepth(PLAYER_EFFECT_DEPTHS.energyShot);
+
+    this.tweens.add({
+      targets: pulse,
+      alpha: 0,
+      scaleX: 1.22,
+      scaleY: 1.08,
+      duration: 210,
+      ease: "Quad.easeOut",
+      onComplete: () => {
+        pulse.destroy();
+      },
+    });
+  }
+
+  private playCyanBurstImpactFeedback(
+    impacts: readonly CyanBurstBeamImpact[],
+  ): void {
+    if (!this.level || !this.roomState) {
+      return;
+    }
+
+    const targets = getLevelEnergyTargets(this.level);
+
+    impacts.forEach((impact) => {
+      const target = targets.find(
+        (candidate) => candidate.id === impact.targetId,
+      );
+      const state = this.roomState?.energyTargets[impact.targetId];
+
+      if (!target || !state) {
+        return;
+      }
+
+      const { area } = target;
+      const color =
+        impact.kind === "boss"
+          ? 0xe76f51
+          : impact.kind === "cracked-block"
+            ? 0xf4d35e
+            : 0x80d7c2;
+      const pulse = this.add
+        .image(
+          area.x + area.width / 2,
+          area.y + area.height / 2,
+          ASSET_KEYS.ENERGY_IMPACT,
+        )
+        .setDisplaySize(
+          Math.min(Math.max(area.width + 8, 16), 32),
+          Math.min(Math.max(area.height + 8, 16), 32),
+        )
+        .setTint(color)
+        .setAlpha(clampWideEffectAlpha(state.isBroken ? 0.68 : 0.58))
+        .setDepth(PLAYER_EFFECT_DEPTHS.energyShot);
+
+      this.tweens.add({
+        targets: pulse,
+        alpha: 0,
+        scaleX: 1.18,
+        scaleY: 1.18,
+        duration: 170,
+        ease: "Quad.easeOut",
+        onComplete: () => {
+          pulse.destroy();
+        },
+      });
+    });
+  }
+
+  private hasCyanSparkInsufficientEnergyRejection(
+    result: ReturnType<typeof updatePlayerEnergy>,
+  ): boolean {
+    return result.rejections.some(
+      (rejection) =>
+        rejection.request === "cyan-spark" &&
+        rejection.reason === "insufficient-energy",
+    );
+  }
+
+  private playInsufficientEnergyFeedback(): void {
+    if (!this.player) {
+      return;
+    }
+
+    const physicsState = this.player.getPhysicsState();
+    const visualState = this.player.getVisualState();
+
+    this.emitBurstParticles(
+      createInsufficientEnergyParticles(
+        physicsState.position,
+        visualState.facing,
+      ),
+    );
+
+    const pulse = this.add
+      .ellipse(
+        physicsState.position.x,
+        physicsState.position.y - 13,
+        22,
+        24,
+        0xe35d6a,
+        0.22,
+      )
+      .setDepth(PLAYER_EFFECT_DEPTHS.energyShot);
+
+    this.tweens.add({
+      targets: pulse,
+      alpha: 0,
+      scaleX: 1.28,
+      scaleY: 0.74,
+      duration: 150,
+      ease: "Quad.easeOut",
+      onComplete: () => {
+        pulse.destroy();
+      },
     });
   }
 
@@ -1094,6 +1894,7 @@ export class LevelScene extends Phaser.Scene {
     const { position } = this.player.getPhysicsState();
 
     this.clearRespawnRecoveryTimer();
+    this.resetTemporaryEnergyStateForCheckpoint();
     this.player.die();
     this.updatePlayerEnergyAura(false);
     this.emitBurstParticles(
@@ -1158,10 +1959,12 @@ export class LevelScene extends Phaser.Scene {
 
     this.jumpState = createInitialJumpMovementState();
     this.dashState = resetDashMovementState(this.dashState);
+    this.resetTemporaryEnergyStateForCheckpoint();
     this.hasCompletedLevel = false;
     this.updateTrapMarkers();
     this.updateItemMarkers();
     this.updateInteractiveObjectMarkers();
+    this.updateEnergyTargetMarkers();
     this.updateCheckpointMarkers(activeCheckpointId);
   }
 
@@ -1267,10 +2070,70 @@ export class LevelScene extends Phaser.Scene {
       );
   }
 
+  private updateEnergyTargetMarkers(): void {
+    this.energyTargetMarkers.forEach((_marker, targetId) => {
+      this.updateEnergyTargetMarker(targetId);
+    });
+  }
+
+  private updateEnergyTargetMarker(targetId: EnergyTargetId): void {
+    if (!this.level || !this.roomState) {
+      return;
+    }
+
+    const target = getLevelEnergyTargets(this.level).find(
+      (candidate) => candidate.id === targetId,
+    );
+    const state = this.roomState.energyTargets[targetId];
+    const marker = this.energyTargetMarkers.get(targetId);
+
+    if (!target || !state || !marker) {
+      return;
+    }
+
+    const feedback = getEnergyTargetFeedback(target, state);
+    const { area } = target;
+    const isActive = state.isActive && !state.isBroken;
+    const isBrokenBlock =
+      target.kind === "energy-cracked-block" && state.isBroken;
+
+    marker.base
+      .setFillStyle(feedback.visual.fillColor, feedback.visual.fillAlpha)
+      .setStrokeStyle(
+        1,
+        feedback.visual.strokeColor,
+        feedback.visual.strokeAlpha,
+      );
+    marker.active
+      .setPosition(area.x + area.width / 2, area.y + area.height / 2)
+      .setSize(area.width, area.height)
+      .setAlpha(isActive ? 0.86 : 0)
+      .setVisible(isActive);
+    marker.broken
+      .setPosition(area.x + area.width / 2, area.y + area.height / 2)
+      .setSize(area.width, area.height)
+      .setAlpha(isBrokenBlock ? 0.82 : 0)
+      .setVisible(isBrokenBlock);
+  }
+
   private refreshRoomSolids(): void {
     if (!this.level || !this.roomState) {
       this.solids = [];
       return;
+    }
+
+    this.solids = [
+      ...this.getBaseRoomSolidAreas(),
+      ...getEnergyTargetSolidAreas(
+        getLevelEnergyTargets(this.level),
+        this.roomState,
+      ),
+    ];
+  }
+
+  private getBaseRoomSolidAreas(): readonly RectLike[] {
+    if (!this.level || !this.roomState) {
+      return [];
     }
 
     const terrainSolids = removeDisabledTrapSolids(
@@ -1279,13 +2142,17 @@ export class LevelScene extends Phaser.Scene {
       this.roomState,
     );
 
-    this.solids = [
+    return [
       ...terrainSolids,
       ...getInteractiveObjectSolidAreas(
         this.level.interactiveObjects,
         this.roomState,
       ),
     ];
+  }
+
+  private getCyanBurstBlockingSolids(): readonly RectLike[] {
+    return this.getBaseRoomSolidAreas();
   }
 
   private syncProjectileMarkers(): void {
@@ -1326,7 +2193,7 @@ export class LevelScene extends Phaser.Scene {
             getProjectileTextureKey(),
           )
           .setOrigin(0.5)
-          .setDepth(6);
+          .setDepth(VISUAL_READABILITY_DEPTHS.trapProjectile);
 
       trailMarker
         .setPosition(
@@ -1335,13 +2202,14 @@ export class LevelScene extends Phaser.Scene {
         )
         .setSize(trailFeedback.area.width, trailFeedback.area.height)
         .setFillStyle(trailFeedback.color, trailFeedback.alpha)
-        .setDepth(5);
+        .setDepth(PLAYER_EFFECT_DEPTHS.trail);
 
       marker.setPosition(
         hitbox.x + hitbox.width / 2,
         hitbox.y + hitbox.height / 2,
       );
       marker.setDisplaySize(hitbox.width, hitbox.height);
+      marker.setDepth(VISUAL_READABILITY_DEPTHS.trapProjectile);
       this.projectileTrailMarkers.set(projectile.id, trailMarker);
       this.projectileMarkers.set(projectile.id, marker);
     });
@@ -1362,6 +2230,86 @@ export class LevelScene extends Phaser.Scene {
       marker.destroy();
       this.projectileTrailMarkers.delete(projectileId);
     });
+  }
+
+  private syncCyanSparkProjectileMarkers(): void {
+    const activeProjectileIds = new Set<string>();
+
+    this.cyanSparkProjectiles.forEach((projectile) => {
+      activeProjectileIds.add(projectile.id);
+
+      const hitbox = getCyanSparkProjectileHitbox(projectile);
+      const marker =
+        this.cyanSparkProjectileMarkers.get(projectile.id) ??
+        this.add
+          .image(
+            hitbox.x + hitbox.width / 2,
+            hitbox.y + hitbox.height / 2,
+            ASSET_KEYS.ENERGY_CYAN_SPARK_PROJECTILE,
+          )
+          .setOrigin(0.5)
+          .setAlpha(0.92)
+          .setDepth(PLAYER_EFFECT_DEPTHS.energyShot);
+
+      marker
+        .setPosition(hitbox.x + hitbox.width / 2, hitbox.y + hitbox.height / 2)
+        .setDisplaySize(8, 8)
+        .setFlipX(projectile.direction < 0);
+
+      this.cyanSparkProjectileMarkers.set(projectile.id, marker);
+    });
+
+    this.cyanSparkProjectileMarkers.forEach((marker, projectileId) => {
+      if (activeProjectileIds.has(projectileId)) {
+        return;
+      }
+
+      marker.destroy();
+      this.cyanSparkProjectileMarkers.delete(projectileId);
+    });
+  }
+
+  private syncCyanBurstBeamMarker(): void {
+    if (
+      !this.player ||
+      !this.cyanBurstLockedFacing ||
+      this.playerEnergyState.activity !== "burst-firing" ||
+      this.playerEnergyState.burstDurationRemainingMs <= 0
+    ) {
+      this.clearCyanBurstBeamMarker();
+      return;
+    }
+
+    const beam = resolveCyanBurstBeam({
+      origin: this.player.getPhysicsState().position,
+      facing: this.cyanBurstLockedFacing,
+      solids: this.getCyanBurstBlockingSolids(),
+    });
+    const { area } = beam;
+    const marker =
+      this.cyanBurstBeamMarker ??
+      this.add
+        .tileSprite(
+          area.x + area.width / 2,
+          area.y + area.height / 2,
+          area.width,
+          area.height,
+          ASSET_KEYS.ENERGY_CYAN_BURST_BEAM,
+        )
+        .setOrigin(0.5)
+        .setAlpha(clampWideEffectAlpha(0.62))
+        .setDepth(PLAYER_EFFECT_DEPTHS.energyShot);
+
+    marker
+      .setPosition(area.x + area.width / 2, area.y + area.height / 2)
+      .setSize(area.width, area.height)
+      .setAlpha(clampWideEffectAlpha(0.62));
+    marker.tilePositionX =
+      this.cyanBurstLockedFacing === "right"
+        ? -this.time.now * 0.12
+        : this.time.now * 0.12;
+
+    this.cyanBurstBeamMarker = marker;
   }
 
   private drawTrapCrack(
@@ -1468,6 +2416,7 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
+    this.clearTemporaryEnergyState();
     gameStateStore.setPaused(true);
     this.scene.pause();
     this.scene.launch(SCENE_KEYS.PAUSE);
@@ -1495,6 +2444,23 @@ export class LevelScene extends Phaser.Scene {
     });
   }
 
+  private emitEnergyAudioCues(cues: readonly EnergyAudioCue[]): void {
+    cues.forEach((cue) => {
+      if (cue.action === "stop") {
+        emitGameEvent(GAME_EVENTS.AUDIO_STOP_REQUESTED, {
+          audioId: cue.audioId,
+        });
+        return;
+      }
+
+      emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
+        audioId: cue.audioId,
+        category: cue.category,
+        ...(cue.loop === undefined ? {} : { loop: cue.loop }),
+      });
+    });
+  }
+
   private playGameplayMusic(): void {
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
       audioId: MUSIC_AUDIO_IDS.MVP_LOOP,
@@ -1502,7 +2468,80 @@ export class LevelScene extends Phaser.Scene {
     });
   }
 
+  private setPlayerEnergyState(state: PlayerEnergyState): void {
+    this.playerEnergyState = state;
+    this.syncPlayerEnergyHud();
+  }
+
+  private syncPlayerEnergyHud(): void {
+    gameStateStore.setPlayerEnergyHudState({
+      current: this.playerEnergyState.energy,
+      max: PLAYER_ENERGY_MAX,
+      isCharging: this.playerEnergyState.activity === "charging",
+    });
+  }
+
+  private triggerPlayerEnergyHudFeedback(
+    result: ReturnType<typeof updatePlayerEnergy>,
+  ): void {
+    if (result.effects.includes("cyan-energy-full")) {
+      gameStateStore.triggerPlayerEnergyHudFeedback("full");
+    }
+
+    if (
+      result.rejections.some(
+        (rejection) => rejection.reason === "insufficient-energy",
+      )
+    ) {
+      gameStateStore.triggerPlayerEnergyHudFeedback("insufficient");
+    }
+  }
+
+  private resetPlayerEnergyForCheckpoint(initialEnergy: number): void {
+    this.emitEnergyAudioCues(getStopPlayerEnergyAudioCues());
+    this.setPlayerEnergyState(resetPlayerEnergyState(initialEnergy));
+    this.secondaryActionIntentState = createInitialSecondaryActionIntentState();
+    this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstHitBossIds.clear();
+    this.cyanSparkAnimationRemainingMs = 0;
+    this.clearCyanSparkProjectiles();
+    this.clearCyanBurstBeamMarker();
+  }
+
+  private resetTemporaryEnergyStateForCheckpoint(): void {
+    const { activeCheckpoint } = gameStateStore.getSnapshot();
+
+    this.resetPlayerEnergyForCheckpoint(activeCheckpoint.initialEnergy);
+  }
+
+  private clearTemporaryEnergyState(): void {
+    this.emitEnergyAudioCues(getStopPlayerEnergyAudioCues());
+    this.setPlayerEnergyState(
+      clearPlayerEnergyTemporaryState(this.playerEnergyState),
+    );
+    this.secondaryActionIntentState = createInitialSecondaryActionIntentState();
+    this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstHitBossIds.clear();
+    this.cyanSparkAnimationRemainingMs = 0;
+    this.clearCyanSparkProjectiles();
+    this.clearCyanBurstBeamMarker();
+  }
+
+  private clearCyanSparkProjectiles(): void {
+    this.cyanSparkProjectiles = [];
+    this.cyanSparkProjectileMarkers.forEach((marker) => {
+      marker.destroy();
+    });
+    this.cyanSparkProjectileMarkers.clear();
+  }
+
+  private clearCyanBurstBeamMarker(): void {
+    this.cyanBurstBeamMarker?.destroy();
+    this.cyanBurstBeamMarker = undefined;
+  }
+
   private cleanup(): void {
+    this.emitEnergyAudioCues(getStopPlayerEnergyAudioCues());
     this.clearRespawnTimer();
     this.clearRespawnRecoveryTimer();
     this.playerAura?.destroy();
@@ -1518,6 +2557,14 @@ export class LevelScene extends Phaser.Scene {
     this.solids = [];
     this.jumpState = createInitialJumpMovementState();
     this.dashState = createInitialDashMovementState();
+    this.setPlayerEnergyState(createInitialPlayerEnergyState());
+    this.secondaryActionIntentState = createInitialSecondaryActionIntentState();
+    this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstHitBossIds.clear();
+    this.cyanSparkAnimationRemainingMs = 0;
+    this.clearCyanSparkProjectiles();
+    this.clearCyanBurstBeamMarker();
+    this.cyanSparkProjectileSequence = 0;
     this.levelStartedAtMs = 0;
     this.levelStartDeathCount = 0;
     this.checkpointMarkers.clear();
@@ -1526,6 +2573,12 @@ export class LevelScene extends Phaser.Scene {
     this.itemMarkers.clear();
     this.interactiveObjectMarkers.forEach((marker) => marker.destroy());
     this.interactiveObjectMarkers.clear();
+    this.energyTargetMarkers.forEach((marker) => {
+      marker.base.destroy();
+      marker.active.destroy();
+      marker.broken.destroy();
+    });
+    this.energyTargetMarkers.clear();
     this.projectileMarkers.forEach((marker) => marker.destroy());
     this.projectileMarkers.clear();
     this.projectileTrailMarkers.forEach((marker) => marker.destroy());

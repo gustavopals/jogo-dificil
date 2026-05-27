@@ -5,6 +5,9 @@ import { LEVEL_03 } from "./level-03";
 import { LEVEL_04 } from "./level-04";
 import { LEVEL_05 } from "./level-05";
 import { LEVEL_06 } from "./level-06";
+import { LEVEL_07 } from "./level-07";
+import { LEVEL_08 } from "./level-08";
+import { LEVEL_09 } from "./level-09";
 
 export const LEVEL_DEFINITIONS = [
   LEVEL_01,
@@ -13,6 +16,9 @@ export const LEVEL_DEFINITIONS = [
   LEVEL_04,
   LEVEL_05,
   LEVEL_06,
+  LEVEL_07,
+  LEVEL_08,
+  LEVEL_09,
 ] as const satisfies readonly LevelDefinition[];
 
 export function getLevelDefinition(

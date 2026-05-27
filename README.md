@@ -1,7 +1,7 @@
 # jogo-dificil
 
 Jogo de plataforma 2D de navegador, dificil, rapido de reiniciar e baseado em
-surpresa, precisao, tentativa e erro. A versao atual tem 6 fases curtas,
+surpresa, precisao, tentativa e erro. A versao atual tem 9 fases curtas,
 checkpoints, mortes rapidas, respawn automatico, reinicio manual, dash,
 armadilhas, itens, audio basico, resultados locais por fase e tela inicial.
 
@@ -79,7 +79,9 @@ npm run format
 - `D` ou `Seta Direita`: andar para direita.
 - `Espaco`, `W` ou `Seta Cima`: pular.
 - `J` ou `Z`: dash.
-- `K` ou `X`: acao secundaria/interagir.
+- `K` ou `X`: acao secundaria/interagir, toque curto para `Centelha Ciano` e
+  segurar/soltar para `Rajada Ciano`.
+- `L` ou `C`: carregar `Energia Ciano` no chao.
 - `R`: reiniciar do checkpoint ativo.
 - `Esc`: pausar/retomar.
 - `M`: mutar/desmutar audio.
@@ -89,7 +91,7 @@ npm run format
 
 1. Abra o jogo.
 2. Na tela inicial, pressione `Enter`, `Espaco` ou clique/toque para iniciar.
-3. Complete as 6 fases atuais em sequencia.
+3. Complete as 9 fases atuais em sequencia.
 4. Ao morrer, o jogador respawna rapidamente no checkpoint ativo.
 5. Use `R` para reiniciar manualmente do checkpoint sem contar morte.
 6. Ao concluir uma fase, a transicao mostra tempo, mortes da fase e recorde local.
@@ -102,8 +104,11 @@ npm run format
 - `assets/ASSETS.md`: origem/licenca dos assets.
 - `docs/mvp-gameplay-checklist.md`: checklist manual do MVP.
 - `docs/block-2-gameplay-checklist.md`: plano e checklist manual das fases 4 a 6.
+- `docs/block-3-gameplay-checklist.md`: plano e checklist manual das fases 7 a 9.
 - `docs/dev-qa-tools.md`: ferramentas dev para iniciar fases e acelerar playtest.
 - `docs/build-optimization.md`: decisao inicial de chunking do build.
 - `docs/performance-stability-check.md`: medicao inicial de estabilidade.
 - `docs/mvp-release-checklist.md`: checklist do primeiro build jogavel.
 - `docs/phase-15-improvement-plan.md`: analise pos-MVP e plano de melhorias.
+- `docs/phase-16-energy-shot-plan.md`: plano e fechamento do kit `Energia
+Ciano` e do Bloco 3.

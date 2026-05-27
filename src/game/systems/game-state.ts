@@ -1,5 +1,12 @@
 import { GAME_RESOLUTION, TILE_SIZE_PX } from "../constants";
-import type { CheckpointId, LevelId, Vector2Like } from "../../shared";
+import {
+  DEFAULT_PLAYER_INITIAL_ENERGY,
+  PLAYER_ENERGY_MAX,
+  PLAYER_ENERGY_MIN,
+  type CheckpointId,
+  type LevelId,
+  type Vector2Like,
+} from "../../shared";
 import { emitGameEvent, GAME_EVENTS, type DeathCause } from "./game-events";
 
 export const INITIAL_LEVEL_ID: LevelId = "level-01";
@@ -12,6 +19,29 @@ export type PlayerLifeState = "alive" | "dead";
 export type ActiveCheckpoint = Vector2Like & {
   readonly id: CheckpointId;
   readonly levelId: LevelId;
+  readonly initialEnergy: number;
+};
+
+export type PlayerEnergyHudState = {
+  readonly current: number;
+  readonly max: number;
+  readonly isCharging: boolean;
+  readonly isFull: boolean;
+  readonly feedback: PlayerEnergyHudFeedback;
+};
+
+export type PlayerEnergyHudStateInput = {
+  readonly current: number;
+  readonly max?: number;
+  readonly isCharging?: boolean;
+  readonly feedback?: PlayerEnergyHudFeedback;
+};
+
+export type PlayerEnergyHudFeedbackKind = "none" | "full" | "insufficient";
+
+export type PlayerEnergyHudFeedback = {
+  readonly kind: PlayerEnergyHudFeedbackKind;
+  readonly sequence: number;
 };
 
 export type GameStateSnapshot = {
@@ -20,6 +50,7 @@ export type GameStateSnapshot = {
   playerLifeState: PlayerLifeState;
   deathCount: number;
   activeCheckpoint: ActiveCheckpoint;
+  playerEnergy: PlayerEnergyHudState;
   isPaused: boolean;
   isMuted: boolean;
   isMusicMuted: boolean;
@@ -41,13 +72,90 @@ function createInitialCheckpoint(
     x: INITIAL_PLAYER_PIVOT_X,
     y: INITIAL_PLAYER_PIVOT_Y,
   },
+  initialEnergy = DEFAULT_PLAYER_INITIAL_ENERGY,
 ): ActiveCheckpoint {
   return {
     id: createInitialCheckpointId(levelId),
     levelId,
     x: position.x,
     y: position.y,
+    initialEnergy: normalizeInitialEnergy(initialEnergy),
   };
+}
+
+function normalizeInitialEnergy(initialEnergy: number): number {
+  if (!Number.isFinite(initialEnergy)) {
+    return DEFAULT_PLAYER_INITIAL_ENERGY;
+  }
+
+  return Math.min(
+    PLAYER_ENERGY_MAX,
+    Math.max(PLAYER_ENERGY_MIN, initialEnergy),
+  );
+}
+
+function createPlayerEnergyHudState(
+  current = DEFAULT_PLAYER_INITIAL_ENERGY,
+): PlayerEnergyHudState {
+  return normalizePlayerEnergyHudState({
+    current,
+    max: PLAYER_ENERGY_MAX,
+    isCharging: false,
+    feedback: createInitialPlayerEnergyFeedback(),
+  });
+}
+
+function normalizePlayerEnergyHudState(
+  input: PlayerEnergyHudStateInput,
+  fallbackFeedback: PlayerEnergyHudFeedback = createInitialPlayerEnergyFeedback(),
+): PlayerEnergyHudState {
+  const max =
+    Number.isFinite(input.max) && input.max !== undefined
+      ? Math.max(1, input.max)
+      : PLAYER_ENERGY_MAX;
+  const current = Number.isFinite(input.current)
+    ? Math.min(max, Math.max(PLAYER_ENERGY_MIN, input.current))
+    : PLAYER_ENERGY_MIN;
+
+  return {
+    current,
+    max,
+    isCharging: input.isCharging ?? false,
+    isFull: current >= max,
+    feedback: normalizePlayerEnergyFeedback(input.feedback ?? fallbackFeedback),
+  };
+}
+
+function createInitialPlayerEnergyFeedback(): PlayerEnergyHudFeedback {
+  return {
+    kind: "none",
+    sequence: 0,
+  };
+}
+
+function normalizePlayerEnergyFeedback(
+  feedback: PlayerEnergyHudFeedback,
+): PlayerEnergyHudFeedback {
+  return {
+    kind: feedback.kind,
+    sequence: Number.isFinite(feedback.sequence)
+      ? Math.max(0, Math.trunc(feedback.sequence))
+      : 0,
+  };
+}
+
+function arePlayerEnergyHudStatesEqual(
+  left: PlayerEnergyHudState,
+  right: PlayerEnergyHudState,
+): boolean {
+  return (
+    left.current === right.current &&
+    left.max === right.max &&
+    left.isCharging === right.isCharging &&
+    left.isFull === right.isFull &&
+    left.feedback.kind === right.feedback.kind &&
+    left.feedback.sequence === right.feedback.sequence
+  );
 }
 
 function cloneState(state: GameStateSnapshot): GameStateSnapshot {
@@ -55,6 +163,9 @@ function cloneState(state: GameStateSnapshot): GameStateSnapshot {
     ...state,
     activeCheckpoint: {
       ...state.activeCheckpoint,
+    },
+    playerEnergy: {
+      ...state.playerEnergy,
     },
   };
 }
@@ -66,6 +177,7 @@ export function createInitialGameState(): GameStateSnapshot {
     playerLifeState: "alive",
     deathCount: 0,
     activeCheckpoint: createInitialCheckpoint(INITIAL_LEVEL_ID),
+    playerEnergy: createPlayerEnergyHudState(),
     isPaused: false,
     isMuted: false,
     isMusicMuted: false,
@@ -104,12 +216,18 @@ class GameStateStore {
   public startLevel(
     levelId: LevelId = INITIAL_LEVEL_ID,
     spawnPosition?: Vector2Like,
+    initialEnergy = DEFAULT_PLAYER_INITIAL_ENERGY,
   ): void {
     this.setState({
       status: "playing",
       currentLevelId: levelId,
       playerLifeState: "alive",
-      activeCheckpoint: createInitialCheckpoint(levelId, spawnPosition),
+      activeCheckpoint: createInitialCheckpoint(
+        levelId,
+        spawnPosition,
+        initialEnergy,
+      ),
+      playerEnergy: createPlayerEnergyHudState(initialEnergy),
       isPaused: false,
     });
   }
@@ -166,6 +284,7 @@ class GameStateStore {
     this.setState({
       status: "playing",
       playerLifeState: "alive",
+      playerEnergy: createPlayerEnergyHudState(checkpoint.initialEnergy),
       isPaused: false,
     });
 
@@ -180,6 +299,33 @@ class GameStateStore {
     });
 
     return checkpoint;
+  }
+
+  public setPlayerEnergyHudState(energy: PlayerEnergyHudStateInput): void {
+    const playerEnergy = normalizePlayerEnergyHudState(
+      energy,
+      this.state.playerEnergy.feedback,
+    );
+
+    if (arePlayerEnergyHudStatesEqual(this.state.playerEnergy, playerEnergy)) {
+      return;
+    }
+
+    this.setState({ playerEnergy });
+  }
+
+  public triggerPlayerEnergyHudFeedback(
+    kind: Exclude<PlayerEnergyHudFeedbackKind, "none">,
+  ): void {
+    this.setState({
+      playerEnergy: {
+        ...this.state.playerEnergy,
+        feedback: {
+          kind,
+          sequence: this.state.playerEnergy.feedback.sequence + 1,
+        },
+      },
+    });
   }
 
   public completeLevel(nextLevelId?: LevelId): void {
@@ -238,6 +384,9 @@ class GameStateStore {
       activeCheckpoint: patch.activeCheckpoint
         ? { ...patch.activeCheckpoint }
         : { ...this.state.activeCheckpoint },
+      playerEnergy: patch.playerEnergy
+        ? { ...patch.playerEnergy }
+        : { ...this.state.playerEnergy },
     };
 
     this.notify();

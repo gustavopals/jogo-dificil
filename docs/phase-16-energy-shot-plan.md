@@ -190,6 +190,40 @@ Não afeta:
 - Hazards permanentes.
 - Vários alvos atrás de um bloqueador sólido.
 
+## Regra Visual Anti-Cópia
+
+O kit `Energia Ciano` pode usar o arquétipo amplo de golpe de energia shonen,
+mas deve ter leitura própria do Pino e do jogo. A direção visual final precisa
+passar por esta regra antes de entrar como asset.
+
+Permitido:
+
+- Paleta ciano, branco e azul-esverdeado, ligada à faixa e ao cabelo do Pino.
+- Poses assimétricas e compactas, com uma mão projetando energia e a outra
+  estabilizando corpo/faixa.
+- Energia em lascas, faíscas, linhas quebradas e segmentos pixelados.
+- `Centelha Ciano` como pequeno disparo pontudo, curto e rápido.
+- `Carga Ciano` como aura baixa, próxima ao corpo, com partículas pequenas.
+- `Rajada Ciano` como feixe curto, segmentado e horizontal, com recuo do Pino.
+
+Proibido:
+
+- Pose de duas mãos em concha juntando energia no centro.
+- Feixe gigante contínuo atravessando a tela inteira.
+- Aura amarela/dourada de transformação.
+- Grito/nome de golpe inspirado em obra famosa.
+- Ícones, símbolos, silhuetas, cabelo, poses ou enquadramentos reconhecíveis de
+  Dragon Ball ou outro anime específico.
+- Transformação visual que mude Pino para parecer personagem existente.
+
+Checklist de aprovação visual:
+
+- A pose funciona em silhueta mesmo sem efeitos.
+- A energia parece ciano/laboratório, não cópia de anime específico.
+- O efeito não cobre hazards pequenos.
+- O disparo cabe no grid do jogo e mantém leitura em 1x.
+- O sprite do Pino mantém hitbox 10x22px; só o visual pode extrapolar.
+
 ## Tese De Gameplay
 
 Energia no Pino deve ser uma ferramenta de precisão, não uma arma universal.
@@ -221,8 +255,18 @@ Regras de prioridade:
 - Soltar `L`/`C`: manter energia acumulada; não dispara poder automaticamente.
 
 Essa escolha separa o botão de carregar energia do botão de disparar, mas ainda
-mantém `K`/`X` como ação secundária principal. Na implementação, o input mapper
-deve ganhar uma action nova, provisoriamente `charge-energy`.
+mantém `K`/`X` como ação secundária principal. A action `charge-energy` foi
+adicionada ao input mapper e fica ligada a `L`/`C`; a lógica de carregar energia
+será integrada nas próximas subtasks.
+
+O input de `K`/`X` também passa por um resolvedor de intenção testável:
+
+- Pressionar perto de objeto interativo preserva a interação atual.
+- Toque curto sem interação gera intenção futura de `Centelha Ciano`.
+- Segurar só inicia a preparação runtime da `Rajada Ciano` quando
+  `canPrepareCyanBurst` permite, exigindo energia cheia e sem cooldown/estado
+  ocupado.
+- Soltar após preparação gera intenção futura de disparo da `Rajada Ciano`.
 
 ## Regras Fechadas De Energia
 
@@ -298,6 +342,88 @@ Tipos de objeto planejados para a fase:
 - `energy-core`: alvo pesado que exige `Rajada Ciano` e pode abrir passagem
   temporária.
 
+Schema declarativo inicial:
+
+- `LevelDefinition.energyTargets` lista alvos opcionais por fase, com `id`,
+  `kind`, `area`, `acceptedPowers`, `hitPoints` e `resetOnRespawn`.
+- `acceptedPowers` declara explicitamente se o alvo aceita `cyan-spark`,
+  `cyan-burst` ou ambos; a cena não precisa inferir isso pelo tipo visual.
+- `activatesObjectId` aponta para um objeto interativo existente quando o alvo
+  deve abrir porta, acionar mecanismo ou liberar passagem.
+- `activationDurationMs` permite declarar ativações temporárias para núcleos
+  pesados sem colocar temporizador hardcoded na fase.
+- `relayWindowMs` declara a janela de sequência dos `energy-relay`.
+- `hitGroupId` agrupa hurtboxes de boss para manter um hit por boss por Rajada.
+- `blocksMovement` e `absorbsEnergy` deixam blocos rachados e absorvedores
+  claros no dado, antes da implementação completa de cada comportamento.
+- A validação exige `absorbsEnergy: true` para `energy-absorber` e rejeita
+  `activatesObjectId` nesse tipo para manter o alvo sem recompensa mecânica.
+
+`energy-switch` implementado:
+
+- Entra como alvo leve quando `acceptedPowers` inclui `cyan-spark` e/ou
+  `cyan-burst`.
+- Ao ser atingido, fica ativo, zera sua vida runtime e deixa de receber novas
+  colisões de energia.
+- Se declarar `activatesObjectId`, ativa o objeto interativo apontado; isso já
+  permite abrir portas ou acionar mecanismos existentes.
+- O reset da sala restaura switches com `resetOnRespawn: true` e preserva os
+  que forem declarados como persistentes.
+
+`energy-cracked-block` implementado:
+
+- Só é alvo válido para `cyan-burst`; a validação de fase rejeita blocos rachados
+  que aceitam `cyan-spark`.
+- Enquanto não quebrado, entra nos sólidos da sala por padrão;
+  `blocksMovement: false` permite declarar bloco rachado visual/alvo sem
+  bloquear movimento.
+- A `Rajada Ciano` aplica dano ao bloco; dano parcial mantém o bloco ativo e
+  sólido, dano suficiente marca `isBroken` e remove o sólido no mesmo refresh da
+  sala.
+- `Centelha Ciano` não ativa nem danifica o bloco rachado. Se o bloco bloqueia
+  movimento, a centelha só colide com ele como sólido comum.
+- Respawn restaura ou preserva o estado quebrado conforme `resetOnRespawn`.
+
+`energy-relay` implementado:
+
+- Só é alvo válido para `cyan-spark`; a validação de fase rejeita relays que
+  aceitam `cyan-burst`.
+- `hitPoints` representa a quantidade de pulsos de `Centelha Ciano` exigida
+  para completar a sequência.
+- Cada pulso reduz `hitPointsRemaining` em 1 e reinicia a janela declarada em
+  `relayWindowMs`.
+- Se `relayWindowMs` expira antes do próximo pulso, a sequência reseta para a
+  contagem inicial.
+- Ao completar a sequência, o relay fica ativo, deixa de receber colisões e
+  aciona `activatesObjectId` quando declarado.
+
+`energy-absorber` implementado:
+
+- Declara `absorbsEnergy: true` para deixar claro no dado que é um alvo falso
+  criado para consumir poder sem benefício.
+- Pode aceitar `cyan-spark`, `cyan-burst` ou ambos via `acceptedPowers`, mas não
+  pode declarar `activatesObjectId`.
+- Cada acerto registra `absorbedEnergyHits` no estado runtime, sem reduzir vida,
+  sem quebrar, sem ativar objeto e sem resolver o alvo.
+- Depois de absorver energia, continua disponível para novas colisões de
+  `Centelha Ciano` e `Rajada Ciano`.
+- O reset da sala limpa o contador de absorções quando `resetOnRespawn` é
+  verdadeiro e preserva o estado quando o alvo for declarado persistente.
+
+`energy-core` implementado:
+
+- Só é alvo válido para `cyan-burst`; a validação de fase rejeita núcleos que
+  aceitam `cyan-spark`.
+- Recebe dano forte da `Rajada Ciano` até zerar `hitPointsRemaining`; antes disso
+  permanece inativo e pode exigir mais de uma Rajada.
+- Ao ativar, fica fora das próximas colisões de energia e aciona
+  `activatesObjectId` quando declarado, permitindo abrir uma passagem pesada.
+- Se declarar `activationDurationMs`, mantém `activationRemainingMs` no runtime,
+  fecha o objeto ativado ao expirar, restaura a vida do núcleo e volta a ficar
+  disponível para nova Rajada.
+- Sem `activationDurationMs`, a ativação permanece até reset de sala ou até ser
+  preservada por `resetOnRespawn: false`.
+
 Fora do escopo inicial:
 
 - Mira diagonal ou livre.
@@ -323,6 +449,98 @@ Implementação recomendada:
   estado temporário de alvos.
 - Adicionar API de QA em dev para ler energia atual, forçar energia cheia e
   testar alvo ativado.
+
+Estado puro implementado:
+
+- `src/game/physics/player-energy.ts` concentra energia atual, atividade
+  (`idle`, `charging`, `burst-preparing`, `burst-firing`), cooldown da
+  `Centelha Ciano`, cooldown da `Rajada Ciano`, preparação da rajada e duração
+  ativa do feixe.
+- O update é determinístico e recebe apenas estado anterior, delta, input de
+  carga, disponibilidade de carga, estado de chão/ar e pedido de ação de
+  energia.
+- Reset de energia recria estado limpo com valor inicial configurável, pronto
+  para ser conectado a fase/checkpoint na próxima subtask.
+
+Energia inicial por fase/checkpoint:
+
+- `LevelDefinition.initialEnergy` define a energia inicial do começo da fase.
+- `CheckpointDefinition.initialEnergy` sobrescreve o valor da fase para aquele
+  checkpoint.
+- Se nenhum valor for declarado, o fallback continua sendo 40.
+- `ActiveCheckpoint.initialEnergy` carrega o valor resolvido, para respawn e
+  reinício manual restaurarem a energia correta nas próximas integrações.
+
+Reset de estados temporários:
+
+- `LevelScene` mantém um `playerEnergyState` runtime iniciado pelo checkpoint
+  ativo.
+- Segurar `L`/`C` atualiza a energia pelo estado puro, respeitando chão/ar.
+- Enquanto a `Carga Ciano` está disponível no chão, o movimento horizontal cai
+  para 30% e o dash fica bloqueado; pular, ficar no ar ou estar em dash impede a
+  carga naquele frame.
+- Morte, respawn automático, reinício manual com `R` e troca via checkpoint
+  limpam carga, cooldowns, preparação, duração de rajada e intenção secundária,
+  restaurando a energia inicial configurada no checkpoint ativo.
+- Pausa limpa carga, cooldowns, preparação, duração de rajada e intenção
+  secundária, mas preserva a energia acumulada pelo jogador.
+
+Renderização inicial da `Centelha Ciano`:
+
+- Toque curto em `K`/`X`, sem interação próxima, cria um projétil horizontal
+  pequeno na frente do Pino.
+- A centelha usa retângulo ciano com contorno branco para manter leitura de
+  pixel art original sem depender de asset final.
+- A cena só renderiza quando o estado puro aceita `cyan-spark`, consumindo 10
+  energia e iniciando cooldown de 180 ms.
+- Falta de energia ou cooldown ativo bloqueiam a renderização; falta de energia
+  dispara feedback curto com partículas quebradas e pulso coral/ciano no Pino.
+- `src/game/physics/energy-projectiles.ts` move a centelha a 420 px/s e remove
+  o projétil ao atingir 128 px de alcance.
+- A atualização da centelha remove o projétil ao colidir com sólidos, alvos
+  genéricos, hurtboxes de boss ou ao atingir o alcance máximo. Alvos e bosses
+  entram como candidatos retangulares para as próximas tasks conectarem aos
+  schemas reais.
+- O limite de dois disparos ativos fica centralizado em
+  `canSpawnCyanSparkProjectile`; a cena bloqueia o terceiro disparo antes de
+  consumir energia ou iniciar cooldown.
+- O feedback de energia insuficiente só responde à rejeição
+  `cyan-spark`/`insufficient-energy`; cooldown e limite de projéteis continuam
+  silenciosos até a subtask de HUD/audio dedicada.
+
+Preparação inicial da `Rajada Ciano`:
+
+- Segurar `K`/`X` por 500 ms com energia cheia dispara o intent
+  `special-charge-start` e envia `cyan-burst-prepare` para o estado puro.
+- A cena alimenta o resolvedor de intenção com `canPrepareCyanBurst`, então 99
+  de energia, cooldown ativo ou atividade ocupada não iniciam a preparação.
+- A preparação coloca a energia em `burst-preparing` e inicia a contagem de
+  preparação da rajada.
+- A direção da rajada fica travada no facing do Pino no momento em que
+  `cyan-burst-prepare` é aceito; tentar virar durante `burst-preparing` não muda
+  a direção guardada para o feixe.
+- A cena mostra um pulso ciano/branco curto e partículas perto da mão do Pino
+  quando a preparação começa.
+- Soltar `K`/`X` quando a preparação pura já está pronta envia
+  `cyan-burst-fire`, entra em `burst-firing` e renderiza um feixe horizontal de
+  192x12 px por 280 ms.
+- O custo de 100 energia é aplicado apenas quando `cyan-burst-fire` é aceito; a
+  preparação mantém energia cheia e cancelar preparação não consome recurso.
+- O feixe usa a direção travada da preparação e é limpo automaticamente quando
+  `cyan-burst-finished` sai do estado puro.
+- A Rajada resolve colisão pura contra sólidos e alvos retangulares; sólidos
+  comuns cortam o comprimento visual do feixe.
+- `energy-cracked-block` entra como bloco especial sólido enquanto não quebrado;
+  uma Rajada aplica 2 de dano forte e remove o bloco dos sólidos quando a vida
+  chega a zero.
+- Alvos genéricos e `boss-hurtbox` também recebem 2 de dano por Rajada aceita,
+  preparando o contrato de vida dos bosses da fase 17.
+- A cena aplica o impacto no momento do disparo, não a cada frame do feixe; a
+  regra formal usa `hitGroupId` para impedir múltiplas hurtboxes do mesmo boss
+  de receberem dano na mesma Rajada.
+- Enquanto o feixe ativo existir, a cena mantém um registro dos bosses já
+  atingidos pela Rajada atual e limpa esse registro ao cancelar, resetar ou
+  receber `cyan-burst-finished`.
 
 ## Visual, Animações E Assets
 
@@ -464,40 +682,121 @@ Função: combinar dash, centelha, rajada e interação.
 
 ### Task 16.6 - Animações E Arte Do Poder
 
-- Criar sprites do Pino carregando energia.
-- Criar sprites do Pino disparando `Centelha Ciano`.
-- Criar sprites do Pino preparando e soltando `Rajada Ciano`.
-- Criar projétil, feixe, impacto, alvo ativo e bloco quebrado.
-- Registrar animações em dados, mantendo hitbox do Pino 10x22px.
-- Garantir que efeitos não escondem hazards pequenos.
+- Criar sprites do Pino carregando energia. Implementado com
+  `player-pino-charge-01.png` e `player-pino-charge-02.png`, ambos 14x26px,
+  usando aura baixa ciano e pose assimétrica própria.
+- Criar sprites do Pino disparando `Centelha Ciano`. Implementado com
+  `player-pino-cyan-spark-01.png` e `player-pino-cyan-spark-02.png`, ambos
+  14x26px, com braço estendido, recuo curto e faísca ciano no punho.
+- Criar sprites do Pino preparando e soltando `Rajada Ciano`. Implementado com
+  `player-pino-cyan-burst-prepare-01.png`,
+  `player-pino-cyan-burst-prepare-02.png`,
+  `player-pino-cyan-burst-fire-01.png` e
+  `player-pino-cyan-burst-fire-02.png`, todos 14x26px, com energia segmentada no
+  punho, recuo do corpo e início curto de feixe.
+- Criar projétil, feixe, impacto, alvo ativo e bloco quebrado. Implementado com
+  `energy-cyan-spark-projectile.png` (8x8px),
+  `energy-cyan-burst-beam.png`, `energy-impact.png`,
+  `energy-target-active.png` e `energy-cracked-block-broken.png` (16x16px),
+  mantendo leitura ciano compacta e fragmentos sem ocupar a tela inteira.
+- Registrar animações em dados, mantendo hitbox do Pino 10x22px. Implementado
+  em `PINO_ANIMATIONS` com estados `cyan-charge`, `cyan-spark`,
+  `cyan-burst-prepare` e `cyan-burst-fire`, todos apontando para os sprites do
+  Pino e carregando `hitboxPx` fixo em 10x22px.
+- Garantir que efeitos não escondem hazards pequenos. Implementado com regra
+  central em `visual-readability`: hazards diretos, `spike-pop` e projéteis de
+  trap ficam acima dos efeitos de energia, e efeitos largos de energia têm alpha
+  máximo de 0.56.
 
 ### Task 16.7 - Audio E HUD De Energia
 
 - Criar sons originais de carga, energia cheia, tiro, falha, especial e impacto.
-- Integrar sons ao audio manager e ao mute global.
-- Criar medidor pequeno de energia no HUD.
-- Dar feedback de energia cheia e energia insuficiente.
-- Evitar texto tutorial fixo na tela.
+  Implementado com oito WAVs originais em `assets/audio/sfx/`:
+  `energy-charge-loop.wav`, `energy-charge-full.wav`, `energy-shot.wav`,
+  `energy-shot-empty.wav`, `energy-special-windup.wav`,
+  `energy-special-fire.wav`, `energy-impact-small.wav` e
+  `energy-impact-heavy.wav`.
+- Integrar sons ao audio manager e ao mute global. Implementado com cues puros
+  em `player-energy-audio-feedback`, emitidos pela `LevelScene` via eventos
+  `audio:play-requested`/`audio:stop-requested`; o `AudioScene` registra os
+  WAVs e o `AudioManager` aplica mute global também no loop de carga ativo.
+- Criar medidor pequeno de energia no HUD. Implementado como barra segmentada
+  compacta na faixa superior do HUD, sincronizada por `playerEnergy` no
+  `gameStateStore`; a `LevelScene` publica energia atual, máximo e estado de
+  carga sem adicionar texto tutorial fixo.
+- Dar feedback de energia cheia e energia insuficiente. Implementado com pulso
+  branco/ciano no medidor quando a energia chega ao máximo e piscada coral curta
+  quando uma ação é rejeitada por energia insuficiente, mantendo som e efeito do
+  Pino já existentes.
+- Evitar texto tutorial fixo na tela. Implementado mantendo o HUD de energia
+  sem labels de controle ou instruções permanentes; a leitura acontece por barra
+  segmentada, cor, pulso, piscada, áudio e animação do Pino.
 
 ### Task 16.8 - Criar Bloco 3 De Fases
 
-- Criar `level-07` para ensinar `Centelha Ciano` e recarga.
-- Criar `level-08` para distorcer com absorvedor e bloco rachado.
+- Criar `level-07` para ensinar `Centelha Ciano` e recarga. Implementado como
+  `Faisca De Treino`: sala segura sem traps, energia inicial 20 para dois tiros
+  simples, tres `energy-switch` abrindo portas em sequencia e checkpoint de
+  recarga com energia 0 antes do terceiro alvo.
+- Criar `level-08` para distorcer com absorvedor e bloco rachado. Implementado
+  como `O Alvo Mente`: `energy-absorber` falso antes da primeira leitura, alvo
+  correto depois de `spike-pop`, checkpoint de carga segura e
+  `energy-cracked-block` bloqueando a rota ate receber `Rajada Ciano`.
 - Criar `level-09` para combinar dash, tiro simples, especial e interação.
-- Encadear `level-06 -> level-07 -> level-08 -> level-09`.
-- Criar checklist manual do Bloco 3.
+  Implementado como `Carga Em Movimento`: gap inicial de dash, `energy-relay`
+  de tres `Centelha Ciano`, checkpoint antes da combinacao final,
+  `energy-core` temporario acionado por `Rajada Ciano` e alavanca final com
+  `K`/`X`.
+- Encadear `level-06 -> level-07 -> level-08 -> level-09`. Implementado com
+  `nextLevelId` em `level-06`, `level-07` e `level-08`; `level-09` encerra a
+  campanha atual e a tela final comunica 9 fases vencidas.
+- Criar checklist manual do Bloco 3. Implementado em
+  `docs/block-3-gameplay-checklist.md`, cobrindo validacao automatizada,
+  playtest por fase, energia, HUD, audio, reset, cadeia e criterios de ajuste.
 
 ### Task 16.9 - Testes E QA Da Energia
 
-- Testes unitários do estado de energia.
-- Testes unitários de input tap/hold/carga.
-- Testes de colisão da `Centelha Ciano`.
-- Testes de hit único da `Rajada Ciano`.
-- Testes de schema/validação dos alvos de energia.
-- Testes de conteúdo para `level-07`, `level-08` e `level-09`.
+- Testes unitários do estado de energia. Implementado em
+  `tests/player-energy.test.ts`, cobrindo estado inicial, clamp de energia,
+  delta negativo, carga, recarga cheia, gasto/cooldown da `Centelha Ciano`,
+  preparação/cancelamento/disparo da `Rajada Ciano`, rejeições por energia,
+  cooldown, estado ocupado e reset/limpeza de temporários.
+- Testes unitários de input tap/hold/carga. Implementado em
+  `tests/secondary-action-intent.test.ts` e `tests/input-bindings.test.ts`,
+  cobrindo toque curto de `K`/`X` para `Centelha Ciano`, hold de `K`/`X` para
+  preparar/disparar/cancelar `Rajada Ciano`, prioridade de interação próxima e
+  `L`/`C` como ação segurada `charge-energy` separada de `secondary`.
+- Testes de colisão da `Centelha Ciano`. Implementado em
+  `tests/energy-projectiles.test.ts` e `tests/level-energy-targets.test.ts`,
+  cobrindo colisão com sólidos, alvos leves, hurtboxes de boss, varredura entre
+  frames, direção esquerda, erro vertical, múltiplos projéteis, prioridade entre
+  colisão e limite de alcance e mapeamento dos alvos declarativos que aceitam
+  `cyan-spark`.
+- Testes de hit único da `Rajada Ciano`. Implementado em
+  `tests/energy-projectiles.test.ts`, cobrindo múltiplas hurtboxes no mesmo
+  `hitGroupId`, bosses já atingidos na rajada ativa, repetição de checks do
+  mesmo feixe sem novo dano e reset do rastreamento para uma nova rajada.
+- Testes de schema/validação dos alvos de energia. Implementado em
+  `tests/level-schema.test.ts` e `tests/level-validation.test.ts`, cobrindo
+  export dos tipos declarativos, todos os `EnergyTargetKind`, poderes aceitos,
+  caso válido com todos os tipos, geometria, `hitPoints`, duplicidade de ids,
+  regras por tipo, timers positivos, `activatesObjectId` e referências
+  inválidas.
+- Testes de conteúdo para `level-07`, `level-08` e `level-09`. Implementado em
+  `tests/block-3-content.test.ts`, cobrindo registro das fases, validação,
+  cadeia `level-06 -> level-07 -> level-08 -> level-09`, metadata de curva,
+  assets mínimos, treino seguro de `Centelha Ciano`, recarga, absorvedor, bloco
+  rachado, relay, core temporário, alavanca final e reset dos gates.
 - Smoke Playwright cobrindo carregar energia, tiro simples, especial e alvo
-  ativado.
+  ativado. Implementado em `e2e/game-smoke.e2e.ts`, usando input real de
+  `K`/`L`: `level-07` dispara `Centelha Ciano` e ativa o primeiro
+  `energy-switch`; `level-08` vai ao checkpoint, carrega energia, solta
+  `Rajada Ciano` e quebra o `energy-cracked-block`.
 - Ferramentas de QA para energia cheia, cooldown zerado e leitura de estado.
+  Implementado com `fillEnergy()`, `clearEnergyCooldowns()` e
+  `readEnergyState()` em `window.__JOGO_DIFICIL_QA__`, permitindo forcar energia
+  cheia, limpar cooldowns/estados temporarios e ler energia, atividade, timers e
+  disponibilidade de `Centelha Ciano`/`Rajada Ciano`.
 
 ## Riscos
 

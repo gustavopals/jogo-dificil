@@ -42,6 +42,24 @@ Simular conclusao da fase atual:
 window.__JOGO_DIFICIL_QA__.completeLevel();
 ```
 
+Preencher energia do Pino:
+
+```js
+window.__JOGO_DIFICIL_QA__.fillEnergy();
+```
+
+Zerar cooldowns e estados temporarios de energia:
+
+```js
+window.__JOGO_DIFICIL_QA__.clearEnergyCooldowns();
+```
+
+Ler apenas o estado de energia:
+
+```js
+window.__JOGO_DIFICIL_QA__.readEnergyState();
+```
+
 Ler snapshot de QA:
 
 ```js
@@ -58,7 +76,8 @@ O snapshot inclui:
 - mortes acumuladas;
 - ultima morte conhecida, com causa e fonte quando existir;
 - estado do jogador;
-- estado de traps, projeteis, itens e objetos interativos da fase.
+- estado de traps, projeteis, itens, objetos interativos e alvos de energia da
+  fase.
 
 ## Uso Recomendado
 
@@ -66,5 +85,7 @@ O snapshot inclui:
 - Para revisar um trecho pos-checkpoint, usar `goToCheckpoint()` e repetir a
   sala.
 - Para validar transicoes, usar `completeLevel()` em vez de jogar a fase inteira.
+- Para testar `Rajada Ciano` sem esperar recarga, usar `fillEnergy()` e
+  `clearEnergyCooldowns()` antes do trecho alvo.
 - Para smoke tests, preferir os helpers de QA a cliques longos quando o objetivo
   for apenas posicionar o jogo em um estado conhecido.

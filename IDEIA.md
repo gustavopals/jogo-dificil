@@ -801,11 +801,11 @@ Implementação inicial da transição entre fases:
   fase e mortes acumuladas por cerca de 1 segundo antes de iniciar a próxima
   fase.
 - A decisão inicial do MVP era preservar o contador de mortes ao avançar entre
-  as 3 fases; no fluxo atual, a mesma regra vale para as 6 fases da campanha.
+  as 3 fases; no fluxo atual, a mesma regra vale para as 9 fases da campanha.
   O contador só é resetado quando o jogador reinicia a partir da tela final.
 - A tela final simples com mortes totais e `ENTER reinicia` aparece ao concluir
-  a última fase da campanha atual; desde a Task 15.6, isso acontece em
-  `level-06`.
+  a última fase da campanha atual; desde o encadeamento do Bloco 3, isso
+  acontece em `level-09`.
 - A vinheta de fim de fase continua sendo disparada por `AudioScene`; ao entrar
   na próxima fase, a transição pede o loop musical do MVP novamente.
 
@@ -1042,6 +1042,18 @@ Fase 16 - Kit de energia original:
   `Carga Ciano` é recuperação manual vulnerável e `Rajada Ciano` é especial de
   alto compromisso. Elas devem comunicar, respectivamente, velocidade,
   vulnerabilidade e recompensa.
+- Matriz de interação fechada: `Centelha Ciano` ativa switches leves, relays,
+  weak points simples e projéteis canceláveis; `Carga Ciano` não ativa nem
+  quebra nada, apenas recupera recurso e bloqueia dash/mobilidade; `Rajada
+  Ciano` ativa núcleos pesados, quebra `energy-cracked-block`, acerta bosses em
+  janela vulnerável e para em sólidos comuns.
+- Regra visual anti-cópia fechada: energia sempre ciano/branco/azul-esverdeada,
+  com lascas, faíscas e segmentos pixelados; Pino usa pose assimétrica própria,
+  sem mãos em concha, aura dourada, grito/nome inspirado em obra famosa, feixe
+  gigante contínuo ou silhueta reconhecível de personagem existente.
+- Task 16.1 fechada: nomes, IDs internos, custos, limites, papéis, diferença
+  operacional, matriz de interação e regra visual anti-cópia passam a ser
+  contrato final para implementar o kit `Energia Ciano` nas tasks seguintes.
 - Função de gameplay: ferramenta de precisão para ativar alvos, quebrar blocos
   específicos, preparar o boss da fase 17 e criar timing de fase, não arma livre
   para resolver tudo.
@@ -1049,6 +1061,72 @@ Fase 16 - Kit de energia original:
   de objeto interage; toque curto sem interação dispara `Centelha Ciano`;
   segurar `K`/`X` com energia cheia prepara a `Rajada Ciano`; `L`/`C` fica como
   novo botão segurado para carregar energia.
+- Implementação iniciada da Task 16.2: o input mapper reconhece a nova action
+  `charge-energy`, com binding padrão `L`/`C`; a lógica de carga ainda será
+  conectada ao estado de energia.
+- `K`/`X` agora passa por um resolvedor de intenção testável: interação perto de
+  objeto continua preservada, toque curto sem interação vira intenção futura de
+  `Centelha Ciano` e segurar/soltar fica reservado para a preparação e disparo
+  da `Rajada Ciano`.
+- Estado puro da `Energia Ciano` criado em `src/game/physics/player-energy.ts`:
+  energia atual, atividade de carga/preparação/disparo, cooldowns, preparação,
+  duração da rajada, efeitos/rejeições de ação e reset limpo com energia inicial
+  configurável.
+- Energia inicial por fase/checkpoint entrou no contrato declarativo:
+  `LevelDefinition.initialEnergy` define o começo da fase,
+  `CheckpointDefinition.initialEnergy` pode sobrescrever por checkpoint e o
+  `ActiveCheckpoint` guarda o valor resolvido para respawn/reinício.
+- Runtime inicial da `Energia Ciano` conectado na `LevelScene`: `L`/`C` já
+  alimenta o estado puro, `K`/`X` lê energia cheia para intenção de especial, e
+  morte, pausa, respawn automático e `R` limpam estados temporários previsíveis.
+  Pausa preserva energia atual; checkpoint/respawn/R restauram a energia
+  configurada no checkpoint ativo.
+- `Carga Ciano` agora aplica o compromisso de movimento planejado: no chão, a
+  carga reduz velocidade horizontal para 30% e bloqueia dash; pulo, ar e dash
+  ativo impedem a carga naquele frame.
+- `Centelha Ciano` começou pela renderização: toque curto em `K`/`X`, sem
+  interação próxima, cria um tiro horizontal pequeno com retângulo ciano/branco
+  na frente do Pino.
+- `Centelha Ciano` já consome 10 de energia e respeita cooldown de 180 ms antes
+  de renderizar. Se faltar energia ou o cooldown estiver ativo, o tiro não sai;
+  feedback de falha fica para subtask própria.
+- `Centelha Ciano` agora existe como projétil runtime simples: nasce na frente
+  do Pino, anda horizontalmente a 420 px/s e some ao atingir 128 px.
+- Colisão da `Centelha Ciano` ficou pura e previsível: remove o projétil ao
+  tocar sólidos, alvos retangulares genéricos, hurtboxes de boss ou o limite de
+  alcance. A cena já liga sólidos reais; alvos/boss serão conectados quando os
+  schemas específicos entrarem.
+- O limite de dois disparos ativos da `Centelha Ciano` já está aplicado antes do
+  consumo de energia; tentar disparar uma terceira centelha não gasta recurso
+  nem inicia cooldown.
+- Falha por energia insuficiente na `Centelha Ciano` agora tem feedback curto:
+  partículas quebradas perto da mão do Pino e pulso coral/ciano na aura. O
+  efeito só toca na rejeição `insufficient-energy`, sem confundir cooldown ou
+  limite de projéteis ativos.
+- `Rajada Ciano` começou a integração runtime: segurar `K`/`X` por 500 ms com
+  energia cheia inicia `cyan-burst-prepare`, muda o estado para
+  `burst-preparing` e mostra pulso ciano/branco curto perto da mão do Pino.
+- A preparação da `Rajada Ciano` agora usa `canPrepareCyanBurst`: exige energia
+  cheia real, sem cooldown e sem atividade ocupada, evitando que 99 de energia
+  ou cooldown ativo coloquem o input no modo especial.
+- A direção da `Rajada Ciano` fica travada no facing do Pino quando
+  `cyan-burst-prepare` é aceito; durante `burst-preparing`, tentar virar não
+  muda a direção reservada para o feixe.
+- `Rajada Ciano` já renderiza um feixe curto placeholder: soltar `K`/`X` quando
+  a preparação está pronta entra em `burst-firing`, mostra um retângulo
+  ciano/branco de 192x12 px na direção travada e remove o feixe ao terminar a
+  duração de 280 ms.
+- O custo da `Rajada Ciano` é debitado no disparo aceito (`cyan-burst-fired`),
+  não na preparação; cancelar a preparação preserva a energia cheia.
+- A `Rajada Ciano` agora colide com sólidos comuns, que encurtam o feixe, e com
+  alvos declarativos retangulares de energia. `energy-cracked-block` funciona
+  como bloco sólido especial até receber dano suficiente da Rajada.
+- Dano forte inicial fechado para a Rajada: 2 pontos por disparo aceito em
+  `energy-cracked-block`, alvos genéricos e `boss-hurtbox`; o impacto é aplicado
+  no momento do disparo, não como dano contínuo por frame.
+- Hit único de boss fechado: hurtboxes de boss podem compartilhar `hitGroupId`;
+  a Rajada aplica no máximo um impacto por grupo e a cena registra bosses já
+  atingidos até o feixe terminar ou ser limpo por cancel/reset.
 - Valores fechados da energia: máximo 100, energia inicial configurável por
   fase/checkpoint com padrão 40, carga no chão de 45 energia/s e sem carga no ar
   no MVP da fase 16.
@@ -1064,6 +1142,70 @@ Fase 16 - Kit de energia original:
   velocidade, não pode dar dash e cancela carga ao pular.
 - Tipos de alvo planejados: `energy-switch`, `energy-cracked-block`,
   `energy-relay`, `energy-absorber` e `energy-core`.
+- Schema declarativo dos alvos de energia fechado: fases usam
+  `LevelDefinition.energyTargets`, com `acceptedPowers`, vida/contagem em
+  `hitPoints`, reset por respawn, ativação opcional via `activatesObjectId`,
+  timers opcionais (`activationDurationMs`, `relayWindowMs`), `hitGroupId` para
+  boss e flags de leitura como `blocksMovement`/`absorbsEnergy`.
+- Regras de validação do schema: `energy-cracked-block` e `energy-core` aceitam
+  só `cyan-burst`; `energy-relay` aceita só `cyan-spark` e precisa de
+  `relayWindowMs`; `energy-absorber` precisa declarar `absorbsEnergy: true` e
+  não pode ativar objetos; referências de `activatesObjectId` precisam existir
+  em `interactiveObjects`.
+- `energy-switch` implementado: recebe colisão de `Centelha Ciano` e/ou
+  `Rajada Ciano` conforme `acceptedPowers`, ativa seu estado runtime, deixa de
+  ser alvo depois de ativo e aciona `activatesObjectId` para abrir portas ou
+  mecanismos já existentes.
+- `energy-cracked-block` implementado: aceita somente `Rajada Ciano`, vira sólido
+  da sala enquanto não quebrado quando `blocksMovement` não é `false`, ignora
+  dano/ativação por `Centelha Ciano`, quebra quando `hitPointsRemaining` chega a
+  zero e respeita o reset declarativo da sala.
+- `energy-relay` implementado: aceita somente `Centelha Ciano`, usa `hitPoints`
+  como quantidade de pulsos, reinicia a janela a cada acerto, reseta a sequência
+  quando `relayWindowMs` expira, ativa o próprio alvo ao completar e pode acionar
+  `activatesObjectId`.
+- `energy-absorber` implementado: declara `absorbsEnergy: true`, pode aceitar
+  `Centelha Ciano` e/ou `Rajada Ciano`, consome colisões sem reduzir vida, sem
+  quebrar e sem acionar objetos, registra `absorbedEnergyHits` no runtime e
+  continua alvo válido após cada absorção.
+- `energy-core` implementado: aceita somente `Rajada Ciano`, recebe dano forte
+  até ativar, pode acionar `activatesObjectId`, usa `activationRemainingMs` para
+  passagens temporárias declaradas por `activationDurationMs`, fecha o objeto e
+  rearma a vida ao expirar.
+- Sprites da `Carga Ciano` criados para Pino:
+  `player-pino-charge-01.png` e `player-pino-charge-02.png`, ambos 14x26px,
+  registrados como assets originais e mantendo a hitbox real 10x22px.
+- Sprites do disparo da `Centelha Ciano` criados para Pino:
+  `player-pino-cyan-spark-01.png` e `player-pino-cyan-spark-02.png`, ambos
+  14x26px, com braço estendido, pulso ciano curto e sem extrapolar a hitbox
+  real do personagem.
+- Sprites da `Rajada Ciano` criados para Pino: dois frames de preparação
+  (`player-pino-cyan-burst-prepare-01.png` e
+  `player-pino-cyan-burst-prepare-02.png`) e dois frames de soltura
+  (`player-pino-cyan-burst-fire-01.png` e
+  `player-pino-cyan-burst-fire-02.png`), todos 14x26px, com energia segmentada
+  no punho e recuo compacto.
+- Kit visual externo dos poderes criado: `energy-cyan-spark-projectile.png`
+  representa o projétil pequeno 8x8px da `Centelha Ciano`;
+  `energy-cyan-burst-beam.png` é o segmento tileável 16x16px do feixe;
+  `energy-impact.png` cobre acertos; `energy-target-active.png` marca alvo de
+  energia resolvido/ativo; `energy-cracked-block-broken.png` mostra o bloco
+  rachado quebrado em fragmentos. Todos usam ciano próprio do jogo e ocupam
+  pouco espaço visual para não esconder hazards.
+- Animações de `Energia Ciano` registradas nos dados do Pino:
+  `cyan-charge`, `cyan-spark`, `cyan-burst-prepare` e `cyan-burst-fire` entram
+  em `PINO_ANIMATIONS`, apontam para os sprites 14x26px já criados e declaram
+  `hitboxPx` 10x22px para manter a colisão real estável enquanto a cena troca
+  o visual conforme carga, tiro e rajada.
+- Legibilidade dos perigos pequenos protegida: `visual-readability` define
+  depths para hazards diretos, `spike-pop` e projéteis de trap ficarem acima dos
+  efeitos de energia do Pino, enquanto partículas/impactos/feixe largos são
+  limitados a alpha máximo 0.56 para não encobrir espinhos ou tells pequenos.
+- Sons originais da `Energia Ciano` criados por síntese local: loop baixo de
+  `Carga Ciano`, ping de energia cheia, disparo da `Centelha Ciano`, falha sem
+  energia, subida e disparo da `Rajada Ciano`, impacto pequeno e impacto pesado.
+  Os oito WAVs ficam em `assets/audio/sfx/` e seus metadados ficam em
+  `src/data/audio/energy-audio.ts`.
 - Animações planejadas: carregar energia, energia cheia, tiro simples, especial
   em preparação, especial disparando, projétil, feixe, impactos e estados de
   alvo/bloco quebrado.
@@ -1072,6 +1214,61 @@ Fase 16 - Kit de energia original:
 - O Bloco 3 deve seguir a regra de expansão: `level-07` ensina `Centelha Ciano`
   e recarga, `level-08` distorce com absorvedor/bloco rachado e `level-09`
   combina dash, tiro simples, especial e interação.
+- `level-07`, `Faisca De Treino`, foi criado como a primeira sala do Bloco 3:
+  começa com 20 de energia, suficiente para duas `Centelha Ciano`, usa tres
+  `energy-switch` para abrir portas simples e coloca um checkpoint seguro com
+  energia 0 antes do terceiro alvo para ensinar `Carga Ciano` sem texto fixo.
+- `level-08`, `O Alvo Mente`, foi criado para distorcer a confiança no kit de
+  energia: um `energy-absorber` falso gasta tiros sem ativar nada, o
+  `energy-switch` correto fica depois de um `spike-pop` conhecido e a segunda
+  metade exige carregar energia em area segura antes de quebrar um
+  `energy-cracked-block` com `Rajada Ciano`.
+- `level-09`, `Carga Em Movimento`, foi criado para combinar o kit completo do
+  Bloco 3: gap inicial de dash, `energy-relay` de tres `Centelha Ciano`,
+  checkpoint antes da combinacao final, `energy-core` temporario aberto por
+  `Rajada Ciano` e alavanca final com `K`/`X` para testar prioridade de
+  interacao.
+- Bloco 3 encadeado na campanha: `level-06` agora aponta para `level-07`,
+  `level-07` aponta para `level-08`, `level-08` aponta para `level-09` e
+  `level-09` fica como tela final das 9 fases atuais.
+- O checklist manual do Bloco 3 fica em `docs/block-3-gameplay-checklist.md`,
+  cobrindo validacao automatizada, playtest de cada fase, reset, HUD, audio,
+  resultados locais e criterios de ajuste para energia.
+- Testes unitarios do estado puro da `Energia Ciano` ficam em
+  `tests/player-energy.test.ts`: eles cobrem clamp de energia, delta negativo,
+  carga, cooldowns, gasto, rejeicoes, preparacao/cancelamento/disparo da
+  `Rajada Ciano` e reset/limpeza de estados temporarios.
+- Testes unitarios de input da `Energia Ciano` ficam em
+  `tests/secondary-action-intent.test.ts` e `tests/input-bindings.test.ts`:
+  eles cobrem `K`/`X` como tap curto para `Centelha Ciano`, hold para
+  preparar/disparar/cancelar `Rajada Ciano`, prioridade de interacao e `L`/`C`
+  como carga separada.
+- Testes de colisao da `Centelha Ciano` ficam em
+  `tests/energy-projectiles.test.ts` e `tests/level-energy-targets.test.ts`:
+  eles cobrem solidos, alvos leves, hurtboxes de boss, varredura entre frames,
+  direcao esquerda, erro vertical, multiplos projeteis e limite de alcance.
+- Testes de hit unico da `Rajada Ciano` ficam em
+  `tests/energy-projectiles.test.ts`: eles cobrem multiplas hurtboxes no mesmo
+  `hitGroupId`, bosses ja atingidos pela rajada ativa, repeticao de checks do
+  mesmo feixe sem dano duplicado e reset para uma nova rajada.
+- Testes de schema e validacao dos alvos de energia ficam em
+  `tests/level-schema.test.ts` e `tests/level-validation.test.ts`: eles cobrem
+  todos os tipos declarativos, poderes aceitos, caso valido completo,
+  geometria, `hitPoints`, ids duplicados, regras por tipo, timers positivos e
+  referencias.
+- Testes de conteudo do Bloco 3 ficam em `tests/block-3-content.test.ts`: eles
+  cobrem registro, validacao, cadeia, metadata, assets, treino seguro de
+  `Centelha Ciano`, recarga, absorvedor, bloco rachado, relay, core temporario,
+  alavanca final e reset dos gates de `level-07`, `level-08` e `level-09`.
+- Smoke Playwright de energia fica em `e2e/game-smoke.e2e.ts`: ele usa input
+  real para disparar `Centelha Ciano` com `K`, ativar o primeiro
+  `energy-switch` de `level-07`, carregar energia com `L`, soltar
+  `Rajada Ciano` em `level-08` e quebrar o `energy-cracked-block`. O snapshot
+  dev de QA agora expõe `energyTargets` para validar alvos no navegador.
+- Hooks de QA de energia ficam em `window.__JOGO_DIFICIL_QA__`: `fillEnergy()`
+  força energia cheia, `clearEnergyCooldowns()` limpa cooldowns/estados
+  temporarios, e `readEnergyState()` retorna energia, atividade, timers e
+  disponibilidade de `Centelha Ciano`/`Rajada Ciano`.
 - Documento completo: `docs/phase-16-energy-shot-plan.md`.
 
 Fase 17 - Trinca de chefões:
@@ -1079,8 +1276,10 @@ Fase 17 - Trinca de chefões:
 - A fase 17 foi redesenhada para planejar três chefões dentro da campanha de 10
   fases, usando um sistema compartilhado de arena, estado, ataques, dano e
   reset.
-- Distribuição planejada: `Hirolito Narguilito` fecha `level-03`,
+- Distribuição fechada na Task 17.1: `Hirolito Narguilito` fecha `level-03`,
   `Dr. Imports` fecha `level-06` e `Giga Fabio` é o boss final de `level-10`.
+  Esta decisão ainda não altera o encadeamento dos dados; a integração fica para
+  a Task 17.9, quando as arenas já existirem.
 - As imagens em `assets/boss/examples/` servem como referência visual:
   narguilé/cristal/fumaça para Hirolito, casaco escuro/roxo/importações para
   Dr. Imports e brute grande preto/dourado para Giga Fabio.
@@ -1089,13 +1288,19 @@ Fase 17 - Trinca de chefões:
   e reset completo em morte, respawn e `R`.
 - Estados planejados para todos: `inactive`, `intro`, `patrol`, `windup`,
   `attack`, `recover`, `stunned` e `defeated`.
-- `Hirolito Narguilito`: primeiro boss, 2 hits, ataques `smoke-puff` e
-  `hose-snap`, weak point de cristal, arena simples no fim de `level-03`.
-- `Dr. Imports`: segundo boss, 3 hits, ataques `import-bottle`, `paper-wall` e
-  `smoke-swap`, movimento por três âncoras no fim de `level-06`.
-- `Giga Fabio`: boss final, 4 hits de `Rajada Ciano`, ataques `floor-slam`,
-  `boulder-toss` e `shoulder-charge`, arena dedicada em `level-10` com recarga
-  de energia.
+- Visual, papel e dificuldade fechados na Task 17.1:
+  `Hirolito Narguilito` é compacto/cômico, com corpo de narguilé, cristal ciano
+  e mangueira, primeiro boss de baixa-média dificuldade com 2 hits;
+  `Dr. Imports` usa casaco escuro, roxo, maleta/frasco e fumaça, segundo boss de
+  dificuldade média com 3 hits, dash e projéteis; `Giga Fabio` é brute grande
+  preto/dourado com núcleo no peito/cinto, boss final de dificuldade média-alta
+  com 4 hits de `Rajada Ciano`.
+- `Hirolito Narguilito`: ataques `smoke-puff` e `hose-snap`, weak point de
+  cristal, arena simples no fim de `level-03`.
+- `Dr. Imports`: ataques `import-bottle`, `paper-wall` e `smoke-swap`,
+  movimento por três âncoras no fim de `level-06`.
+- `Giga Fabio`: ataques `floor-slam`, `boulder-toss` e `shoulder-charge`, arena
+  dedicada em `level-10` com recarga de energia.
 - `Centelha Ciano` causa dano nos bosses 1 e 2 durante janela vulnerável;
   `Rajada Ciano` causa dano em todos, mas é obrigatória para dano real no
   `Giga Fabio`.
@@ -2197,10 +2402,56 @@ Direção pendente:
 - Bloco 3 planejado como `level-07`, `level-08` e `level-09`, ensinando,
   distorcendo e combinando tiro simples, carga de energia, especial, dash e
   interação.
+- Primeiro mapa do Bloco 3 implementado: `level-07` entra no registry e nas
+  ferramentas de QA como treino seguro de `Centelha Ciano` e recarga, ainda sem
+  encadear a saida de `level-06`.
+- Segundo mapa do Bloco 3 implementado: `level-08` entra no registry e nas
+  ferramentas de QA como distorcao de leitura com absorvedor falso, alvo correto
+  depois de trap conhecida e bloco rachado exclusivo da `Rajada Ciano`, ainda
+  sem encadear a campanha.
+- Terceiro mapa do Bloco 3 implementado: `level-09` entra no registry e nas
+  ferramentas de QA como combinacao de dash, relay de `Centelha Ciano`, core
+  temporario de `Rajada Ciano` e alavanca final, ainda sem encadear a campanha.
+- Encadeamento do Bloco 3 implementado: a campanha atual roda
+  `level-06 -> level-07 -> level-08 -> level-09`, e a tela final foi movida
+  para depois de `level-09`.
+- Checklist manual do Bloco 3 criado em
+  `docs/block-3-gameplay-checklist.md`, com roteiro de playtest para
+  `Centelha Ciano`, `Carga Ciano`, `Rajada Ciano`, absorvedor, bloco rachado,
+  relay, core temporario, alavanca final e tela final de 9 fases.
+- Testes unitarios do estado de energia reforcados em
+  `tests/player-energy.test.ts`, fechando a primeira subtask de QA da Fase 16.9.
+- Testes unitarios de input tap/hold/carga reforcados em
+  `tests/secondary-action-intent.test.ts` e `tests/input-bindings.test.ts`,
+  fechando a segunda subtask de QA da Fase 16.9.
+- Testes de colisao da `Centelha Ciano` reforcados em
+  `tests/energy-projectiles.test.ts` e `tests/level-energy-targets.test.ts`,
+  fechando a terceira subtask de QA da Fase 16.9.
+- Testes de hit unico da `Rajada Ciano` reforcados em
+  `tests/energy-projectiles.test.ts`, fechando a quarta subtask de QA da Fase
+  16.9.
+- Testes de schema e validacao dos alvos de energia reforcados em
+  `tests/level-schema.test.ts` e `tests/level-validation.test.ts`, fechando a
+  quinta subtask de QA da Fase 16.9.
+- Testes de conteudo para `level-07`, `level-08` e `level-09` reforcados em
+  `tests/block-3-content.test.ts`, fechando a sexta subtask de QA da Fase 16.9.
+- Smoke Playwright de energia atualizado em `e2e/game-smoke.e2e.ts`, fechando a
+  setima subtask de QA da Fase 16.9.
+- Hooks de QA de energia criados em `window.__JOGO_DIFICIL_QA__`, fechando a
+  oitava subtask de QA da Fase 16.9 com energia cheia, cooldown zerado e leitura
+  direta do estado de energia para playtest e smoke.
+- Fase 16.9 validada com formatacao, testes unitarios, smoke Playwright, build,
+  lint e `git diff --check`.
+- Revisao final da Fase 16 fechou dois ajustes de commit: `Carga Ciano` aplica
+  a restricao real de movimento/dash planejada, e parar o loop de carga agora
+  encerra apenas esse SFX, sem cortar outros efeitos sonoros ativos.
 - Fase 17 redesenhada para adicionar três chefões na campanha de 10 fases:
   `Hirolito Narguilito` em `level-03`, `Dr. Imports` em `level-06` e
   `Giga Fabio` como boss final em `level-10`, todos usando arenas curtas,
   tells claros, vida baixa, reset completo e dano integrado à Energia Ciano.
+- Task 17.1 iniciada: a distribuição dos bosses foi fechada nesses três pontos
+  da campanha, sem mudar ainda `nextLevelId` ou dados de fase. A integração de
+  progressão fica para a Task 17.9, depois que as arenas de boss existirem.
 - Arte inicial de traps, itens e marcadores criada para o MVP: espinhos,
   bloco falso, plataforma que cai, piso quebrável, projétil, chip obrigatório,
   chave, token opcional, checkpoint inativo/ativo e saída de fase. Todos são

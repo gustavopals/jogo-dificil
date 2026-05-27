@@ -1,0 +1,3 @@
+export const PLAYER_ENERGY_MIN = 0;
+export const PLAYER_ENERGY_MAX = 100;
+export const DEFAULT_PLAYER_INITIAL_ENERGY = 40;

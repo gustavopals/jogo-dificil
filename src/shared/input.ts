@@ -3,7 +3,8 @@ export type GameplayAction =
   | "move-right"
   | "jump"
   | "primary"
-  | "secondary";
+  | "secondary"
+  | "charge-energy";
 
 export type SystemAction = "restart" | "pause" | "mute";
 

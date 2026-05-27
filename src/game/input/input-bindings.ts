@@ -12,6 +12,7 @@ export const GAMEPLAY_ACTIONS = [
   "jump",
   "primary",
   "secondary",
+  "charge-energy",
 ] as const satisfies readonly GameplayAction[];
 
 export const SYSTEM_ACTIONS = [
@@ -45,6 +46,10 @@ export const DEFAULT_INPUT_BINDINGS = [
   {
     action: "secondary",
     keys: ["K", "X"],
+  },
+  {
+    action: "charge-energy",
+    keys: ["L", "C"],
   },
   {
     action: "restart",

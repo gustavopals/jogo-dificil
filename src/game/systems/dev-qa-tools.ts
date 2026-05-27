@@ -5,7 +5,9 @@ import type { CheckpointId, LevelId, Vector2Like } from "../../shared";
 import { SCENE_KEYS } from "../scenes/scene-keys";
 import { GAME_EVENTS, onGameEvent, type PlayerDiedEvent } from "./game-events";
 import { gameStateStore, type GameStateSnapshot } from "./game-state";
+import { resolveLevelInitialEnergy } from "./level-progress";
 import type {
+  EnergyTargetRuntimeState,
   InteractiveObjectRuntimeState,
   ItemRuntimeState,
   ProjectileRuntimeState,
@@ -27,6 +29,19 @@ export type DevQaPlayerSnapshot = {
   readonly isGrounded: boolean;
   readonly isAlive: boolean;
   readonly animationState: string;
+  readonly energy: number;
+  readonly energyActivity: string;
+};
+
+export type DevQaEnergyStateSnapshot = {
+  readonly energy: number;
+  readonly activity: string;
+  readonly sparkCooldownRemainingMs: number;
+  readonly burstCooldownRemainingMs: number;
+  readonly burstPreparationRemainingMs: number;
+  readonly burstDurationRemainingMs: number;
+  readonly canUseCyanSpark: boolean;
+  readonly canPrepareCyanBurst: boolean;
 };
 
 export type DevQaLevelSnapshot = {
@@ -41,6 +56,7 @@ export type DevQaLevelSnapshot = {
   readonly projectiles: readonly ProjectileRuntimeState[];
   readonly items: readonly ItemRuntimeState[];
   readonly interactiveObjects: readonly InteractiveObjectRuntimeState[];
+  readonly energyTargets: readonly EnergyTargetRuntimeState[];
 };
 
 export type DevQaSnapshot = Pick<
@@ -76,6 +92,9 @@ export type DevQaApi = {
   readonly startLevel: (levelId: LevelId) => DevQaCommandResult;
   readonly goToCheckpoint: (checkpointId?: CheckpointId) => DevQaCommandResult;
   readonly completeLevel: () => DevQaCommandResult;
+  readonly fillEnergy: () => DevQaCommandResult;
+  readonly clearEnergyCooldowns: () => DevQaCommandResult;
+  readonly readEnergyState: () => DevQaEnergyStateSnapshot | null;
 };
 
 type DevQaWindow = Window & {
@@ -88,6 +107,9 @@ type DevQaScene = Phaser.Scene & {
   ) => DevQaLevelSnapshot | null;
   readonly goToDevQaCheckpoint?: (checkpointId?: CheckpointId) => boolean;
   readonly completeDevQaLevel?: () => boolean;
+  readonly fillDevQaEnergy?: () => boolean;
+  readonly clearDevQaEnergyCooldowns?: () => boolean;
+  readonly readDevQaEnergyState?: () => DevQaEnergyStateSnapshot | null;
 };
 
 export function getDevQaLevelIds(): readonly LevelId[] {
@@ -124,7 +146,11 @@ export function installDevQaTools(
 
       const level = getLevelDefinition(levelId)!;
 
-      gameStateStore.startLevel(level.id, level.spawn);
+      gameStateStore.startLevel(
+        level.id,
+        level.spawn,
+        resolveLevelInitialEnergy(level),
+      );
       stopSceneIfKnown(game, SCENE_KEYS.PAUSE);
       stopSceneIfKnown(game, SCENE_KEYS.LEVEL_TRANSITION);
       stopSceneIfKnown(game, SCENE_KEYS.MENU);
@@ -176,6 +202,53 @@ export function installDevQaTools(
       }
 
       return createCommandSuccess(readSnapshot());
+    },
+    fillEnergy: () => {
+      const levelScene = getDevQaLevelScene(game);
+
+      if (!levelScene?.fillDevQaEnergy) {
+        return createCommandFailure(
+          "LevelScene nao esta ativa para preencher energia.",
+          readSnapshot(),
+        );
+      }
+
+      const didFill = levelScene.fillDevQaEnergy();
+
+      if (!didFill) {
+        return createCommandFailure(
+          "A energia nao pode ser preenchida por QA neste estado.",
+          readSnapshot(),
+        );
+      }
+
+      return createCommandSuccess(readSnapshot());
+    },
+    clearEnergyCooldowns: () => {
+      const levelScene = getDevQaLevelScene(game);
+
+      if (!levelScene?.clearDevQaEnergyCooldowns) {
+        return createCommandFailure(
+          "LevelScene nao esta ativa para zerar cooldowns de energia.",
+          readSnapshot(),
+        );
+      }
+
+      const didClear = levelScene.clearDevQaEnergyCooldowns();
+
+      if (!didClear) {
+        return createCommandFailure(
+          "Cooldowns de energia nao podem ser zerados por QA neste estado.",
+          readSnapshot(),
+        );
+      }
+
+      return createCommandSuccess(readSnapshot());
+    },
+    readEnergyState: () => {
+      const levelScene = getDevQaLevelScene(game);
+
+      return levelScene?.readDevQaEnergyState?.() ?? null;
     },
   };
 

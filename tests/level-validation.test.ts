@@ -156,6 +156,21 @@ describe("level validation", () => {
   it("validates duplicate ids inside a level and across a level list", () => {
     const duplicateEntityIdLevel = defineLevel({
       ...BASE_LEVEL,
+      energyTargets: [
+        {
+          id: BASE_LEVEL.terrain[0]!.id,
+          kind: "energy-cracked-block",
+          area: {
+            x: 192,
+            y: 190,
+            width: 24,
+            height: 32,
+          },
+          acceptedPowers: ["cyan-burst"],
+          hitPoints: 2,
+          resetOnRespawn: true,
+        },
+      ],
       items: [
         {
           ...BASE_LEVEL.items[0]!,
@@ -168,6 +183,12 @@ describe("level validation", () => {
       expect.objectContaining({
         code: "duplicate-id",
         path: "items[0].id",
+      }),
+    );
+    expect(validateLevel(duplicateEntityIdLevel).issues).toContainEqual(
+      expect.objectContaining({
+        code: "duplicate-id",
+        path: "energyTargets[0].id",
       }),
     );
 
@@ -229,6 +250,32 @@ describe("level validation", () => {
         expect.objectContaining({
           code: "out-of-bounds",
           path: "checkpoints[0].area",
+        }),
+      ]),
+    );
+  });
+
+  it("validates initial energy values for level and checkpoints", () => {
+    const invalidLevel = defineLevel({
+      ...BASE_LEVEL,
+      initialEnergy: -1,
+      checkpoints: [
+        {
+          ...BASE_LEVEL.checkpoints[0]!,
+          initialEnergy: 101,
+        },
+      ],
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(invalidLevel).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "invalid-energy",
+          path: "initialEnergy",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy",
+          path: "checkpoints[0].initialEnergy",
         }),
       ]),
     );
@@ -362,6 +409,285 @@ describe("level validation", () => {
         expect.objectContaining({
           code: "out-of-bounds",
           path: "interactiveObjects[0].area",
+        }),
+      ]),
+    );
+  });
+
+  it("validates energy target geometry and hit points", () => {
+    const invalidLevel = defineLevel({
+      ...BASE_LEVEL,
+      energyTargets: [
+        {
+          id: "energy-target-invalid-rect",
+          kind: "energy-cracked-block",
+          area: {
+            x: 470,
+            y: 190,
+            width: 24,
+            height: 32,
+          },
+          acceptedPowers: ["cyan-burst"],
+          hitPoints: 2,
+          resetOnRespawn: true,
+        },
+        {
+          id: "energy-target-invalid-hp",
+          kind: "boss-hurtbox",
+          area: {
+            x: 320,
+            y: 160,
+            width: 32,
+            height: 48,
+          },
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          hitPoints: 0,
+          resetOnRespawn: false,
+        },
+      ],
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(invalidLevel).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "out-of-bounds",
+          path: "energyTargets[0].area",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[1].hitPoints",
+        }),
+      ]),
+    );
+  });
+
+  it("accepts valid declarative energy target rules for every target kind", () => {
+    const validLevel = defineLevel({
+      ...BASE_LEVEL,
+      energyTargets: [
+        {
+          id: "valid-energy-switch",
+          kind: "energy-switch",
+          area: {
+            x: 176,
+            y: 198,
+            width: 16,
+            height: 24,
+          },
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          hitPoints: 1,
+          resetOnRespawn: true,
+          activatesObjectId: "lever-main",
+        },
+        {
+          id: "valid-cracked-block",
+          kind: "energy-cracked-block",
+          area: {
+            x: 208,
+            y: 190,
+            width: 24,
+            height: 32,
+          },
+          acceptedPowers: ["cyan-burst"],
+          hitPoints: 2,
+          resetOnRespawn: true,
+          startsBroken: false,
+          blocksMovement: true,
+        },
+        {
+          id: "valid-energy-relay",
+          kind: "energy-relay",
+          area: {
+            x: 240,
+            y: 198,
+            width: 16,
+            height: 24,
+          },
+          acceptedPowers: ["cyan-spark"],
+          hitPoints: 3,
+          resetOnRespawn: true,
+          activatesObjectId: "lever-main",
+          relayWindowMs: 900,
+        },
+        {
+          id: "valid-energy-absorber",
+          kind: "energy-absorber",
+          area: {
+            x: 272,
+            y: 198,
+            width: 16,
+            height: 24,
+          },
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          hitPoints: 1,
+          resetOnRespawn: true,
+          absorbsEnergy: true,
+        },
+        {
+          id: "valid-energy-core",
+          kind: "energy-core",
+          area: {
+            x: 304,
+            y: 174,
+            width: 24,
+            height: 48,
+          },
+          acceptedPowers: ["cyan-burst"],
+          hitPoints: 2,
+          resetOnRespawn: true,
+          activatesObjectId: "lever-main",
+          activationDurationMs: 1400,
+        },
+        {
+          id: "valid-boss-hurtbox",
+          kind: "boss-hurtbox",
+          area: {
+            x: 344,
+            y: 158,
+            width: 32,
+            height: 64,
+          },
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          hitPoints: 4,
+          resetOnRespawn: false,
+          hitGroupId: "boss-validation",
+        },
+      ],
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(validLevel)).toEqual({
+      isValid: true,
+      issues: [],
+    });
+  });
+
+  it("validates declarative energy target rules and references", () => {
+    const invalidLevel = defineLevel({
+      ...BASE_LEVEL,
+      energyTargets: [
+        {
+          id: "invalid-empty-powers",
+          kind: "energy-switch",
+          area: {
+            x: 192,
+            y: 190,
+            width: 16,
+            height: 24,
+          },
+          acceptedPowers: [],
+          hitPoints: 1,
+          resetOnRespawn: true,
+        },
+        {
+          id: "invalid-cracked-block-powers",
+          kind: "energy-cracked-block",
+          area: {
+            x: 224,
+            y: 190,
+            width: 24,
+            height: 32,
+          },
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          hitPoints: 2,
+          resetOnRespawn: true,
+        },
+        {
+          id: "invalid-relay",
+          kind: "energy-relay",
+          area: {
+            x: 264,
+            y: 198,
+            width: 16,
+            height: 24,
+          },
+          acceptedPowers: ["cyan-spark"],
+          hitPoints: 3,
+          resetOnRespawn: true,
+        },
+        {
+          id: "invalid-core-duration",
+          kind: "energy-core",
+          area: {
+            x: 296,
+            y: 174,
+            width: 24,
+            height: 48,
+          },
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          hitPoints: 1,
+          resetOnRespawn: true,
+          activatesObjectId: "missing-energy-door",
+          activationDurationMs: 0,
+        },
+        {
+          id: "invalid-absorber-benefit",
+          kind: "energy-absorber",
+          area: {
+            x: 336,
+            y: 198,
+            width: 16,
+            height: 24,
+          },
+          acceptedPowers: ["cyan-spark", "cyan-burst"],
+          hitPoints: 1,
+          resetOnRespawn: true,
+          absorbsEnergy: false,
+          activatesObjectId: "lever-main",
+        },
+        {
+          id: "invalid-relay-window",
+          kind: "energy-relay",
+          area: {
+            x: 368,
+            y: 198,
+            width: 16,
+            height: 24,
+          },
+          acceptedPowers: ["cyan-spark"],
+          hitPoints: 3,
+          resetOnRespawn: true,
+          relayWindowMs: 0,
+        },
+      ],
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(invalidLevel).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[0].acceptedPowers",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[1].acceptedPowers",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[2].acceptedPowers",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[3].activationDurationMs",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[3].acceptedPowers",
+        }),
+        expect.objectContaining({
+          code: "missing-reference",
+          path: "energyTargets[3].activatesObjectId",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[4].absorbsEnergy",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[4].activatesObjectId",
+        }),
+        expect.objectContaining({
+          code: "invalid-energy-target",
+          path: "energyTargets[5].relayWindowMs",
         }),
       ]),
     );

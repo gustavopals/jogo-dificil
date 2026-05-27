@@ -1,4 +1,7 @@
 import type {
+  EnergyTargetDefinition,
+  EnergyTargetId,
+  EnergyTargetKind,
   HazardId,
   InteractiveObjectId,
   InteractiveObjectKind,
@@ -51,6 +54,19 @@ export type InteractiveObjectRuntimeState = {
   readonly resetOnRespawn: boolean;
 };
 
+export type EnergyTargetRuntimeState = {
+  readonly id: EnergyTargetId;
+  readonly kind: EnergyTargetKind;
+  readonly hitPoints: number;
+  readonly hitPointsRemaining: number;
+  readonly activationRemainingMs: number;
+  readonly relayWindowRemainingMs: number;
+  readonly absorbedEnergyHits: number;
+  readonly isActive: boolean;
+  readonly isBroken: boolean;
+  readonly resetOnRespawn: boolean;
+};
+
 export type RoomRuntimeState = {
   readonly traps: Readonly<Record<TrapId, TrapRuntimeState>>;
   readonly projectiles: readonly ProjectileRuntimeState[];
@@ -60,6 +76,9 @@ export type RoomRuntimeState = {
   readonly items: Readonly<Record<ItemId, ItemRuntimeState>>;
   readonly interactiveObjects: Readonly<
     Record<InteractiveObjectId, InteractiveObjectRuntimeState>
+  >;
+  readonly energyTargets: Readonly<
+    Record<EnergyTargetId, EnergyTargetRuntimeState>
   >;
 };
 
@@ -98,6 +117,12 @@ export function createInitialRoomState(
         createInitialInteractiveObjectState(interactiveObject),
       ]),
     ),
+    energyTargets: Object.fromEntries(
+      (level.energyTargets ?? []).map((energyTarget) => [
+        energyTarget.id,
+        createInitialEnergyTargetState(energyTarget),
+      ]),
+    ),
   };
 }
 
@@ -113,6 +138,7 @@ export function resetRoomStateForRespawn(
     movingPlatforms: resetMovingPlatformStates(state, initialState),
     items: resetItemStates(state, initialState),
     interactiveObjects: resetInteractiveObjectStates(state, initialState),
+    energyTargets: resetEnergyTargetStates(state, initialState),
   };
 }
 
@@ -239,6 +265,343 @@ export function setInteractiveObjectActive(
   };
 }
 
+export function activateEnergySwitch(
+  state: RoomRuntimeState,
+  energyTarget: EnergyTargetDefinition,
+): RoomRuntimeState {
+  if (energyTarget.kind !== "energy-switch") {
+    return state;
+  }
+
+  const targetState = state.energyTargets[energyTarget.id];
+
+  if (!targetState || targetState.isBroken) {
+    return state;
+  }
+
+  const activeState = {
+    ...state,
+    energyTargets: {
+      ...state.energyTargets,
+      [energyTarget.id]: {
+        ...targetState,
+        hitPointsRemaining: 0,
+        isActive: true,
+      },
+    },
+  };
+
+  if (!energyTarget.activatesObjectId) {
+    return activeState;
+  }
+
+  return setInteractiveObjectActive(
+    activeState,
+    energyTarget.activatesObjectId,
+    true,
+  );
+}
+
+export function activateEnergyRelay(
+  state: RoomRuntimeState,
+  energyTarget: EnergyTargetDefinition,
+): RoomRuntimeState {
+  if (energyTarget.kind !== "energy-relay") {
+    return state;
+  }
+
+  const targetState = state.energyTargets[energyTarget.id];
+
+  if (!targetState || targetState.isActive || targetState.isBroken) {
+    return state;
+  }
+
+  const hitPointsRemaining = Math.max(0, targetState.hitPointsRemaining - 1);
+  const isActive = hitPointsRemaining <= 0;
+  const activeState = {
+    ...state,
+    energyTargets: {
+      ...state.energyTargets,
+      [energyTarget.id]: {
+        ...targetState,
+        hitPointsRemaining,
+        relayWindowRemainingMs: isActive
+          ? 0
+          : (energyTarget.relayWindowMs ?? 0),
+        isActive,
+      },
+    },
+  };
+
+  if (!isActive || !energyTarget.activatesObjectId) {
+    return activeState;
+  }
+
+  return setInteractiveObjectActive(
+    activeState,
+    energyTarget.activatesObjectId,
+    true,
+  );
+}
+
+export function absorbEnergyTarget(
+  state: RoomRuntimeState,
+  energyTarget: EnergyTargetDefinition,
+): RoomRuntimeState {
+  if (
+    energyTarget.kind !== "energy-absorber" ||
+    energyTarget.absorbsEnergy !== true
+  ) {
+    return state;
+  }
+
+  const targetState = state.energyTargets[energyTarget.id];
+
+  if (!targetState || targetState.isBroken) {
+    return state;
+  }
+
+  return {
+    ...state,
+    energyTargets: {
+      ...state.energyTargets,
+      [energyTarget.id]: {
+        ...targetState,
+        absorbedEnergyHits: targetState.absorbedEnergyHits + 1,
+      },
+    },
+  };
+}
+
+export function activateEnergyCore(
+  state: RoomRuntimeState,
+  energyTarget: EnergyTargetDefinition,
+  damage: number,
+): RoomRuntimeState {
+  if (energyTarget.kind !== "energy-core") {
+    return state;
+  }
+
+  const targetState = state.energyTargets[energyTarget.id];
+  const appliedDamage = Math.max(0, Math.floor(damage));
+
+  if (
+    !targetState ||
+    appliedDamage <= 0 ||
+    targetState.isActive ||
+    targetState.isBroken ||
+    targetState.hitPointsRemaining <= 0
+  ) {
+    return state;
+  }
+
+  const hitPointsRemaining = Math.max(
+    0,
+    targetState.hitPointsRemaining - appliedDamage,
+  );
+  const isActive = hitPointsRemaining <= 0;
+  const activeState = {
+    ...state,
+    energyTargets: {
+      ...state.energyTargets,
+      [energyTarget.id]: {
+        ...targetState,
+        hitPointsRemaining,
+        activationRemainingMs: isActive
+          ? (energyTarget.activationDurationMs ?? 0)
+          : targetState.activationRemainingMs,
+        isActive,
+      },
+    },
+  };
+
+  if (!isActive || !energyTarget.activatesObjectId) {
+    return activeState;
+  }
+
+  return setInteractiveObjectActive(
+    activeState,
+    energyTarget.activatesObjectId,
+    true,
+  );
+}
+
+export function updateRoomEnergyTargets(
+  state: RoomRuntimeState,
+  level: Pick<LevelDefinition, "energyTargets">,
+  deltaMs: number,
+): RoomRuntimeState {
+  const energyTargets = level.energyTargets ?? [];
+
+  if (energyTargets.length === 0) {
+    return state;
+  }
+
+  let didChange = false;
+  const nextEnergyTargets = { ...state.energyTargets };
+  let nextInteractiveObjects = state.interactiveObjects;
+
+  energyTargets.forEach((energyTarget) => {
+    if (energyTarget.kind === "energy-relay") {
+      const targetState = state.energyTargets[energyTarget.id];
+
+      if (
+        !targetState ||
+        targetState.isActive ||
+        targetState.isBroken ||
+        targetState.relayWindowRemainingMs <= 0
+      ) {
+        return;
+      }
+
+      const relayWindowRemainingMs = Math.max(
+        0,
+        targetState.relayWindowRemainingMs - Math.max(0, deltaMs),
+      );
+
+      if (relayWindowRemainingMs > 0) {
+        didChange = true;
+        nextEnergyTargets[energyTarget.id] = {
+          ...targetState,
+          relayWindowRemainingMs,
+        };
+
+        return;
+      }
+
+      didChange = true;
+      nextEnergyTargets[energyTarget.id] = {
+        ...targetState,
+        hitPointsRemaining: targetState.hitPoints,
+        relayWindowRemainingMs: 0,
+      };
+
+      return;
+    }
+
+    if (energyTarget.kind !== "energy-core") {
+      return;
+    }
+
+    const targetState = state.energyTargets[energyTarget.id];
+
+    if (
+      !targetState ||
+      !targetState.isActive ||
+      targetState.isBroken ||
+      targetState.activationRemainingMs <= 0
+    ) {
+      return;
+    }
+
+    const activationRemainingMs = Math.max(
+      0,
+      targetState.activationRemainingMs - Math.max(0, deltaMs),
+    );
+
+    if (activationRemainingMs > 0) {
+      didChange = true;
+      nextEnergyTargets[energyTarget.id] = {
+        ...targetState,
+        activationRemainingMs,
+      };
+
+      return;
+    }
+
+    didChange = true;
+    nextEnergyTargets[energyTarget.id] = {
+      ...targetState,
+      hitPointsRemaining: targetState.hitPoints,
+      activationRemainingMs: 0,
+      isActive: false,
+    };
+
+    if (energyTarget.activatesObjectId) {
+      nextInteractiveObjects = setInteractiveObjectInRecordActive(
+        nextInteractiveObjects,
+        energyTarget.activatesObjectId,
+        false,
+      );
+    }
+  });
+
+  if (!didChange) {
+    return state;
+  }
+
+  return {
+    ...state,
+    energyTargets: nextEnergyTargets,
+    interactiveObjects: nextInteractiveObjects,
+  };
+}
+
+export function damageEnergyTarget(
+  state: RoomRuntimeState,
+  targetId: EnergyTargetId,
+  damage: number,
+): RoomRuntimeState {
+  const targetState = state.energyTargets[targetId];
+  const appliedDamage = Math.max(0, Math.floor(damage));
+
+  if (
+    !targetState ||
+    appliedDamage <= 0 ||
+    targetState.kind === "energy-absorber" ||
+    targetState.kind === "energy-core" ||
+    targetState.isBroken ||
+    targetState.hitPointsRemaining <= 0
+  ) {
+    return state;
+  }
+
+  const hitPointsRemaining = Math.max(
+    0,
+    targetState.hitPointsRemaining - appliedDamage,
+  );
+  const isDepleted = hitPointsRemaining <= 0;
+  const isBreakableBlock = targetState.kind === "energy-cracked-block";
+  const isBossHurtbox = targetState.kind === "boss-hurtbox";
+
+  return {
+    ...state,
+    energyTargets: {
+      ...state.energyTargets,
+      [targetId]: {
+        ...targetState,
+        hitPointsRemaining,
+        isActive:
+          targetState.isActive ||
+          (isDepleted && !isBossHurtbox && !isBreakableBlock),
+        isBroken:
+          targetState.isBroken ||
+          (isDepleted && (isBreakableBlock || isBossHurtbox)),
+      },
+    },
+  };
+}
+
+function setInteractiveObjectInRecordActive(
+  interactiveObjects: RoomRuntimeState["interactiveObjects"],
+  objectId: InteractiveObjectId,
+  isActive: boolean,
+): RoomRuntimeState["interactiveObjects"] {
+  const objectState = interactiveObjects[objectId];
+
+  if (!objectState || objectState.isActive === isActive) {
+    return interactiveObjects;
+  }
+
+  return {
+    ...interactiveObjects,
+    [objectId]: {
+      ...objectState,
+      isActive,
+    },
+  };
+}
+
 function createInitialTrapState(
   trap: LevelDefinition["traps"][number],
 ): TrapRuntimeState {
@@ -285,6 +648,26 @@ function createInitialInteractiveObjectState(
     kind: interactiveObject.kind,
     isActive: interactiveObject.startsActive,
     resetOnRespawn: interactiveObject.resetOnRespawn,
+  };
+}
+
+function createInitialEnergyTargetState(
+  energyTarget: EnergyTargetDefinition,
+): EnergyTargetRuntimeState {
+  const hitPoints = Math.max(1, Math.floor(energyTarget.hitPoints));
+  const isBroken = energyTarget.startsBroken ?? false;
+
+  return {
+    id: energyTarget.id,
+    kind: energyTarget.kind,
+    hitPoints,
+    hitPointsRemaining: isBroken ? 0 : hitPoints,
+    activationRemainingMs: 0,
+    relayWindowRemainingMs: 0,
+    absorbedEnergyHits: 0,
+    isActive: energyTarget.startsActive ?? false,
+    isBroken,
+    resetOnRespawn: energyTarget.resetOnRespawn,
   };
 }
 
@@ -360,6 +743,26 @@ function resetInteractiveObjectStates(
           currentObjectState?.resetOnRespawn === false
             ? currentObjectState
             : initialObjectState,
+        ];
+      },
+    ),
+  );
+}
+
+function resetEnergyTargetStates(
+  state: RoomRuntimeState,
+  initialState: RoomRuntimeState,
+): RoomRuntimeState["energyTargets"] {
+  return Object.fromEntries(
+    Object.entries(initialState.energyTargets).map(
+      ([targetId, initialTargetState]) => {
+        const currentTargetState = state.energyTargets[targetId];
+
+        return [
+          targetId,
+          currentTargetState?.resetOnRespawn === false
+            ? currentTargetState
+            : initialTargetState,
         ];
       },
     ),

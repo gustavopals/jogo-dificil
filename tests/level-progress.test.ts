@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import { LEVEL_01 } from "../src/data/levels";
+import type { LevelDefinition } from "../src/data/levels/schema";
 import {
+  createActiveCheckpointFromDefinition,
   createLevelStartCheckpoint,
   findTouchedCheckpoint,
   isTouchingExit,
   rectsOverlap,
+  resolveCheckpointInitialEnergy,
+  resolveLevelInitialEnergy,
 } from "../src/game/systems/level-progress";
+import { DEFAULT_PLAYER_INITIAL_ENERGY } from "../src/shared";
 
 describe("level progress", () => {
   it("creates a start checkpoint from level spawn data", () => {
@@ -15,6 +20,32 @@ describe("level progress", () => {
       levelId: "level-01",
       x: LEVEL_01.spawn.x,
       y: LEVEL_01.spawn.y,
+      initialEnergy: DEFAULT_PLAYER_INITIAL_ENERGY,
+    });
+  });
+
+  it("resolves initial energy from level defaults and checkpoint overrides", () => {
+    const level = {
+      ...LEVEL_01,
+      initialEnergy: 55,
+      checkpoints: [
+        {
+          ...LEVEL_01.checkpoints[0]!,
+          initialEnergy: 85,
+        },
+      ],
+    } satisfies LevelDefinition;
+    const checkpoint = level.checkpoints[0]!;
+
+    expect(resolveLevelInitialEnergy(level)).toBe(55);
+    expect(resolveCheckpointInitialEnergy(level, checkpoint)).toBe(85);
+    expect(createLevelStartCheckpoint(level).initialEnergy).toBe(55);
+    expect(createActiveCheckpointFromDefinition(level, checkpoint)).toEqual({
+      id: checkpoint.id,
+      levelId: level.id,
+      x: checkpoint.position.x,
+      y: checkpoint.position.y,
+      initialEnergy: 85,
     });
   });
 

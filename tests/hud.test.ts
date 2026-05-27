@@ -6,6 +6,8 @@ import {
   formatHudLevel,
   formatMusicMuteStatus,
   formatMuteStatus,
+  getHudEnergyMeterView,
+  HUD_ENERGY_METER_STYLE,
   isHudOutsideCriticalGameplayArea,
 } from "../src/game/ui/hud";
 
@@ -40,6 +42,69 @@ describe("HUD", () => {
       music: "♪",
       mute: "MUDO",
     });
+  });
+
+  it("keeps energy guidance out of fixed HUD text", () => {
+    const labels = formatHudLabels(
+      {
+        deathCount: 3,
+        isMuted: false,
+        isMusicMuted: false,
+      },
+      LEVEL_01,
+    );
+    const fixedHudText = Object.values(labels).join(" ");
+    const forbiddenTutorialPatterns = [
+      /aperte/i,
+      /pressione/i,
+      /segure/i,
+      /\bL\/C\b/i,
+      /\bK\/X\b/i,
+      /carregar energia/i,
+      /energia insuficiente/i,
+      /carga ciano/i,
+      /centelha ciano/i,
+      /rajada ciano/i,
+    ];
+
+    forbiddenTutorialPatterns.forEach((pattern) => {
+      expect(fixedHudText).not.toMatch(pattern);
+    });
+  });
+
+  it("formats the energy meter as small segmented fill ratios", () => {
+    expect(
+      getHudEnergyMeterView({
+        current: 50,
+        max: 100,
+        isCharging: false,
+        isFull: false,
+      }),
+    ).toMatchObject({
+      fillRatio: 0.5,
+      fillColor: HUD_ENERGY_METER_STYLE.fillColor,
+      segmentFillRatios: [1, 1, 0.5, 0, 0],
+    });
+  });
+
+  it("uses distinct energy meter colors for charging and full energy", () => {
+    expect(
+      getHudEnergyMeterView({
+        current: 70,
+        max: 100,
+        isCharging: true,
+        isFull: false,
+      }).fillColor,
+    ).toBe(HUD_ENERGY_METER_STYLE.chargingFillColor);
+
+    expect(
+      getHudEnergyMeterView({
+        current: 100,
+        max: 100,
+        isCharging: false,
+        isFull: true,
+      }).fillColor,
+    ).toBe(HUD_ENERGY_METER_STYLE.fullFillColor);
   });
 
   it("keeps the HUD in a small top area away from core platforming space", () => {

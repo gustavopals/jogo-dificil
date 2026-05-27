@@ -1192,8 +1192,8 @@ Partes planejadas:
 - [x] Documentar diferença entre `Centelha Ciano`, `Carga Ciano` e
   `Rajada Ciano`.
 - [x] Documentar o que cada poder pode ativar, quebrar ou bloquear.
-- [ ] Registrar regra visual para evitar copia de referencias famosas.
-- [ ] Atualizar `IDEIA.md` com as decisões finais.
+- [x] Registrar regra visual para evitar copia de referencias famosas.
+- [x] Atualizar `IDEIA.md` com as decisões finais.
 
 Pronto quando:
 
@@ -1201,12 +1201,12 @@ Pronto quando:
 
 ### Task 16.2 - Input E Estado De Energia
 
-- [ ] Adicionar action `charge-energy` ao input mapper.
-- [ ] Mapear `L`/`C` como botão de carregar energia.
-- [ ] Preservar `K`/`X` para interação, tiro simples e especial por segurar.
-- [ ] Criar estado puro de energia, carga, cooldown e reset.
-- [ ] Cobrir energia inicial por fase/checkpoint.
-- [ ] Garantir que morte, pausa, respawn e `R` limpam estados temporários.
+- [x] Adicionar action `charge-energy` ao input mapper.
+- [x] Mapear `L`/`C` como botão de carregar energia.
+- [x] Preservar `K`/`X` para interação, tiro simples e especial por segurar.
+- [x] Criar estado puro de energia, carga, cooldown e reset.
+- [x] Cobrir energia inicial por fase/checkpoint.
+- [x] Garantir que morte, pausa, respawn e `R` limpam estados temporários.
 
 Pronto quando:
 
@@ -1215,12 +1215,12 @@ Pronto quando:
 
 ### Task 16.3 - Implementar Centelha Ciano
 
-- [ ] Renderizar tiro pequeno horizontal.
-- [ ] Consumir energia e respeitar cooldown.
-- [ ] Mover projétil com velocidade e alcance máximo declarados.
-- [ ] Colidir com sólidos, alvos, boss e limite de alcance.
-- [ ] Limitar a dois disparos ativos.
-- [ ] Criar feedback de falha quando falta energia.
+- [x] Renderizar tiro pequeno horizontal.
+- [x] Consumir energia e respeitar cooldown.
+- [x] Mover projétil com velocidade e alcance máximo declarados.
+- [x] Colidir com sólidos, alvos, boss e limite de alcance.
+- [x] Limitar a dois disparos ativos.
+- [x] Criar feedback de falha quando falta energia.
 
 Pronto quando:
 
@@ -1229,13 +1229,13 @@ Pronto quando:
 
 ### Task 16.4 - Implementar Rajada Ciano Especial
 
-- [ ] Implementar preparação por segurar `K`/`X`.
-- [ ] Exigir energia cheia.
-- [ ] Travar direção durante preparação.
-- [ ] Renderizar feixe curto com duração limitada.
-- [ ] Consumir energia ao disparar.
-- [ ] Quebrar blocos especiais e causar dano forte em alvo/boss.
-- [ ] Impedir múltiplos hits no mesmo boss pela mesma rajada.
+- [x] Implementar preparação por segurar `K`/`X`.
+- [x] Exigir energia cheia.
+- [x] Travar direção durante preparação.
+- [x] Renderizar feixe curto com duração limitada.
+- [x] Consumir energia ao disparar.
+- [x] Quebrar blocos especiais e causar dano forte em alvo/boss.
+- [x] Impedir múltiplos hits no mesmo boss pela mesma rajada.
 
 Pronto quando:
 
@@ -1244,14 +1244,14 @@ Pronto quando:
 
 ### Task 16.5 - Alvos De Energia
 
-- [ ] Criar schema declarativo para alvos de energia.
-- [ ] Implementar `energy-switch`.
-- [ ] Implementar `energy-cracked-block`.
-- [ ] Implementar `energy-relay`.
-- [ ] Implementar `energy-absorber`.
-- [ ] Implementar `energy-core`.
-- [ ] Integrar alvos ao estado runtime e ao reset de sala.
-- [ ] Cobrir validação e ativação com testes unitários.
+- [x] Criar schema declarativo para alvos de energia.
+- [x] Implementar `energy-switch`.
+- [x] Implementar `energy-cracked-block`.
+- [x] Implementar `energy-relay`.
+- [x] Implementar `energy-absorber`.
+- [x] Implementar `energy-core`.
+- [x] Integrar alvos ao estado runtime e ao reset de sala.
+- [x] Cobrir validação e ativação com testes unitários.
 
 Pronto quando:
 
@@ -1259,12 +1259,12 @@ Pronto quando:
 
 ### Task 16.6 - Animações E Arte Do Poder
 
-- [ ] Criar sprites do Pino carregando energia.
-- [ ] Criar sprites do Pino disparando `Centelha Ciano`.
-- [ ] Criar sprites do Pino preparando e soltando `Rajada Ciano`.
-- [ ] Criar projétil, feixe, impacto, alvo ativo e bloco quebrado.
-- [ ] Registrar animações em dados, mantendo hitbox do Pino 10x22px.
-- [ ] Garantir que efeitos não escondem hazards pequenos.
+- [x] Criar sprites do Pino carregando energia.
+- [x] Criar sprites do Pino disparando `Centelha Ciano`.
+- [x] Criar sprites do Pino preparando e soltando `Rajada Ciano`.
+- [x] Criar projétil, feixe, impacto, alvo ativo e bloco quebrado.
+- [x] Registrar animações em dados, mantendo hitbox do Pino 10x22px.
+- [x] Garantir que efeitos não escondem hazards pequenos.
 
 Pronto quando:
 
@@ -1273,12 +1273,12 @@ Pronto quando:
 
 ### Task 16.7 - Audio E HUD De Energia
 
-- [ ] Criar sons originais de carga, energia cheia, tiro, falha, especial e
+- [x] Criar sons originais de carga, energia cheia, tiro, falha, especial e
   impacto.
-- [ ] Integrar sons ao audio manager e ao mute global.
-- [ ] Criar medidor pequeno de energia no HUD.
-- [ ] Dar feedback de energia cheia e energia insuficiente.
-- [ ] Evitar texto tutorial fixo na tela.
+- [x] Integrar sons ao audio manager e ao mute global.
+- [x] Criar medidor pequeno de energia no HUD.
+- [x] Dar feedback de energia cheia e energia insuficiente.
+- [x] Evitar texto tutorial fixo na tela.
 
 Pronto quando:
 
@@ -1287,11 +1287,11 @@ Pronto quando:
 
 ### Task 16.8 - Criar Bloco 3 De Fases
 
-- [ ] Criar `level-07` para ensinar `Centelha Ciano` e recarga.
-- [ ] Criar `level-08` para distorcer com absorvedor e bloco rachado.
-- [ ] Criar `level-09` para combinar dash, tiro simples, especial e interação.
-- [ ] Encadear `level-06 -> level-07 -> level-08 -> level-09`.
-- [ ] Criar checklist manual do Bloco 3.
+- [x] Criar `level-07` para ensinar `Centelha Ciano` e recarga.
+- [x] Criar `level-08` para distorcer com absorvedor e bloco rachado.
+- [x] Criar `level-09` para combinar dash, tiro simples, especial e interação.
+- [x] Encadear `level-06 -> level-07 -> level-08 -> level-09`.
+- [x] Criar checklist manual do Bloco 3.
 
 Pronto quando:
 
@@ -1300,16 +1300,16 @@ Pronto quando:
 
 ### Task 16.9 - Testes E QA Da Energia
 
-- [ ] Criar testes unitários de estado de energia.
-- [ ] Criar testes unitários de input tap/hold/carga.
-- [ ] Criar testes de colisão da `Centelha Ciano`.
-- [ ] Criar testes de hit único da `Rajada Ciano`.
-- [ ] Criar testes de schema/validação dos alvos de energia.
-- [ ] Criar testes de conteúdo para `level-07`, `level-08` e `level-09`.
-- [ ] Atualizar smoke Playwright para carregar energia, disparar tiro simples,
+- [x] Criar testes unitários de estado de energia.
+- [x] Criar testes unitários de input tap/hold/carga.
+- [x] Criar testes de colisão da `Centelha Ciano`.
+- [x] Criar testes de hit único da `Rajada Ciano`.
+- [x] Criar testes de schema/validação dos alvos de energia.
+- [x] Criar testes de conteúdo para `level-07`, `level-08` e `level-09`.
+- [x] Atualizar smoke Playwright para carregar energia, disparar tiro simples,
   soltar especial e ativar um alvo.
-- [ ] Criar hooks de QA para energia cheia, cooldown zerado e leitura de estado.
-- [ ] Rodar lint, testes, build e smoke.
+- [x] Criar hooks de QA para energia cheia, cooldown zerado e leitura de estado.
+- [x] Rodar lint, testes, build e smoke.
 
 Pronto quando:
 
@@ -1330,9 +1330,9 @@ Chefões planejados:
 
 ### Task 17.1 - Definir Trinca De Bosses
 
-- [ ] Fechar distribuição em `level-03`, `level-06` e `level-10`.
-- [ ] Registrar visual, papel e dificuldade de cada boss.
-- [ ] Documentar uso das imagens em `assets/boss/examples/`.
+- [x] Fechar distribuição em `level-03`, `level-06` e `level-10`.
+- [x] Registrar visual, papel e dificuldade de cada boss.
+- [x] Documentar uso das imagens em `assets/boss/examples/`.
 - [ ] Definir regra de dano por `Centelha Ciano` e `Rajada Ciano`.
 - [ ] Registrar decisões finais em `IDEIA.md`.
 
@@ -1900,3 +1900,90 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   fases: `Hirolito Narguilito` em `level-03`, `Dr. Imports` em `level-06` e
   `Giga Fabio` como boss final em `level-10`. O plano completo de arena,
   ataques, dano, arte, áudio e QA fica em `docs/phase-17-boss-plan.md`.
+
+### 2026-05-27
+
+- [x] Task 16.8 parcial concluida: `level-07`, `Faisca De Treino`, criado como
+  sala segura para ensinar `Centelha Ciano` e `Carga Ciano`. A fase começa com
+  energia para dois tiros, usa tres `energy-switch` abrindo portas simples e
+  posiciona um checkpoint de recarga com energia 0 antes do terceiro alvo.
+  `level-07` ja entra no registry e nas ferramentas de QA, mas o encadeamento
+  a partir de `level-06` fica para a task especifica de cadeia do Bloco 3.
+- [x] Task 16.8 parcial concluida: `level-08`, `O Alvo Mente`, criado para
+  distorcer a leitura da energia. A fase introduz um `energy-absorber` falso,
+  coloca o `energy-switch` correto depois de um `spike-pop` conhecido e exige
+  carregar energia em area segura antes de quebrar um `energy-cracked-block`
+  com `Rajada Ciano`. A fase ja entra no registry e nas ferramentas de QA; o
+  encadeamento continua reservado para a task propria do Bloco 3.
+- [x] Task 16.8 parcial concluida: `level-09`, `Carga Em Movimento`, criado
+  para combinar dash, sequencia de `Centelha Ciano`, carga para `Rajada Ciano`
+  e interacao final. A fase usa um gap inicial de dash, um `energy-relay` de
+  tres pulsos abrindo porta, checkpoint antes do trecho final, `energy-core`
+  temporario abrindo passagem e alavanca com `K`/`X` antes da saida. A fase ja
+  entra no registry e nas ferramentas de QA; o encadeamento continua separado.
+- [x] Task 16.8 parcial concluida: campanha encadeada em
+  `level-06 -> level-07 -> level-08 -> level-09`. A tela final agora aparece
+  depois de `level-09` e o texto de conclusao foi atualizado para as 9 fases
+  atuais.
+- [x] Task 16.8 concluida: checklist manual do Bloco 3 criado em
+  `docs/block-3-gameplay-checklist.md`, cobrindo `level-07`, `level-08`,
+  `level-09`, cadeia de campanha, energia, HUD, audio, reset, resultados locais
+  e criterios de ajuste para playtest.
+- [x] Task 16.9 parcial concluida: testes unitarios do estado puro de energia
+  reforcados em `tests/player-energy.test.ts`, cobrindo estado inicial, clamp,
+  delta negativo, carga, cooldowns, gasto, rejeicoes, preparacao/cancelamento da
+  `Rajada Ciano`, disparo, finalizacao e reset/limpeza de temporarios.
+- [x] Task 16.9 parcial concluida: testes unitarios de input tap/hold/carga
+  reforcados em `tests/secondary-action-intent.test.ts` e
+  `tests/input-bindings.test.ts`, cobrindo tap curto de `K`/`X`, hold para
+  especial, cancelamento, prioridade de interacao e `L`/`C` como
+  `charge-energy` independente.
+- [x] Task 16.9 parcial concluida: testes de colisao da `Centelha Ciano`
+  reforcados em `tests/energy-projectiles.test.ts` e
+  `tests/level-energy-targets.test.ts`, cobrindo solidos, alvos, boss, varredura
+  entre frames, direcao esquerda, erro vertical, multiplos projeteis e limite de
+  alcance.
+- [x] Task 16.9 parcial concluida: testes de hit unico da `Rajada Ciano`
+  reforcados em `tests/energy-projectiles.test.ts`, cobrindo multiplas hurtboxes
+  no mesmo `hitGroupId`, bosses ja atingidos pela rajada ativa, repeticao de
+  checks sem dano duplicado e reset do rastreamento para uma nova rajada.
+- [x] Task 16.9 parcial concluida: testes de schema e validacao dos alvos de
+  energia reforcados em `tests/level-schema.test.ts` e
+  `tests/level-validation.test.ts`, cobrindo todos os tipos declarativos,
+  poderes aceitos, caso valido completo, geometria, `hitPoints`, ids duplicados,
+  regras por tipo, timers positivos e referencias.
+- [x] Task 16.9 parcial concluida: testes de conteudo para `level-07`,
+  `level-08` e `level-09` reforcados em `tests/block-3-content.test.ts`,
+  cobrindo registro, validacao, cadeia, metadata, assets, treino seguro,
+  absorvedor, bloco rachado, relay, core temporario, alavanca final e reset dos
+  gates.
+- [x] Task 16.9 parcial concluida: smoke Playwright de energia atualizado em
+  `e2e/game-smoke.e2e.ts`, cobrindo input real para carregar energia com `L`,
+  disparar `Centelha Ciano` com `K`, ativar `energy-switch`, soltar
+  `Rajada Ciano` e quebrar `energy-cracked-block`. O snapshot dev de QA agora
+  expõe `energyTargets` para validar o alvo no navegador.
+- [x] Task 16.9 parcial concluida: hooks de QA de energia criados em
+  `window.__JOGO_DIFICIL_QA__`, com `fillEnergy()`,
+  `clearEnergyCooldowns()` e `readEnergyState()` para forcar energia cheia,
+  limpar cooldowns/estados temporarios e ler energia, atividade, timers e
+  disponibilidade dos poderes. O smoke de energia tambem valida esses hooks.
+- [x] Task 16.9 concluida: validacao completa executada com `npm run format`,
+  `npm run test -- dev-qa-tools`, `npm run test:e2e -- --grep 'energia ciano'`,
+  `npm run test:e2e`, `npm run build`, `npm run lint`, `npm run test` e
+  `git diff --check`.
+- [x] Fase 16 revisada para commit: checklist completo conferido, README
+  atualizado com controles de `Energia Ciano`, `Carga Ciano` agora reduz
+  movimento para 30% e bloqueia dash via regra pura testada, e o stop do loop de
+  carga passa a parar apenas o SFX de carga. Validado com `npm run format`,
+  `npm run lint`, `npm run test`, `npm run build`, `npm run test:e2e` e
+  `git diff --check`.
+- [x] Task 17.1 parcial concluida: distribuição da trinca fechada com
+  `Hirolito Narguilito` no fim de `level-03`, `Dr. Imports` no fim de
+  `level-06` e `Giga Fabio` em `level-10` como fase final dedicada. A decisão
+  ficou registrada em `docs/phase-17-boss-plan.md` e `IDEIA.md`; o
+  encadeamento dos dados continua reservado para a Task 17.9.
+- [x] Task 17.1 parcial concluida: visual, papel e dificuldade de cada boss
+  registrados em `docs/phase-17-boss-plan.md` e resumidos em `IDEIA.md`.
+  `Hirolito Narguilito` fica como leitura compacta de baixa-média dificuldade,
+  `Dr. Imports` como teste intermediario de dash/projeteis, e `Giga Fabio` como
+  boss final de dificuldade média-alta baseado no kit completo de energia.

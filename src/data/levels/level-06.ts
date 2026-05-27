@@ -36,6 +36,7 @@ export const LEVEL_06 = defineLevel({
       width: TILE_SIZE_PX,
       height: TILE_SIZE_PX * 3,
     },
+    nextLevelId: "level-07",
   },
   checkpoints: [
     {

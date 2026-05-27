@@ -9,6 +9,11 @@ import trapFallingPlatformUrl from "../assets/sprites/trap-falling-platform.png"
 import trapFalseBlockUrl from "../assets/sprites/trap-false-block.png";
 import trapProjectileUrl from "../assets/sprites/trap-projectile.png";
 import trapSpikesUrl from "../assets/sprites/trap-spikes.png";
+import energyCrackedBlockBrokenUrl from "../assets/sprites/energy-cracked-block-broken.png";
+import energyCyanBurstBeamUrl from "../assets/sprites/energy-cyan-burst-beam.png";
+import energyCyanSparkProjectileUrl from "../assets/sprites/energy-cyan-spark-projectile.png";
+import energyImpactUrl from "../assets/sprites/energy-impact.png";
+import energyTargetActiveUrl from "../assets/sprites/energy-target-active.png";
 import { describe, expect, it } from "vitest";
 
 import { GAMEPLAY_SPRITE_ASSETS, GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
@@ -20,6 +25,13 @@ const GAMEPLAY_SPRITE_URLS = {
   [GAMEPLAY_SPRITE_KEYS.TRAP_FALLING_PLATFORM]: trapFallingPlatformUrl,
   [GAMEPLAY_SPRITE_KEYS.TRAP_BREAKABLE_FLOOR]: trapBreakableFloorUrl,
   [GAMEPLAY_SPRITE_KEYS.TRAP_PROJECTILE]: trapProjectileUrl,
+  [GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_SPARK_PROJECTILE]:
+    energyCyanSparkProjectileUrl,
+  [GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_BURST_BEAM]: energyCyanBurstBeamUrl,
+  [GAMEPLAY_SPRITE_KEYS.ENERGY_IMPACT]: energyImpactUrl,
+  [GAMEPLAY_SPRITE_KEYS.ENERGY_TARGET_ACTIVE]: energyTargetActiveUrl,
+  [GAMEPLAY_SPRITE_KEYS.ENERGY_CRACKED_BLOCK_BROKEN]:
+    energyCrackedBlockBrokenUrl,
   [GAMEPLAY_SPRITE_KEYS.ITEM_REQUIRED_CHIP]: itemRequiredChipUrl,
   [GAMEPLAY_SPRITE_KEYS.ITEM_MECHANISM_KEY]: itemMechanismKeyUrl,
   [GAMEPLAY_SPRITE_KEYS.ITEM_OPTIONAL_TOKEN]: itemOptionalTokenUrl,
@@ -37,6 +49,11 @@ describe("gameplay sprites", () => {
       GAMEPLAY_SPRITE_KEYS.TRAP_FALLING_PLATFORM,
       GAMEPLAY_SPRITE_KEYS.TRAP_BREAKABLE_FLOOR,
       GAMEPLAY_SPRITE_KEYS.TRAP_PROJECTILE,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_SPARK_PROJECTILE,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_BURST_BEAM,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_IMPACT,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_TARGET_ACTIVE,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_CRACKED_BLOCK_BROKEN,
       GAMEPLAY_SPRITE_KEYS.ITEM_REQUIRED_CHIP,
       GAMEPLAY_SPRITE_KEYS.ITEM_MECHANISM_KEY,
       GAMEPLAY_SPRITE_KEYS.ITEM_OPTIONAL_TOKEN,
@@ -64,5 +81,39 @@ describe("gameplay sprites", () => {
       expect(asset.sizePx.height % 8).toBe(0);
       expect(imageAssetKeys).toContain(asset.key);
     });
+  });
+
+  it("defines the Phase 16 energy visual kit", () => {
+    const energySpriteKeys: ReadonlySet<string> = new Set([
+      GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_SPARK_PROJECTILE,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_BURST_BEAM,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_IMPACT,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_TARGET_ACTIVE,
+      GAMEPLAY_SPRITE_KEYS.ENERGY_CRACKED_BLOCK_BROKEN,
+    ]);
+    const energySprites = GAMEPLAY_SPRITE_ASSETS.filter((asset) =>
+      energySpriteKeys.has(asset.key),
+    );
+
+    expect(energySprites.map((asset) => asset.path)).toEqual([
+      "assets/sprites/energy-cyan-spark-projectile.png",
+      "assets/sprites/energy-cyan-burst-beam.png",
+      "assets/sprites/energy-impact.png",
+      "assets/sprites/energy-target-active.png",
+      "assets/sprites/energy-cracked-block-broken.png",
+    ]);
+    expect(energySprites.map((asset) => asset.sizePx)).toEqual([
+      { width: 8, height: 8 },
+      { width: 16, height: 16 },
+      { width: 16, height: 16 },
+      { width: 16, height: 16 },
+      { width: 16, height: 16 },
+    ]);
+    expect(energySprites.map((asset) => asset.description).join(" ")).toContain(
+      "Centelha Ciano",
+    );
+    expect(energySprites.map((asset) => asset.description).join(" ")).toContain(
+      "Rajada Ciano",
+    );
   });
 });

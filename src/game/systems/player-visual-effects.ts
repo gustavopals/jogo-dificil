@@ -1,4 +1,5 @@
 import type { FacingDirection, Vector2Like } from "../../shared";
+import { clampWideEffectAlpha } from "./visual-readability";
 
 export type PlayerEnergyMode =
   | "idle"
@@ -35,6 +36,7 @@ export const PLAYER_EFFECT_DEPTHS = {
   trail: 5,
   burst: 6,
   sprite: 7,
+  energyShot: 8,
 } as const;
 
 export const PLAYER_DASH_TRAIL_INTERVAL_MS = 38;
@@ -178,6 +180,98 @@ export function createRunSparkParticle(
   );
 }
 
+export function createInsufficientEnergyParticles(
+  position: Vector2Like,
+  facing: FacingDirection,
+): readonly PlayerBurstParticle[] {
+  const direction = facing === "left" ? -1 : 1;
+
+  return [
+    createBurstParticle(
+      position,
+      direction * 11,
+      -15,
+      direction * 5,
+      -4,
+      4,
+      2,
+      IMPACT_COLOR,
+      0.68,
+      130,
+    ),
+    createBurstParticle(
+      position,
+      direction * 8,
+      -12,
+      -direction * 5,
+      1,
+      2,
+      2,
+      WHITE_COLOR,
+      0.46,
+      110,
+    ),
+    createBurstParticle(
+      position,
+      direction * 13,
+      -9,
+      direction * 3,
+      5,
+      5,
+      2,
+      ENERGY_HOT_COLOR,
+      0.36,
+      145,
+    ),
+  ];
+}
+
+export function createCyanBurstPreparationParticles(
+  position: Vector2Like,
+  facing: FacingDirection,
+): readonly PlayerBurstParticle[] {
+  const direction = facing === "left" ? -1 : 1;
+
+  return [
+    createBurstParticle(
+      position,
+      direction * 10,
+      -15,
+      direction * 8,
+      -7,
+      5,
+      2,
+      ENERGY_COLOR,
+      0.64,
+      190,
+    ),
+    createBurstParticle(
+      position,
+      direction * 5,
+      -18,
+      direction * 2,
+      -10,
+      3,
+      3,
+      WHITE_COLOR,
+      0.52,
+      170,
+    ),
+    createBurstParticle(
+      position,
+      direction * 14,
+      -11,
+      direction * 9,
+      1,
+      6,
+      2,
+      ENERGY_HOT_COLOR,
+      0.3,
+      210,
+    ),
+  ];
+}
+
 export function getDashGhostOffset(facing: FacingDirection): Vector2Like {
   const direction = facing === "left" ? 1 : -1;
 
@@ -207,7 +301,7 @@ function createBurstParticle(
     width,
     height,
     color,
-    alpha,
+    alpha: clampWideEffectAlpha(alpha),
     durationMs,
   };
 }

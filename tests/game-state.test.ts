@@ -16,6 +16,7 @@ import {
   TILE_SIZE_PX,
 } from "../src/game/constants";
 import { gameStateStore } from "../src/game/systems/game-state";
+import { DEFAULT_PLAYER_INITIAL_ENERGY } from "../src/shared";
 
 beforeEach(() => {
   gameStateStore.resetRun();
@@ -48,6 +49,7 @@ describe("game state", () => {
       activeCheckpoint: {
         id: "level-02-start",
         levelId: "level-02",
+        initialEnergy: DEFAULT_PLAYER_INITIAL_ENERGY,
       },
       isPaused: false,
     });
@@ -64,6 +66,78 @@ describe("game state", () => {
       levelId: "level-02",
       x: 96,
       y: 208,
+      initialEnergy: DEFAULT_PLAYER_INITIAL_ENERGY,
+    });
+  });
+
+  it("stores level start energy on the active checkpoint", () => {
+    gameStateStore.startLevel("level-02", { x: 96, y: 208 }, 75);
+
+    expect(gameStateStore.getSnapshot().activeCheckpoint).toMatchObject({
+      id: "level-02-start",
+      levelId: "level-02",
+      initialEnergy: 75,
+    });
+    expect(gameStateStore.getSnapshot().playerEnergy).toEqual({
+      current: 75,
+      max: 100,
+      isCharging: false,
+      isFull: false,
+      feedback: {
+        kind: "none",
+        sequence: 0,
+      },
+    });
+  });
+
+  it("tracks the player energy snapshot used by the HUD", () => {
+    gameStateStore.startLevel("level-01");
+
+    gameStateStore.setPlayerEnergyHudState({
+      current: 100,
+      max: 100,
+      isCharging: true,
+    });
+
+    expect(gameStateStore.getSnapshot().playerEnergy).toEqual({
+      current: 100,
+      max: 100,
+      isCharging: true,
+      isFull: true,
+      feedback: {
+        kind: "none",
+        sequence: 0,
+      },
+    });
+
+    gameStateStore.triggerPlayerEnergyHudFeedback("full");
+
+    expect(gameStateStore.getSnapshot().playerEnergy.feedback).toEqual({
+      kind: "full",
+      sequence: 1,
+    });
+
+    gameStateStore.setPlayerEnergyHudState({
+      current: -20,
+      max: 100,
+    });
+
+    expect(gameStateStore.getSnapshot().playerEnergy).toEqual({
+      current: 0,
+      max: 100,
+      isCharging: false,
+      isFull: false,
+      feedback: {
+        kind: "full",
+        sequence: 1,
+      },
+    });
+
+    gameStateStore.triggerPlayerEnergyHudFeedback("insufficient");
+
+    expect(gameStateStore.getSnapshot().playerEnergy.feedback).toEqual({
+      kind: "insufficient",
+      sequence: 2,
     });
   });
 
@@ -110,6 +184,7 @@ describe("game state", () => {
       levelId: "level-01",
       x: 128,
       y: 192,
+      initialEnergy: 65,
     });
 
     expect(gameStateStore.registerDeath("trap", { x: 130, y: 194 })).toBe(1);
@@ -119,6 +194,7 @@ describe("game state", () => {
       levelId: "level-01",
       x: 128,
       y: 192,
+      initialEnergy: 65,
     });
 
     expect(gameStateStore.registerDeath("hazard", { x: 132, y: 194 })).toBe(2);
@@ -140,6 +216,7 @@ describe("game state", () => {
       activeCheckpoint: {
         id: "level-01-start",
         levelId: "level-01",
+        initialEnergy: DEFAULT_PLAYER_INITIAL_ENERGY,
       },
     });
   });
@@ -161,6 +238,7 @@ describe("game state", () => {
       levelId: "level-01",
       x: 128,
       y: 192,
+      initialEnergy: 70,
     });
 
     expect(gameStateStore.respawnAtCheckpoint(true)).toMatchObject({
@@ -168,11 +246,18 @@ describe("game state", () => {
       levelId: "level-01",
       x: 128,
       y: 192,
+      initialEnergy: 70,
     });
 
     expect(gameStateStore.getSnapshot()).toMatchObject({
       playerLifeState: "alive",
       deathCount: 0,
+      playerEnergy: {
+        current: 70,
+        max: 100,
+        isCharging: false,
+        isFull: false,
+      },
     });
     expect(deathEvents).toEqual([]);
     expect(respawnEvents).toEqual([
@@ -209,6 +294,7 @@ describe("game state", () => {
       levelId: "level-01",
       x: 128,
       y: 192,
+      initialEnergy: 80,
     });
     gameStateStore.registerDeath(
       "trap",

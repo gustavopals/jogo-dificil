@@ -36,25 +36,76 @@ Regra de progressão:
 - Boss 3 testa o kit completo: pulo, dash, `Centelha Ciano`, `Carga Ciano` e
   `Rajada Ciano`.
 
+Decisão de distribuição fechada na Task 17.1:
+
+- `Hirolito Narguilito` fica definitivamente no fim de `level-03`, fechando o
+  Bloco 1. Ele deve ser a primeira leitura de arena: checkpoint próximo, chão
+  simples, ataque único por vez e janela vulnerável clara antes da transição
+  para `level-04`.
+- `Dr. Imports` fica definitivamente no fim de `level-06`, fechando o Bloco 2.
+  Ele deve testar o que o jogador aprendeu em dash, posicionamento, projéteis e
+  interação antes de liberar o Bloco 3 de energia em `level-07`.
+- `Giga Fabio` fica definitivamente em `level-10`, como fase dedicada de
+  encerramento. Ele não deve ser comprimido em `level-09`, porque precisa testar
+  o kit completo de energia depois que `level-07`, `level-08` e `level-09` já
+  ensinaram e combinaram `Centelha Ciano`, `Carga Ciano` e `Rajada Ciano`.
+- Esta decisão não altera o encadeamento dos dados nesta subtask. A integração
+  de progressão fica reservada para a Task 17.9, quando as arenas já existirem.
+
+## Visual, Papel E Dificuldade Fechados
+
+Este registro fecha a intenção de cada boss antes de implementar schema, IA ou
+arena. A prioridade é leitura de gameplay; qualquer asset futuro deve obedecer a
+estes papéis.
+
+| Boss                  | Visual de leitura                                                                                                                                                        | Papel na campanha                                                                                                                                       | Dificuldade alvo                                                                                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Hirolito Narguilito` | Corpo baixo de narguilé, óculos escuros, cristal ciano central, fumaça clara e mangueira como ameaça lateral. Silhueta compacta e cômica, sem ocupar demais a arena.     | Primeiro chefe e fechamento do Bloco 1. Ensina arena, tell, ataque, recover vulnerável e vida visível com punição baixa.                                | Baixa-média: 2 hits, chão simples, uma plataforma baixa, windup generoso e recover longo. O jogador pode morrer aprendendo a regra, mas a repetição deve ser curta.  |
+| `Dr. Imports`         | Figura média de casaco escuro, roxo como cor de perigo, óculos/props de importação, maleta ou frasco como weak point e fumaça roxa para troca de posição.                | Chefe intermediário e fechamento do Bloco 2. Cobra dash, reposicionamento, leitura de projéteis e ataque pela abertura certa.                           | Média: 3 hits, até 2 projéteis ativos, três âncoras de movimento e recover menor que o boss 1. A luta deve exigir deslocamento, não memorização longa.               |
+| `Giga Fabio`          | Brute grande preto/dourado, punhos exagerados, núcleo no peito/cinto, impactos de chão e poeira curta. Silhueta dominante, mas com weak point e ataques sempre legíveis. | Boss final em `level-10`. Testa a campanha inteira: pulo, dash, `Centelha Ciano`, `Carga Ciano`, `Rajada Ciano`, espera de recover e gestão de energia. | Média-alta: 4 hits obrigatórios de `Rajada Ciano`, recarga dentro da arena, windups claros e ataques fortes porém isolados. Deve parecer final sem virar luta longa. |
+
+Regras de dificuldade:
+
+- Nenhum boss do MVP usa padrões aleatórios ou dois ataques simultâneos.
+- A dificuldade cresce por composição de leitura, não por vida alta.
+- Cada boss deve ter checkpoint imediatamente antes da arena.
+- A primeira repetição após morte deve levar poucos segundos até a próxima
+  tentativa real.
+- Visual grande nunca pode esconder Pino, hazards, projéteis ou a leitura da
+  energia ciano.
+
 ## Referências Visuais Locais
 
 As imagens em `assets/boss/examples/` são referências de composição e silhueta,
 não assets finais prontos.
 
-- `boss-1.png` e `boss-1-examples.png`: base do `Hirolito Narguilito`, com
-  corpo de narguilé, óculos escuros, fumaça, mangueira e cristais ciano.
-- `boss-2-reference.jpeg` e `boss-2-examples.png`: base do `Dr. Imports`, com
-  casaco escuro, óculos roxos, maleta, notebook, frascos e fumaça roxa.
-- `boss-3-reference.png` e `boss-3-examples.png`: base do `Giga Fabio`, com
-  corpo grande, postura de brute, preto/dourado, pancadas no chão e poses de
-  queda.
+| Arquivo | Boss | Uso permitido | Não usar como |
+| ------- | ---- | ------------- | ------------- |
+| `assets/boss/examples/boss-1.png` | `Hirolito Narguilito` | Referência principal de composição vertical, corpo de narguilé, óculos, fumaça, mangueira e cristal ciano. | Sprite final, retrato literal ou textura importada para runtime. |
+| `assets/boss/examples/boss-1-examples.png` | `Hirolito Narguilito` | Variações para escolher silhueta compacta, leitura do cristal e poses de mangueira. | Sheet final ou base para copiar traço/quadro diretamente. |
+| `assets/boss/examples/boss-2-reference.jpeg` | `Dr. Imports` | Referência principal de pessoa/tema, casaco escuro, óculos, pose e leitura de "importações". | Retrato direto, asset distribuível final ou textura do jogo. |
+| `assets/boss/examples/boss-2-examples.png` | `Dr. Imports` | Variações para props como maleta, notebook, frascos, fumaça roxa e poses de ataque. | Sprite final ou colagem em pixel art. |
+| `assets/boss/examples/boss-3-reference.png` | `Giga Fabio` | Referência de proporção compacta, postura grande e leitura de brute final. | Sprite final, retrato literal ou base sem redesenho. |
+| `assets/boss/examples/boss-3-examples.png` | `Giga Fabio` | Variações para preto/dourado, punhos grandes, pancadas no chão e poses de queda. | Sheet final ou cópia de silhueta sem adaptação. |
 
-Direção de uso:
+Direção de uso fechada na Task 17.1:
 
-- Usar as imagens como referência autorizada e caricatural.
-- Evitar cópia fotográfica direta nos sprites finais.
-- Padronizar tudo para pixel art com fundo transparente.
-- Manter leitura de gameplay acima de fidelidade ao retrato.
+- As imagens são material de referência local para design, não assets finais do
+  jogo.
+- Os sprites finais devem ser redesenhados como pixel art original com fundo
+  transparente, dimensões planejadas e hitboxes separadas.
+- É permitido aproveitar tema, paleta geral, props, proporção e intenção de
+  caricatura.
+- É proibido copiar rosto, fotografia, traço, pose exata ou colar partes das
+  imagens nos sprites finais.
+- A leitura de gameplay vem antes da fidelidade ao retrato: weak point, tell,
+  projétil, hitbox e estado vulnerável precisam ser mais claros que qualquer
+  semelhança visual.
+- A pasta `assets/boss/examples/` não deve ser importada por `src/game/assets.ts`
+  nem entrar no runtime; os arquivos finais devem ficar em `assets/sprites/`
+  ou subpasta de sprites de boss definida na Task 17.5.
+- Ao criar sprites finais, registrar cada novo arquivo em `assets/ASSETS.md` e
+  manter estes exemplos descritos como referência local.
 
 ## Sistema Base De Boss
 
@@ -332,9 +383,13 @@ type BossDefinition = {
 
 ### Task 17.1 - Definir Trinca De Bosses
 
-- Fechar distribuição em `level-03`, `level-06` e `level-10`.
-- Registrar visual, papel e dificuldade de cada boss.
-- Documentar uso das imagens em `assets/boss/examples/`.
+- Fechar distribuição em `level-03`, `level-06` e `level-10`. Fechado:
+  `Hirolito Narguilito` em `level-03`, `Dr. Imports` em `level-06` e
+  `Giga Fabio` em `level-10`, sem alterar ainda o encadeamento dos dados.
+- Registrar visual, papel e dificuldade de cada boss. Fechado na seção
+  "Visual, Papel E Dificuldade Fechados".
+- Documentar uso das imagens em `assets/boss/examples/`. Fechado na seção
+  "Referências Visuais Locais", com uso permitido e limites por arquivo.
 - Atualizar `IDEIA.md`.
 
 ### Task 17.2 - Schema E Estado Compartilhado

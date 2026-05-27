@@ -9,6 +9,14 @@ export const PINO_TEXTURE_KEYS = {
   JUMP_PEAK: "player-pino-jump-peak",
   FALL: "player-pino-fall",
   DASH: "player-pino-dash",
+  CHARGE_01: "player-pino-charge-01",
+  CHARGE_02: "player-pino-charge-02",
+  CYAN_SPARK_01: "player-pino-cyan-spark-01",
+  CYAN_SPARK_02: "player-pino-cyan-spark-02",
+  CYAN_BURST_PREPARE_01: "player-pino-cyan-burst-prepare-01",
+  CYAN_BURST_PREPARE_02: "player-pino-cyan-burst-prepare-02",
+  CYAN_BURST_FIRE_01: "player-pino-cyan-burst-fire-01",
+  CYAN_BURST_FIRE_02: "player-pino-cyan-burst-fire-02",
   DEATH_01: "player-pino-death-01",
   DEATH_02: "player-pino-death-02",
   RESPAWN_01: "player-pino-respawn-01",
@@ -21,6 +29,11 @@ export type PinoTextureKey =
 export const PINO_SPRITE_SIZE_PX = {
   width: 14,
   height: 26,
+} as const;
+
+export const PINO_HITBOX_SIZE_PX = {
+  width: 10,
+  height: 22,
 } as const;
 
 export type PinoSpriteAssetDefinition = {
@@ -106,6 +119,78 @@ export const PINO_SPRITE_ASSETS = [
     license: "Original do projeto",
   },
   {
+    key: PINO_TEXTURE_KEYS.CHARGE_01,
+    path: "assets/sprites/player-pino-charge-01.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 1 da Carga Ciano de Pino, pose firme com aura baixa e uma mao energizada.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.CHARGE_02,
+    path: "assets/sprites/player-pino-charge-02.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 2 da Carga Ciano de Pino, postura comprimida com faixas de energia ciano nos pes.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.CYAN_SPARK_01,
+    path: "assets/sprites/player-pino-cyan-spark-01.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 1 de Pino disparando Centelha Ciano, braco estendido e faisca curta na mao.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.CYAN_SPARK_02,
+    path: "assets/sprites/player-pino-cyan-spark-02.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 2 de Pino disparando Centelha Ciano, recuo compacto e pulso ciano no punho.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_01,
+    path: "assets/sprites/player-pino-cyan-burst-prepare-01.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 1 de Pino preparando Rajada Ciano, energia segmentada crescendo no punho.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_02,
+    path: "assets/sprites/player-pino-cyan-burst-prepare-02.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 2 de Pino preparando Rajada Ciano, postura comprimida e nucleo ciano maior.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_01,
+    path: "assets/sprites/player-pino-cyan-burst-fire-01.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 1 de Pino soltando Rajada Ciano, braco estendido e inicio curto do feixe.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
+    key: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_02,
+    path: "assets/sprites/player-pino-cyan-burst-fire-02.png",
+    sizePx: PINO_SPRITE_SIZE_PX,
+    description:
+      "Frame 2 de Pino soltando Rajada Ciano, recuo do corpo e feixe segmentado no punho.",
+    origin: "Gerado no projeto por script",
+    license: "Original do projeto",
+  },
+  {
     key: PINO_TEXTURE_KEYS.DEATH_01,
     path: "assets/sprites/player-pino-death-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
@@ -152,6 +237,10 @@ export const PINO_ANIMATION_STATES = {
   RESPAWN: "respawn",
   PRIMARY_ACTION: "primary-action",
   SECONDARY_ACTION: "secondary-action",
+  CYAN_CHARGE: "cyan-charge",
+  CYAN_SPARK: "cyan-spark",
+  CYAN_BURST_PREPARE: "cyan-burst-prepare",
+  CYAN_BURST_FIRE: "cyan-burst-fire",
 } as const;
 
 export type PinoAnimationState =
@@ -166,6 +255,10 @@ export const PINO_ANIMATION_KEYS = {
   RESPAWN: "pino:respawn",
   PRIMARY_ACTION: "pino:primary-action",
   SECONDARY_ACTION: "pino:secondary-action",
+  CYAN_CHARGE: "pino:cyan-charge",
+  CYAN_SPARK: "pino:cyan-spark",
+  CYAN_BURST_PREPARE: "pino:cyan-burst-prepare",
+  CYAN_BURST_FIRE: "pino:cyan-burst-fire",
 } as const;
 
 export type PinoAnimationKey =
@@ -174,7 +267,19 @@ export type PinoAnimationKey =
 export type PinoAnimationDefinition =
   CharacterAnimationDefinition<PinoAnimationState> & {
     readonly key: PinoAnimationKey;
+    readonly hitboxPx: typeof PINO_HITBOX_SIZE_PX;
   };
+
+export const PINO_POWER_ANIMATION_MODES = {
+  NONE: "none",
+  CYAN_CHARGE: "cyan-charge",
+  CYAN_SPARK: "cyan-spark",
+  CYAN_BURST_PREPARE: "cyan-burst-prepare",
+  CYAN_BURST_FIRE: "cyan-burst-fire",
+} as const;
+
+export type PinoPowerAnimationMode =
+  (typeof PINO_POWER_ANIMATION_MODES)[keyof typeof PINO_POWER_ANIMATION_MODES];
 
 export type PinoAnimationSelectorInput = {
   readonly isAlive: boolean;
@@ -183,6 +288,7 @@ export type PinoAnimationSelectorInput = {
   readonly velocity: Vector2Like;
   readonly isUsingPrimaryAction: boolean;
   readonly isUsingSecondaryAction: boolean;
+  readonly powerAnimationMode?: PinoPowerAnimationMode;
 };
 
 const MOVEMENT_EPSILON = 1;
@@ -209,6 +315,7 @@ function createPinoAnimation(
       textureKey,
     })),
     isPlaceholder: config.isPlaceholder,
+    hitboxPx: PINO_HITBOX_SIZE_PX,
   };
 }
 
@@ -284,6 +391,44 @@ const pinoSecondaryActionAnimation = createPinoAnimation({
   frames: [PINO_TEXTURE_KEYS.IDLE],
   isPlaceholder: true,
 });
+const pinoCyanChargeAnimation = createPinoAnimation({
+  key: PINO_ANIMATION_KEYS.CYAN_CHARGE,
+  state: PINO_ANIMATION_STATES.CYAN_CHARGE,
+  frameRate: 8,
+  repeat: -1,
+  frames: [PINO_TEXTURE_KEYS.CHARGE_01, PINO_TEXTURE_KEYS.CHARGE_02],
+  isPlaceholder: false,
+});
+const pinoCyanSparkAnimation = createPinoAnimation({
+  key: PINO_ANIMATION_KEYS.CYAN_SPARK,
+  state: PINO_ANIMATION_STATES.CYAN_SPARK,
+  frameRate: 18,
+  repeat: 0,
+  frames: [PINO_TEXTURE_KEYS.CYAN_SPARK_01, PINO_TEXTURE_KEYS.CYAN_SPARK_02],
+  isPlaceholder: false,
+});
+const pinoCyanBurstPrepareAnimation = createPinoAnimation({
+  key: PINO_ANIMATION_KEYS.CYAN_BURST_PREPARE,
+  state: PINO_ANIMATION_STATES.CYAN_BURST_PREPARE,
+  frameRate: 8,
+  repeat: -1,
+  frames: [
+    PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_01,
+    PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_02,
+  ],
+  isPlaceholder: false,
+});
+const pinoCyanBurstFireAnimation = createPinoAnimation({
+  key: PINO_ANIMATION_KEYS.CYAN_BURST_FIRE,
+  state: PINO_ANIMATION_STATES.CYAN_BURST_FIRE,
+  frameRate: 14,
+  repeat: -1,
+  frames: [
+    PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_01,
+    PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_02,
+  ],
+  isPlaceholder: false,
+});
 
 export const PINO_ANIMATIONS = [
   pinoIdleAnimation,
@@ -294,6 +439,10 @@ export const PINO_ANIMATIONS = [
   pinoRespawnAnimation,
   pinoPrimaryActionAnimation,
   pinoSecondaryActionAnimation,
+  pinoCyanChargeAnimation,
+  pinoCyanSparkAnimation,
+  pinoCyanBurstPrepareAnimation,
+  pinoCyanBurstFireAnimation,
 ] as const satisfies readonly PinoAnimationDefinition[];
 
 export const PINO_ANIMATION_BY_STATE = {
@@ -305,6 +454,10 @@ export const PINO_ANIMATION_BY_STATE = {
   [PINO_ANIMATION_STATES.RESPAWN]: pinoRespawnAnimation,
   [PINO_ANIMATION_STATES.PRIMARY_ACTION]: pinoPrimaryActionAnimation,
   [PINO_ANIMATION_STATES.SECONDARY_ACTION]: pinoSecondaryActionAnimation,
+  [PINO_ANIMATION_STATES.CYAN_CHARGE]: pinoCyanChargeAnimation,
+  [PINO_ANIMATION_STATES.CYAN_SPARK]: pinoCyanSparkAnimation,
+  [PINO_ANIMATION_STATES.CYAN_BURST_PREPARE]: pinoCyanBurstPrepareAnimation,
+  [PINO_ANIMATION_STATES.CYAN_BURST_FIRE]: pinoCyanBurstFireAnimation,
 } as const satisfies Record<PinoAnimationState, PinoAnimationDefinition>;
 
 export function selectPinoAnimationState(
@@ -318,8 +471,23 @@ export function selectPinoAnimationState(
     return PINO_ANIMATION_STATES.DEATH;
   }
 
+  const powerAnimationState = getPinoPowerAnimationState(
+    input.powerAnimationMode ?? PINO_POWER_ANIMATION_MODES.NONE,
+  );
+
+  if (
+    powerAnimationState === PINO_ANIMATION_STATES.CYAN_BURST_PREPARE ||
+    powerAnimationState === PINO_ANIMATION_STATES.CYAN_BURST_FIRE
+  ) {
+    return powerAnimationState;
+  }
+
   if (input.isUsingPrimaryAction) {
     return PINO_ANIMATION_STATES.PRIMARY_ACTION;
+  }
+
+  if (powerAnimationState) {
+    return powerAnimationState;
   }
 
   if (input.isUsingSecondaryAction) {
@@ -343,4 +511,21 @@ export function selectPinoAnimationDefinition(
   input: PinoAnimationSelectorInput,
 ): PinoAnimationDefinition {
   return PINO_ANIMATION_BY_STATE[selectPinoAnimationState(input)];
+}
+
+function getPinoPowerAnimationState(
+  mode: PinoPowerAnimationMode,
+): PinoAnimationState | undefined {
+  switch (mode) {
+    case PINO_POWER_ANIMATION_MODES.CYAN_CHARGE:
+      return PINO_ANIMATION_STATES.CYAN_CHARGE;
+    case PINO_POWER_ANIMATION_MODES.CYAN_SPARK:
+      return PINO_ANIMATION_STATES.CYAN_SPARK;
+    case PINO_POWER_ANIMATION_MODES.CYAN_BURST_PREPARE:
+      return PINO_ANIMATION_STATES.CYAN_BURST_PREPARE;
+    case PINO_POWER_ANIMATION_MODES.CYAN_BURST_FIRE:
+      return PINO_ANIMATION_STATES.CYAN_BURST_FIRE;
+    case PINO_POWER_ANIMATION_MODES.NONE:
+      return undefined;
+  }
 }

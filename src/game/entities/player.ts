@@ -4,10 +4,12 @@ import {
   PINO_ANIMATION_KEYS,
   PINO_ANIMATION_STATES,
   PINO_ANIMATIONS,
+  PINO_POWER_ANIMATION_MODES,
   PINO_TEXTURE_KEYS,
   selectPinoAnimationDefinition,
   type PinoAnimationKey,
   type PinoAnimationState,
+  type PinoPowerAnimationMode,
 } from "../../data/characters/pino-animations";
 import type {
   FacingDirection,
@@ -30,6 +32,7 @@ export type PlayerMovementUpdate = {
   readonly facing?: FacingDirection;
   readonly isUsingPrimaryAction?: boolean;
   readonly isUsingSecondaryAction?: boolean;
+  readonly powerAnimationMode?: PinoPowerAnimationMode;
 };
 
 export type PlayerPhysicsState = {
@@ -47,6 +50,7 @@ export type PlayerVisualState = {
   readonly isRespawning: boolean;
   readonly isUsingPrimaryAction: boolean;
   readonly isUsingSecondaryAction: boolean;
+  readonly powerAnimationMode: PinoPowerAnimationMode;
 };
 
 const PLAYER_HITBOX: RectLike = {
@@ -137,6 +141,7 @@ export class Player {
       isRespawning: false,
       isUsingPrimaryAction: false,
       isUsingSecondaryAction: false,
+      powerAnimationMode: PINO_POWER_ANIMATION_MODES.NONE,
     };
 
     this.applyFacing(config.facing);
@@ -219,6 +224,8 @@ export class Player {
       facing,
       isUsingPrimaryAction: update.isUsingPrimaryAction ?? false,
       isUsingSecondaryAction: update.isUsingSecondaryAction ?? false,
+      powerAnimationMode:
+        update.powerAnimationMode ?? PINO_POWER_ANIMATION_MODES.NONE,
     };
 
     this.applyFacing(facing);
@@ -238,6 +245,7 @@ export class Player {
       isRespawning: false,
       isUsingPrimaryAction: false,
       isUsingSecondaryAction: false,
+      powerAnimationMode: PINO_POWER_ANIMATION_MODES.NONE,
     };
     this.physicsState = {
       ...this.physicsState,
@@ -275,6 +283,7 @@ export class Player {
       isRespawning: true,
       isUsingPrimaryAction: false,
       isUsingSecondaryAction: false,
+      powerAnimationMode: PINO_POWER_ANIMATION_MODES.NONE,
     };
 
     this.applyFacing(facing);
@@ -317,6 +326,7 @@ export class Player {
       velocity: this.physicsState.velocity,
       isUsingPrimaryAction: this.visualState.isUsingPrimaryAction,
       isUsingSecondaryAction: this.visualState.isUsingSecondaryAction,
+      powerAnimationMode: this.visualState.powerAnimationMode,
     });
 
     this.visualState = {
@@ -371,6 +381,26 @@ export class Player {
         scaleX: 1.04,
         scaleY: 1,
         angle: -4 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.CYAN_CHARGE]: {
+        scaleX: 1.02,
+        scaleY: 1.02,
+        angle: -2 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.CYAN_SPARK]: {
+        scaleX: 1.12,
+        scaleY: 0.94,
+        angle: -6 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.CYAN_BURST_PREPARE]: {
+        scaleX: 0.96,
+        scaleY: 1.08,
+        angle: -3 * facingSign,
+      },
+      [PINO_ANIMATION_STATES.CYAN_BURST_FIRE]: {
+        scaleX: 1.16,
+        scaleY: 0.9,
+        angle: -7 * facingSign,
       },
     } as const satisfies Record<
       PinoAnimationState,

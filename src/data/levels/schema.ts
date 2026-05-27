@@ -2,6 +2,10 @@ import type { LevelDefinition } from "../../shared";
 
 export type {
   CheckpointDefinition,
+  EnergyPowerKind,
+  EnergyTargetDefinition,
+  EnergyTargetId,
+  EnergyTargetKind,
   ExitDefinition,
   HazardDefinition,
   InteractiveObjectAction,

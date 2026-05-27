@@ -52,6 +52,21 @@ describe("level registry", () => {
       {
         id: "level-06",
         order: 6,
+        nextLevelId: "level-07",
+      },
+      {
+        id: "level-07",
+        order: 7,
+        nextLevelId: "level-08",
+      },
+      {
+        id: "level-08",
+        order: 8,
+        nextLevelId: "level-09",
+      },
+      {
+        id: "level-09",
+        order: 9,
         nextLevelId: undefined,
       },
     ]);

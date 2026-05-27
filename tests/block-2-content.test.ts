@@ -20,7 +20,7 @@ const BLOCK_2_LEVELS = [LEVEL_04, LEVEL_05, LEVEL_06] as const;
 
 describe("block 2 content", () => {
   it("chains the campaign linearly from level 03 through level 06", () => {
-    expect(LEVEL_DEFINITIONS.map((level) => level.id)).toEqual([
+    expect(LEVEL_DEFINITIONS.slice(0, 6).map((level) => level.id)).toEqual([
       "level-01",
       "level-02",
       "level-03",
@@ -28,13 +28,13 @@ describe("block 2 content", () => {
       "level-05",
       "level-06",
     ]);
-    expect(LEVEL_DEFINITIONS.map((level) => level.difficulty)).toEqual([
-      1, 2, 3, 4, 5, 6,
-    ]);
+    expect(
+      LEVEL_DEFINITIONS.slice(0, 6).map((level) => level.difficulty),
+    ).toEqual([1, 2, 3, 4, 5, 6]);
     expect(LEVEL_03.exit.nextLevelId).toBe(LEVEL_04.id);
     expect(LEVEL_04.exit.nextLevelId).toBe(LEVEL_05.id);
     expect(LEVEL_05.exit.nextLevelId).toBe(LEVEL_06.id);
-    expect("nextLevelId" in LEVEL_06.exit).toBe(false);
+    expect(LEVEL_06.exit.nextLevelId).toBe("level-07");
   });
 
   it("keeps every block 2 level valid, checkpointed and completable", () => {

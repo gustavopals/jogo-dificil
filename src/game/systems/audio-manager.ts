@@ -103,6 +103,8 @@ export class AudioManager {
   }
 
   public stop(audioId: string): void {
+    this.removePendingPlayRequests((request) => request.audioId === audioId);
+
     const activeSound = this.activeSounds.get(audioId);
 
     if (!activeSound) {
@@ -114,6 +116,12 @@ export class AudioManager {
   }
 
   public stopCategory(category: AudioCategory): void {
+    this.removePendingPlayRequests((request) => {
+      const audio = this.audioDefinitions.get(request.audioId);
+
+      return audio?.category === category;
+    });
+
     [...this.activeSounds.entries()].forEach(([audioId, activeSound]) => {
       if (activeSound.category !== category) {
         return;
@@ -245,6 +253,24 @@ export class AudioManager {
     this.activeSounds.set(audio.id, handle);
 
     return "played";
+  }
+
+  private removePendingPlayRequests(
+    shouldRemove: (request: QueuedPlayRequest) => boolean,
+  ): void {
+    for (let index = this.pendingPlayRequests.length - 1; index >= 0; index--) {
+      const request = this.pendingPlayRequests[index];
+
+      if (!request || !shouldRemove(request)) {
+        continue;
+      }
+
+      this.pendingPlayRequests.splice(index, 1);
+    }
+
+    if (this.pendingPlayRequests.length === 0) {
+      this.isAutoplayBlocked = false;
+    }
   }
 
   private refreshActiveVolumes(): void {

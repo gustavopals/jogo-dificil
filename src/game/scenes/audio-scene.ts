@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
 import {
+  ENERGY_AUDIO_DEFINITIONS,
   LEVEL_AUDIO_DEFINITIONS,
   LEVEL_AUDIO_IDS,
   getPlayerDeathAudioId,
@@ -115,6 +116,7 @@ function getInitialAudioDefinitions(): readonly AudioDefinition[] {
   const audioDefinitions: AudioDefinition[] = [
     ...PLAYER_AUDIO_DEFINITIONS,
     ...LEVEL_AUDIO_DEFINITIONS,
+    ...ENERGY_AUDIO_DEFINITIONS,
     ...MUSIC_AUDIO_DEFINITIONS,
   ];
 

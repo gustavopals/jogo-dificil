@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   PLAYER_DASH_TRAIL_INTERVAL_MS,
   PLAYER_RUN_SPARK_INTERVAL_MS,
+  createCyanBurstPreparationParticles,
+  createInsufficientEnergyParticles,
   createJumpBurstParticles,
   createLandingBurstParticles,
   createRunSparkParticle,
@@ -11,6 +13,7 @@ import {
   resolvePlayerEnergyMode,
   shouldEmitTimedEffect,
 } from "../src/game/systems/player-visual-effects";
+import { VISUAL_READABILITY_LIMITS } from "../src/game/systems/visual-readability";
 
 describe("player visual effects", () => {
   it("resolves aura mode from the current player movement", () => {
@@ -75,5 +78,47 @@ describe("player visual effects", () => {
         intervalMs: PLAYER_RUN_SPARK_INTERVAL_MS,
       }),
     ).toBe(false);
+  });
+
+  it("builds short insufficient energy feedback near the facing hand", () => {
+    const rightFeedback = createInsufficientEnergyParticles(
+      { x: 40, y: 80 },
+      "right",
+    );
+    const leftFeedback = createInsufficientEnergyParticles(
+      { x: 40, y: 80 },
+      "left",
+    );
+
+    expect(rightFeedback).toHaveLength(3);
+    expect(rightFeedback[0]!.x).toBeGreaterThan(40);
+    expect(leftFeedback[0]!.x).toBeLessThan(40);
+    expect(
+      Math.max(...rightFeedback.map((particle) => particle.durationMs)),
+    ).toBeLessThan(160);
+    expect(Math.max(...rightFeedback.map((particle) => particle.alpha))).toBe(
+      VISUAL_READABILITY_LIMITS.maxWideEffectAlpha,
+    );
+  });
+
+  it("builds visible Rajada Ciano preparation feedback near the facing hand", () => {
+    const rightFeedback = createCyanBurstPreparationParticles(
+      { x: 40, y: 80 },
+      "right",
+    );
+    const leftFeedback = createCyanBurstPreparationParticles(
+      { x: 40, y: 80 },
+      "left",
+    );
+
+    expect(rightFeedback).toHaveLength(3);
+    expect(rightFeedback[0]!.x).toBeGreaterThan(40);
+    expect(leftFeedback[0]!.x).toBeLessThan(40);
+    expect(
+      Math.max(...rightFeedback.map((particle) => particle.durationMs)),
+    ).toBe(210);
+    expect(Math.max(...rightFeedback.map((particle) => particle.alpha))).toBe(
+      VISUAL_READABILITY_LIMITS.maxWideEffectAlpha,
+    );
   });
 });

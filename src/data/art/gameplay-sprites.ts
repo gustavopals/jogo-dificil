@@ -6,6 +6,11 @@ export const GAMEPLAY_SPRITE_KEYS = {
   TRAP_FALLING_PLATFORM: "trap-falling-platform",
   TRAP_BREAKABLE_FLOOR: "trap-breakable-floor",
   TRAP_PROJECTILE: "trap-projectile",
+  ENERGY_CYAN_SPARK_PROJECTILE: "energy-cyan-spark-projectile",
+  ENERGY_CYAN_BURST_BEAM: "energy-cyan-burst-beam",
+  ENERGY_IMPACT: "energy-impact",
+  ENERGY_TARGET_ACTIVE: "energy-target-active",
+  ENERGY_CRACKED_BLOCK_BROKEN: "energy-cracked-block-broken",
   ITEM_REQUIRED_CHIP: "item-required-chip",
   ITEM_MECHANISM_KEY: "item-mechanism-key",
   ITEM_OPTIONAL_TOKEN: "item-optional-token",
@@ -37,6 +42,10 @@ const TILE_SPRITE_SIZE = {
 const PROJECTILE_SPRITE_SIZE = {
   width: 8,
   height: 8,
+} as const;
+const ENERGY_EFFECT_SPRITE_SIZE = {
+  width: TILE_SIZE,
+  height: TILE_SIZE,
 } as const;
 
 export const GAMEPLAY_SPRITE_ASSETS = [
@@ -78,6 +87,46 @@ export const GAMEPLAY_SPRITE_ASSETS = [
     path: "assets/sprites/trap-projectile.png",
     sizePx: PROJECTILE_SPRITE_SIZE,
     description: "Projetil roxo em losango para traps disparadas.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_SPARK_PROJECTILE,
+    path: "assets/sprites/energy-cyan-spark-projectile.png",
+    sizePx: PROJECTILE_SPRITE_SIZE,
+    description: "Projetil pequeno da Centelha Ciano com nucleo claro.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_BURST_BEAM,
+    path: "assets/sprites/energy-cyan-burst-beam.png",
+    sizePx: ENERGY_EFFECT_SPRITE_SIZE,
+    description: "Segmento tileavel do feixe curto da Rajada Ciano.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.ENERGY_IMPACT,
+    path: "assets/sprites/energy-impact.png",
+    sizePx: ENERGY_EFFECT_SPRITE_SIZE,
+    description: "Explosao compacta de impacto ciano para tiros e alvos.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.ENERGY_TARGET_ACTIVE,
+    path: "assets/sprites/energy-target-active.png",
+    sizePx: ENERGY_EFFECT_SPRITE_SIZE,
+    description: "Alvo de energia ativo com aro ciano e nucleo amarelo.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.ENERGY_CRACKED_BLOCK_BROKEN,
+    path: "assets/sprites/energy-cracked-block-broken.png",
+    sizePx: ENERGY_EFFECT_SPRITE_SIZE,
+    description: "Bloco de energia quebrado em fragmentos com fendas claras.",
     origin: "Gerado no projeto com magick",
     license: "Original do projeto",
   },
