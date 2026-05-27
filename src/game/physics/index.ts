@@ -1,4 +1,24 @@
 export {
+  getBossActiveAttack,
+  getBossActiveAttackHitbox,
+  getBossAttackTellArea,
+  updateBossAttackCycle,
+} from "./boss-attacks";
+export {
+  applyBossRuntimeDamage,
+  createInitialBossRuntimeState,
+  resetBossRuntimeState,
+  transitionBossRuntimeState,
+  updateBossAnchorMovement,
+  updateBossRuntimeTimers,
+} from "./boss-state";
+export {
+  canSpawnBossProjectile,
+  createBossProjectile,
+  getBossProjectileHitbox,
+  updateBossProjectiles,
+} from "./boss-projectiles";
+export {
   calculateDashMovement,
   createInitialDashMovementState,
   DEFAULT_DASH_MOVEMENT_CONFIG,
@@ -40,6 +60,27 @@ export {
   updatePlayerEnergy,
 } from "./player-energy";
 export { getWorldHitbox, resolveKinematicCollisions } from "./solid-collision";
+export type {
+  BossAttackCycleEvent,
+  BossAttackCycleEventKind,
+  BossAttackCycleUpdateInput,
+  BossAttackCycleUpdateResult,
+  BossAttackSelector,
+} from "./boss-attacks";
+export type {
+  BossRuntimeDamageInput,
+  BossRuntimeDamageResult,
+  BossRuntimeState,
+  BossRuntimeTransitionInput,
+} from "./boss-state";
+export type {
+  BossProjectileRemoval,
+  BossProjectileRemovalKind,
+  BossProjectileRuntimeState,
+  CreateBossProjectileInput,
+  UpdateBossProjectilesInput,
+  UpdateBossProjectilesResult,
+} from "./boss-projectiles";
 export type {
   DashDirection,
   DashMovementConfig,

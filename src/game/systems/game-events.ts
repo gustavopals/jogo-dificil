@@ -22,6 +22,7 @@ export type DeathCause =
   | "trap"
   | "projectile"
   | "crusher"
+  | "boss"
   | "manual-restart"
   | "unknown";
 

@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   defineLevel,
   LEVEL_02,
+  type BossDefinition,
   type LevelDefinition,
 } from "../src/data/levels";
+import { transitionBossRuntimeState } from "../src/game/physics";
 import {
   absorbEnergyTarget,
   activateEnergyCore,
@@ -12,6 +14,7 @@ import {
   activateEnergySwitch,
   damageEnergyTarget,
   createInitialRoomState,
+  setRoomBossRuntimeState,
   updateRoomEnergyTargets,
 } from "../src/game/systems/room-state";
 import {
@@ -66,6 +69,87 @@ const LEVEL_WITH_ENERGY_TARGETS = defineLevel({
       hitGroupId: "boss-test",
     },
   ],
+} satisfies LevelDefinition);
+
+const MOVING_BOSS = {
+  id: "boss-test",
+  levelId: "level-02",
+  displayName: "Boss Test",
+  arena: {
+    x: 288,
+    y: 126,
+    width: 144,
+    height: 112,
+  },
+  spawn: {
+    x: 336,
+    y: 190,
+  },
+  initialFacing: "left",
+  health: 3,
+  hitbox: {
+    x: 320,
+    y: 158,
+    width: 32,
+    height: 64,
+  },
+  weakPoint: {
+    x: 320,
+    y: 158,
+    width: 32,
+    height: 64,
+  },
+  resetOnRespawn: true,
+  movement: {
+    kind: "anchor-swap",
+    anchors: [
+      {
+        x: 336,
+        y: 190,
+      },
+      {
+        x: 368,
+        y: 190,
+      },
+    ],
+  },
+  attacks: [
+    {
+      id: "boss-test-smoke-swap",
+      kind: "smoke-swap",
+      windupMs: 500,
+      activeMs: 220,
+      recoverMs: 800,
+      cooldownMs: 900,
+      contactDamage: 0,
+    },
+  ],
+  damageRules: [
+    {
+      power: "cyan-spark",
+      damage: 1,
+      validStates: ["recover"],
+      requiresWeakPoint: true,
+      oncePerAttack: false,
+      consumesHit: true,
+      effects: ["damage"],
+    },
+  ],
+  vulnerabilityWindows: [
+    {
+      id: "boss-test-recover",
+      state: "recover",
+      durationMs: 800,
+      weakPointActive: true,
+    },
+  ],
+  entryCheckpointId: "level-02-mid",
+  defeatUnlocks: ["level-02-exit-door"],
+} satisfies BossDefinition;
+
+const LEVEL_WITH_MOVING_BOSS_HURTBOX = defineLevel({
+  ...LEVEL_WITH_ENERGY_TARGETS,
+  bosses: [MOVING_BOSS],
 } satisfies LevelDefinition);
 
 describe("level energy targets", () => {
@@ -161,6 +245,39 @@ describe("level energy targets", () => {
       id: "test-boss-hurtbox",
       kind: "boss",
       area: LEVEL_WITH_ENERGY_TARGETS.energyTargets![2]!.area,
+    });
+  });
+
+  it("moves boss hurtbox collision targets with boss runtime position", () => {
+    const targets = getLevelEnergyTargets(LEVEL_WITH_MOVING_BOSS_HURTBOX);
+    const roomState = createInitialRoomState(LEVEL_WITH_MOVING_BOSS_HURTBOX);
+    const movedState = setRoomBossRuntimeState(
+      roomState,
+      transitionBossRuntimeState({
+        state: roomState.bosses["boss-test"]!,
+        nextState: "patrol",
+        position: {
+          x: MOVING_BOSS.spawn.x + 32,
+          y: MOVING_BOSS.spawn.y,
+        },
+      }),
+    );
+
+    expect(
+      getCyanSparkCollisionTargets(
+        targets,
+        movedState,
+        LEVEL_WITH_MOVING_BOSS_HURTBOX.bosses,
+      ),
+    ).toContainEqual({
+      id: "test-boss-hurtbox",
+      kind: "boss",
+      area: {
+        x: LEVEL_WITH_ENERGY_TARGETS.energyTargets![2]!.area.x + 32,
+        y: LEVEL_WITH_ENERGY_TARGETS.energyTargets![2]!.area.y,
+        width: LEVEL_WITH_ENERGY_TARGETS.energyTargets![2]!.area.width,
+        height: LEVEL_WITH_ENERGY_TARGETS.energyTargets![2]!.area.height,
+      },
     });
   });
 

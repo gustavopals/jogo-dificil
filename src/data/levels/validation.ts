@@ -2,14 +2,23 @@ import {
   DEFAULT_PLAYER_INITIAL_ENERGY,
   PLAYER_ENERGY_MAX,
   PLAYER_ENERGY_MIN,
+  type BossAttackDefinition,
+  type BossDamageRuleDefinition,
+  type BossDefinition,
+  type BossMovementDefinition,
+  type BossProjectileDefinition,
+  type BossVulnerabilityWindowDefinition,
+  type CheckpointDefinition,
   type EnergyPowerKind,
   type EnergyTargetDefinition,
+  type InteractiveObjectDefinition,
   type LevelDefinition,
 } from "../../shared";
 import type { RectLike, Vector2Like } from "../../shared";
 
 export type LevelValidationCode =
   | "duplicate-id"
+  | "invalid-boss"
   | "invalid-energy"
   | "invalid-energy-target"
   | "invalid-rect"
@@ -36,6 +45,7 @@ type ValidationIssueDraft = {
 
 const CYAN_SPARK_POWER: EnergyPowerKind = "cyan-spark";
 const CYAN_BURST_POWER: EnergyPowerKind = "cyan-burst";
+const BOSS_ARENA_ENTRY_CHECKPOINT_MAX_GAP_PX = 16 * 8;
 
 export function validateLevel(level: LevelDefinition): LevelValidationResult {
   const issues: ValidationIssueDraft[] = [];
@@ -52,6 +62,7 @@ export function validateLevel(level: LevelDefinition): LevelValidationResult {
   validateItems(level, issues);
   validateInteractiveObjects(level, issues);
   validateEnergyTargets(level, issues);
+  validateBosses(level, issues);
   validateReferencedAssets(level, issues);
 
   return createResult(issues);
@@ -120,6 +131,10 @@ function validateUniqueLevelEntityIds(
     ...(level.energyTargets ?? []).map((energyTarget, index) => ({
       id: energyTarget.id,
       path: `energyTargets[${index}].id`,
+    })),
+    ...(level.bosses ?? []).map((boss, index) => ({
+      id: boss.id,
+      path: `bosses[${index}].id`,
     })),
   ];
 
@@ -348,6 +363,482 @@ function validateEnergyTargets(
   });
 }
 
+function validateBosses(
+  level: LevelDefinition,
+  issues: ValidationIssueDraft[],
+): void {
+  const checkpointsById = new Map(
+    level.checkpoints.map((checkpoint) => [checkpoint.id, checkpoint]),
+  );
+  const interactiveObjectsById = new Map(
+    level.interactiveObjects.map((interactiveObject) => [
+      interactiveObject.id,
+      interactiveObject,
+    ]),
+  );
+
+  (level.bosses ?? []).forEach((boss, index) => {
+    const path = `bosses[${index}]`;
+
+    validateBossIdentity(path, boss, level, issues);
+    validateBossGeometry(path, boss, level, issues);
+    validateBossArenaCheckpoint(path, boss, checkpointsById, issues);
+    validateBossMovement(`${path}.movement`, boss.movement, boss.arena, issues);
+    validateBossAttacks(path, boss, issues);
+    validateBossDamageRules(path, boss.damageRules, issues);
+    validateBossVulnerabilityWindows(path, boss, issues);
+    validateBossArenaLock(path, boss, interactiveObjectsById, issues);
+    validateBossDefeatUnlocks(path, boss, interactiveObjectsById, issues);
+  });
+}
+
+function validateBossIdentity(
+  path: string,
+  boss: BossDefinition,
+  level: LevelDefinition,
+  issues: ValidationIssueDraft[],
+): void {
+  if (boss.levelId === level.id) {
+    return;
+  }
+
+  issues.push({
+    code: "invalid-boss",
+    path: `${path}.levelId`,
+    message: `Boss "${boss.id}" must declare levelId "${level.id}".`,
+  });
+}
+
+function validateBossGeometry(
+  path: string,
+  boss: BossDefinition,
+  level: LevelDefinition,
+  issues: ValidationIssueDraft[],
+): void {
+  validateRectInBounds(`${path}.arena`, boss.arena, level.bounds, issues);
+  validatePointInBounds(`${path}.spawn`, boss.spawn, level.bounds, issues);
+  validateBossPointInArena(`${path}.spawn`, boss.spawn, boss.arena, issues);
+  validateBossRectInArena(
+    `${path}.hitbox`,
+    boss.hitbox,
+    boss.arena,
+    level.bounds,
+    issues,
+  );
+  validateBossRectInArena(
+    `${path}.weakPoint`,
+    boss.weakPoint,
+    boss.arena,
+    level.bounds,
+    issues,
+  );
+
+  if (
+    isRectPositive(boss.hitbox) &&
+    isRectPositive(boss.weakPoint) &&
+    !isRectInsideRect(boss.weakPoint, boss.hitbox)
+  ) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.weakPoint`,
+      message: `Boss "${boss.id}" weakPoint must be inside its hitbox.`,
+    });
+  }
+
+  if (!isPositiveInteger(boss.health)) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.health`,
+      message: `Boss "${boss.id}" must have positive integer health.`,
+    });
+  }
+}
+
+function validateBossArenaCheckpoint(
+  path: string,
+  boss: BossDefinition,
+  checkpointsById: ReadonlyMap<string, CheckpointDefinition>,
+  issues: ValidationIssueDraft[],
+): void {
+  const checkpoint = checkpointsById.get(boss.entryCheckpointId);
+
+  if (!checkpoint) {
+    issues.push({
+      code: "missing-reference",
+      path: `${path}.entryCheckpointId`,
+      message: `Boss "${boss.id}" uses missing entry checkpoint "${boss.entryCheckpointId}".`,
+    });
+
+    return;
+  }
+
+  if (isCheckpointImmediatelyBeforeBossArena(checkpoint, boss.arena)) {
+    return;
+  }
+
+  issues.push({
+    code: "invalid-boss",
+    path: `${path}.entryCheckpointId`,
+    message: `Boss "${boss.id}" entry checkpoint "${checkpoint.id}" must be immediately before the arena entrance.`,
+  });
+}
+
+function validateBossMovement(
+  path: string,
+  movement: BossMovementDefinition,
+  arena: RectLike,
+  issues: ValidationIssueDraft[],
+): void {
+  if (
+    movement.speedPxPerSecond !== undefined &&
+    (!Number.isFinite(movement.speedPxPerSecond) ||
+      movement.speedPxPerSecond <= 0)
+  ) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.speedPxPerSecond`,
+      message: `Boss movement must use a positive speedPxPerSecond when declared.`,
+    });
+  }
+
+  if (movement.patrolArea) {
+    validateRect(`${path}.patrolArea`, movement.patrolArea, issues);
+
+    if (
+      isRectPositive(arena) &&
+      isRectPositive(movement.patrolArea) &&
+      !isRectInsideRect(movement.patrolArea, arena)
+    ) {
+      issues.push({
+        code: "invalid-boss",
+        path: `${path}.patrolArea`,
+        message: `Boss patrolArea must be inside its arena.`,
+      });
+    }
+  }
+
+  movement.anchors?.forEach((anchor, index) => {
+    validateBossPointInArena(
+      `${path}.anchors[${index}]`,
+      anchor,
+      arena,
+      issues,
+    );
+  });
+
+  if (
+    (movement.kind === "patrol" || movement.kind === "anchor-swap") &&
+    (movement.anchors?.length ?? 0) < 2 &&
+    movement.patrolArea === undefined
+  ) {
+    issues.push({
+      code: "invalid-boss",
+      path,
+      message: `Boss movement "${movement.kind}" must declare at least two anchors or a patrolArea.`,
+    });
+  }
+}
+
+function validateBossAttacks(
+  path: string,
+  boss: BossDefinition,
+  issues: ValidationIssueDraft[],
+): void {
+  if (boss.attacks.length === 0) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.attacks`,
+      message: `Boss "${boss.id}" must declare at least one attack.`,
+    });
+  }
+
+  validateScopedIds(
+    boss.attacks.map((attack, index) => ({
+      id: attack.id,
+      path: `${path}.attacks[${index}].id`,
+    })),
+    issues,
+  );
+
+  const vulnerabilityWindowIds = new Set(
+    boss.vulnerabilityWindows.map((window) => window.id),
+  );
+
+  boss.attacks.forEach((attack, index) => {
+    validateBossAttack(
+      `${path}.attacks[${index}]`,
+      boss,
+      attack,
+      vulnerabilityWindowIds,
+      issues,
+    );
+  });
+}
+
+function validateBossAttack(
+  path: string,
+  boss: BossDefinition,
+  attack: BossAttackDefinition,
+  vulnerabilityWindowIds: ReadonlySet<string>,
+  issues: ValidationIssueDraft[],
+): void {
+  validatePositiveInteger(`${path}.windupMs`, attack.windupMs, issues);
+  validatePositiveInteger(`${path}.activeMs`, attack.activeMs, issues);
+  validatePositiveInteger(`${path}.recoverMs`, attack.recoverMs, issues);
+  validatePositiveInteger(`${path}.cooldownMs`, attack.cooldownMs, issues);
+
+  if (!isNonNegativeInteger(attack.contactDamage)) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.contactDamage`,
+      message: `Boss attack "${attack.id}" must use non-negative integer contactDamage.`,
+    });
+  }
+
+  if (attack.tellArea) {
+    validateBossRectInsideArena(
+      `${path}.tellArea`,
+      attack.tellArea,
+      boss.arena,
+      issues,
+    );
+  }
+
+  if (attack.hitbox) {
+    validateBossRectInsideArena(
+      `${path}.hitbox`,
+      attack.hitbox,
+      boss.arena,
+      issues,
+    );
+  }
+
+  if (attack.projectile) {
+    validateBossProjectile(
+      `${path}.projectile`,
+      attack,
+      attack.projectile,
+      issues,
+    );
+  }
+
+  if (
+    attack.opensVulnerabilityWindowId &&
+    !vulnerabilityWindowIds.has(attack.opensVulnerabilityWindowId)
+  ) {
+    issues.push({
+      code: "missing-reference",
+      path: `${path}.opensVulnerabilityWindowId`,
+      message: `Boss attack "${attack.id}" opens missing vulnerability window "${attack.opensVulnerabilityWindowId}".`,
+    });
+  }
+}
+
+function validateBossProjectile(
+  path: string,
+  attack: BossAttackDefinition,
+  projectile: BossProjectileDefinition,
+  issues: ValidationIssueDraft[],
+): void {
+  validateRect(`${path}.hitbox`, projectile.hitbox, issues);
+
+  if (
+    !isFiniteVector(projectile.velocity) ||
+    isZeroVector(projectile.velocity)
+  ) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.velocity`,
+      message: `Boss attack "${attack.id}" projectile must use a finite non-zero velocity.`,
+    });
+  }
+
+  validatePositiveInteger(`${path}.maxActive`, projectile.maxActive, issues);
+
+  if (projectile.maxRangePx !== undefined) {
+    validatePositiveInteger(
+      `${path}.maxRangePx`,
+      projectile.maxRangePx,
+      issues,
+    );
+  }
+
+  if (
+    projectile.isDestructibleBy !== undefined &&
+    projectile.isDestructibleBy.length === 0
+  ) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.isDestructibleBy`,
+      message: `Boss attack "${attack.id}" projectile destructible powers cannot be empty when declared.`,
+    });
+  }
+}
+
+function validateBossDamageRules(
+  path: string,
+  damageRules: readonly BossDamageRuleDefinition[],
+  issues: ValidationIssueDraft[],
+): void {
+  if (damageRules.length === 0) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.damageRules`,
+      message: `Boss must declare at least one damage rule.`,
+    });
+  }
+
+  damageRules.forEach((rule, index) => {
+    const rulePath = `${path}.damageRules[${index}]`;
+
+    if (!isNonNegativeInteger(rule.damage)) {
+      issues.push({
+        code: "invalid-boss",
+        path: `${rulePath}.damage`,
+        message: `Boss damage rule for "${rule.power}" must use non-negative integer damage.`,
+      });
+    }
+
+    if (rule.validStates.length === 0) {
+      issues.push({
+        code: "invalid-boss",
+        path: `${rulePath}.validStates`,
+        message: `Boss damage rule for "${rule.power}" must declare at least one valid state.`,
+      });
+    }
+
+    if (rule.effects.length === 0) {
+      issues.push({
+        code: "invalid-boss",
+        path: `${rulePath}.effects`,
+        message: `Boss damage rule for "${rule.power}" must declare at least one effect.`,
+      });
+    }
+
+    if (rule.damage > 0 && !rule.effects.includes("damage")) {
+      issues.push({
+        code: "invalid-boss",
+        path: `${rulePath}.effects`,
+        message: `Boss damage rule for "${rule.power}" must include "damage" when damage is positive.`,
+      });
+    }
+  });
+}
+
+function validateBossVulnerabilityWindows(
+  path: string,
+  boss: BossDefinition,
+  issues: ValidationIssueDraft[],
+): void {
+  if (boss.vulnerabilityWindows.length === 0) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.vulnerabilityWindows`,
+      message: `Boss "${boss.id}" must declare at least one vulnerability window.`,
+    });
+  }
+
+  validateScopedIds(
+    boss.vulnerabilityWindows.map((window, index) => ({
+      id: window.id,
+      path: `${path}.vulnerabilityWindows[${index}].id`,
+    })),
+    issues,
+  );
+
+  const attackIds = new Set(boss.attacks.map((attack) => attack.id));
+
+  boss.vulnerabilityWindows.forEach((window, index) => {
+    validateBossVulnerabilityWindow(
+      `${path}.vulnerabilityWindows[${index}]`,
+      boss,
+      window,
+      attackIds,
+      issues,
+    );
+  });
+}
+
+function validateBossVulnerabilityWindow(
+  path: string,
+  boss: BossDefinition,
+  window: BossVulnerabilityWindowDefinition,
+  attackIds: ReadonlySet<string>,
+  issues: ValidationIssueDraft[],
+): void {
+  validatePositiveInteger(`${path}.durationMs`, window.durationMs, issues);
+
+  window.opensAfterAttackIds?.forEach((attackId, index) => {
+    if (attackIds.has(attackId)) {
+      return;
+    }
+
+    issues.push({
+      code: "missing-reference",
+      path: `${path}.opensAfterAttackIds[${index}]`,
+      message: `Boss "${boss.id}" vulnerability window "${window.id}" references missing attack "${attackId}".`,
+    });
+  });
+}
+
+function validateBossDefeatUnlocks(
+  path: string,
+  boss: BossDefinition,
+  interactiveObjectsById: ReadonlyMap<string, InteractiveObjectDefinition>,
+  issues: ValidationIssueDraft[],
+): void {
+  if (boss.defeatUnlocks.length === 0) {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.defeatUnlocks`,
+      message: `Boss "${boss.id}" must unlock at least one interactive object on defeat.`,
+    });
+  }
+
+  boss.defeatUnlocks.forEach((unlockId, index) => {
+    if (interactiveObjectsById.has(unlockId)) {
+      return;
+    }
+
+    issues.push({
+      code: "missing-reference",
+      path: `${path}.defeatUnlocks[${index}]`,
+      message: `Boss "${boss.id}" unlocks missing interactive object "${unlockId}".`,
+    });
+  });
+}
+
+function validateBossArenaLock(
+  path: string,
+  boss: BossDefinition,
+  interactiveObjectsById: ReadonlyMap<string, InteractiveObjectDefinition>,
+  issues: ValidationIssueDraft[],
+): void {
+  if (!boss.entryDoorId) {
+    return;
+  }
+
+  const entryDoor = interactiveObjectsById.get(boss.entryDoorId);
+
+  if (!entryDoor) {
+    issues.push({
+      code: "missing-reference",
+      path: `${path}.entryDoorId`,
+      message: `Boss "${boss.id}" uses missing entry door "${boss.entryDoorId}".`,
+    });
+
+    return;
+  }
+
+  if (entryDoor.kind !== "door") {
+    issues.push({
+      code: "invalid-boss",
+      path: `${path}.entryDoorId`,
+      message: `Boss "${boss.id}" entryDoorId must reference a door interactive object.`,
+    });
+  }
+}
+
 function validateReferencedAssets(
   level: LevelDefinition,
   issues: ValidationIssueDraft[],
@@ -372,6 +863,17 @@ function validateReferencedAssets(
       pushMissingAssetIssue(
         `items[${index}].assetId`,
         item.assetId,
+        "assets.sprites",
+        issues,
+      );
+    }
+  });
+
+  (level.bosses ?? []).forEach((boss, index) => {
+    if (boss.assetId && !sprites.has(boss.assetId)) {
+      pushMissingAssetIssue(
+        `bosses[${index}].assetId`,
+        boss.assetId,
         "assets.sprites",
         issues,
       );
@@ -563,6 +1065,92 @@ function validateRectInBounds(
   });
 }
 
+function validateBossRectInArena(
+  path: string,
+  rect: RectLike,
+  arena: RectLike,
+  bounds: RectLike,
+  issues: ValidationIssueDraft[],
+): void {
+  validateRectInBounds(path, rect, bounds, issues);
+
+  if (
+    !isRectPositive(arena) ||
+    !isRectPositive(rect) ||
+    isRectInsideRect(rect, arena)
+  ) {
+    return;
+  }
+
+  issues.push({
+    code: "invalid-boss",
+    path,
+    message: `${path} must be inside boss arena.`,
+  });
+}
+
+function validateBossRectInsideArena(
+  path: string,
+  rect: RectLike,
+  arena: RectLike,
+  issues: ValidationIssueDraft[],
+): void {
+  validateRect(path, rect, issues);
+
+  if (
+    !isRectPositive(arena) ||
+    !isRectPositive(rect) ||
+    isRectInsideRect(rect, arena)
+  ) {
+    return;
+  }
+
+  issues.push({
+    code: "invalid-boss",
+    path,
+    message: `${path} must be inside boss arena.`,
+  });
+}
+
+function validateBossPointInArena(
+  path: string,
+  point: Vector2Like,
+  arena: RectLike,
+  issues: ValidationIssueDraft[],
+): void {
+  if (!isRectPositive(arena) || isPointInRect(point, arena)) {
+    return;
+  }
+
+  issues.push({
+    code: "invalid-boss",
+    path,
+    message: `${path} must be inside boss arena.`,
+  });
+}
+
+function isCheckpointImmediatelyBeforeBossArena(
+  checkpoint: CheckpointDefinition,
+  arena: RectLike,
+): boolean {
+  if (!isRectPositive(checkpoint.area) || !isRectPositive(arena)) {
+    return true;
+  }
+
+  const checkpointRight = checkpoint.area.x + checkpoint.area.width;
+  const horizontalGap = arena.x - checkpointRight;
+
+  return (
+    horizontalGap >= 0 &&
+    horizontalGap <= BOSS_ARENA_ENTRY_CHECKPOINT_MAX_GAP_PX &&
+    rectsOverlapVertically(checkpoint.area, arena)
+  );
+}
+
+function rectsOverlapVertically(a: RectLike, b: RectLike): boolean {
+  return a.y < b.y + b.height && a.y + a.height > b.y;
+}
+
 function validateRect(
   path: string,
   rect: RectLike,
@@ -576,6 +1164,45 @@ function validateRect(
     code: "invalid-rect",
     path,
     message: `${path} must have positive width and height.`,
+  });
+}
+
+function validatePositiveInteger(
+  path: string,
+  value: number,
+  issues: ValidationIssueDraft[],
+): void {
+  if (isPositiveInteger(value)) {
+    return;
+  }
+
+  issues.push({
+    code: "invalid-boss",
+    path,
+    message: `${path} must be a positive integer.`,
+  });
+}
+
+function validateScopedIds(
+  entries: readonly { readonly id: string; readonly path: string }[],
+  issues: ValidationIssueDraft[],
+): void {
+  const seenIds = new Map<string, string>();
+
+  entries.forEach(({ id, path }) => {
+    const firstPath = seenIds.get(id);
+
+    if (firstPath) {
+      issues.push({
+        code: "duplicate-id",
+        path,
+        message: `Id "${id}" duplicates ${firstPath}.`,
+      });
+
+      return;
+    }
+
+    seenIds.set(id, path);
   });
 }
 
@@ -610,6 +1237,14 @@ function isPointInRect(point: Vector2Like, rect: RectLike): boolean {
   );
 }
 
+function isFiniteVector(vector: Vector2Like): boolean {
+  return Number.isFinite(vector.x) && Number.isFinite(vector.y);
+}
+
+function isZeroVector(vector: Vector2Like): boolean {
+  return vector.x === 0 && vector.y === 0;
+}
+
 function isRectInsideRect(rect: RectLike, bounds: RectLike): boolean {
   return (
     rect.x >= bounds.x &&
@@ -625,4 +1260,8 @@ function isRectPositive(rect: RectLike): boolean {
 
 function isPositiveInteger(value: number): boolean {
   return Number.isInteger(value) && value > 0;
+}
+
+function isNonNegativeInteger(value: number): boolean {
+  return Number.isInteger(value) && value >= 0;
 }

@@ -1,6 +1,7 @@
 import type { RectLike, TrapDefinition, Vector2Like } from "../../shared";
 import { GAMEPLAY_SPRITE_KEYS, type GameplaySpriteKey } from "../../data/art";
 import type { RoomRuntimeState, TrapRuntimeState } from "./room-state";
+import { VISUAL_READABILITY_SEMANTIC_COLORS } from "./visual-readability";
 
 export type TriggeredTrap = {
   readonly trap: TrapDefinition;
@@ -42,10 +43,10 @@ export type ProjectileTrailFeedback = {
 };
 
 const TRAP_BODY_COLORS = {
-  "false-block": 0xf4d35e,
-  "falling-platform": 0x80d7c2,
-  "spike-pop": 0xe76f51,
-  projectile: 0x9b5de5,
+  "false-block": VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+  "falling-platform": VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+  "spike-pop": VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger,
+  projectile: VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
   "breakable-floor": 0xf4a261,
 } as const satisfies Record<TrapDefinition["kind"], number>;
 
@@ -58,14 +59,14 @@ const TRAP_BODY_TEXTURE_KEYS = {
 } as const satisfies Record<TrapDefinition["kind"], GameplaySpriteKey>;
 
 const TRAP_TELL_COLORS = {
-  "false-block": 0x9b5de5,
-  "falling-platform": 0x80d7c2,
-  "spike-pop": 0xe35d6a,
-  projectile: 0x9b5de5,
-  "breakable-floor": 0xe35d6a,
+  "false-block": VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+  "falling-platform": VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+  "spike-pop": VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger,
+  projectile: VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+  "breakable-floor": VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger,
 } as const satisfies Record<TrapDefinition["kind"], number>;
 
-const PROJECTILE_TRAIL_COLOR = 0x9b5de5;
+const PROJECTILE_TRAIL_COLOR = VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary;
 const PROJECTILE_TRAIL_ALPHA = 0.42;
 const PROJECTILE_TRAIL_MIN_LENGTH_PX = 14;
 const PROJECTILE_TRAIL_THICKNESS_PX = 3;
@@ -106,9 +107,15 @@ export function getTrapFeedback(
   return {
     visual: {
       state: visualState,
-      triggerColor: visualState === "armed" ? 0x9b5de5 : 0xf4d35e,
+      triggerColor:
+        visualState === "armed"
+          ? VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary
+          : VISUAL_READABILITY_SEMANTIC_COLORS.trap.triggered,
       triggerAlpha: visualState === "armed" ? 0.08 : 0.24,
-      triggerStrokeColor: visualState === "armed" ? 0xd5dae6 : 0xf4d35e,
+      triggerStrokeColor:
+        visualState === "armed"
+          ? 0xd5dae6
+          : VISUAL_READABILITY_SEMANTIC_COLORS.trap.triggered,
       triggerStrokeAlpha: visualState === "armed" ? 0.28 : 0.75,
       bodyColor: TRAP_BODY_COLORS[trap.kind],
       bodyAlpha: getTrapBodyAlpha(trap, visualState),
@@ -116,7 +123,7 @@ export function getTrapFeedback(
       tellColor: TRAP_TELL_COLORS[trap.kind],
       tellAlpha: getTrapTellAlpha(trap, visualState),
       tellStrokeAlpha: getTrapTellStrokeAlpha(trap, visualState),
-      crackColor: 0xe35d6a,
+      crackColor: VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger,
       crackAlpha: getTrapCrackAlpha(trap, visualState),
     },
     audio: {
@@ -214,7 +221,9 @@ function getTrapBodyTint(
   visualState: TrapVisualState,
 ): number {
   if (visualState === "resolved") {
-    return trap.kind === "breakable-floor" ? 0xe35d6a : 0x3f4958;
+    return trap.kind === "breakable-floor"
+      ? VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger
+      : VISUAL_READABILITY_SEMANTIC_COLORS.trap.resolved;
   }
 
   if (visualState === "triggered") {

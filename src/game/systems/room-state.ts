@@ -1,4 +1,5 @@
 import type {
+  BossId,
   EnergyTargetDefinition,
   EnergyTargetId,
   EnergyTargetKind,
@@ -13,6 +14,11 @@ import type {
   TrapKind,
   Vector2Like,
 } from "../../shared";
+import {
+  createInitialBossRuntimeState,
+  type BossRuntimeState,
+} from "../physics/boss-state";
+import type { BossProjectileRuntimeState } from "../physics/boss-projectiles";
 
 export type ProjectileSourceId = TrapId | HazardId | InteractiveObjectId;
 
@@ -70,6 +76,7 @@ export type EnergyTargetRuntimeState = {
 export type RoomRuntimeState = {
   readonly traps: Readonly<Record<TrapId, TrapRuntimeState>>;
   readonly projectiles: readonly ProjectileRuntimeState[];
+  readonly bossProjectiles: readonly BossProjectileRuntimeState[];
   readonly movingPlatforms: Readonly<
     Record<TrapId, MovingPlatformRuntimeState>
   >;
@@ -80,6 +87,7 @@ export type RoomRuntimeState = {
   readonly energyTargets: Readonly<
     Record<EnergyTargetId, EnergyTargetRuntimeState>
   >;
+  readonly bosses: Readonly<Record<BossId, BossRuntimeState>>;
 };
 
 export function createInitialRoomState(
@@ -90,6 +98,7 @@ export function createInitialRoomState(
       level.traps.map((trap) => [trap.id, createInitialTrapState(trap)]),
     ),
     projectiles: [],
+    bossProjectiles: [],
     movingPlatforms: Object.fromEntries(
       level.traps.flatMap((trap) => {
         if (trap.kind !== "falling-platform" || !trap.area) {
@@ -123,6 +132,12 @@ export function createInitialRoomState(
         createInitialEnergyTargetState(energyTarget),
       ]),
     ),
+    bosses: Object.fromEntries(
+      (level.bosses ?? []).map((boss) => [
+        boss.id,
+        createInitialBossRuntimeState(boss),
+      ]),
+    ),
   };
 }
 
@@ -135,10 +150,12 @@ export function resetRoomStateForRespawn(
   return {
     traps: resetTrapStates(state, initialState),
     projectiles: [],
+    bossProjectiles: [],
     movingPlatforms: resetMovingPlatformStates(state, initialState),
     items: resetItemStates(state, initialState),
     interactiveObjects: resetInteractiveObjectStates(state, initialState),
     energyTargets: resetEnergyTargetStates(state, initialState),
+    bosses: resetBossStates(state, initialState),
   };
 }
 
@@ -216,6 +233,30 @@ export function spawnRoomProjectile(
   return {
     ...state,
     projectiles: [...state.projectiles, projectile],
+  };
+}
+
+export function spawnRoomBossProjectile(
+  state: RoomRuntimeState,
+  projectile: BossProjectileRuntimeState,
+): RoomRuntimeState {
+  return {
+    ...state,
+    bossProjectiles: [...state.bossProjectiles, projectile],
+  };
+}
+
+export function setRoomBossProjectiles(
+  state: RoomRuntimeState,
+  bossProjectiles: readonly BossProjectileRuntimeState[],
+): RoomRuntimeState {
+  if (state.bossProjectiles === bossProjectiles) {
+    return state;
+  }
+
+  return {
+    ...state,
+    bossProjectiles,
   };
 }
 
@@ -582,6 +623,23 @@ export function damageEnergyTarget(
   };
 }
 
+export function setRoomBossRuntimeState(
+  state: RoomRuntimeState,
+  bossState: BossRuntimeState,
+): RoomRuntimeState {
+  if (!state.bosses[bossState.id]) {
+    return state;
+  }
+
+  return {
+    ...state,
+    bosses: {
+      ...state.bosses,
+      [bossState.id]: bossState,
+    },
+  };
+}
+
 function setInteractiveObjectInRecordActive(
   interactiveObjects: RoomRuntimeState["interactiveObjects"],
   objectId: InteractiveObjectId,
@@ -766,5 +824,23 @@ function resetEnergyTargetStates(
         ];
       },
     ),
+  );
+}
+
+function resetBossStates(
+  state: RoomRuntimeState,
+  initialState: RoomRuntimeState,
+): RoomRuntimeState["bosses"] {
+  return Object.fromEntries(
+    Object.entries(initialState.bosses).map(([bossId, initialBossState]) => {
+      const currentBossState = state.bosses[bossId];
+
+      return [
+        bossId,
+        currentBossState?.resetOnRespawn === false
+          ? currentBossState
+          : initialBossState,
+      ];
+    }),
   );
 }

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
 import {
+  BOSS_AUDIO_DEFINITIONS,
   ENERGY_AUDIO_DEFINITIONS,
   LEVEL_AUDIO_DEFINITIONS,
   LEVEL_AUDIO_IDS,
@@ -117,6 +118,7 @@ function getInitialAudioDefinitions(): readonly AudioDefinition[] {
     ...PLAYER_AUDIO_DEFINITIONS,
     ...LEVEL_AUDIO_DEFINITIONS,
     ...ENERGY_AUDIO_DEFINITIONS,
+    ...BOSS_AUDIO_DEFINITIONS,
     ...MUSIC_AUDIO_DEFINITIONS,
   ];
 

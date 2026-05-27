@@ -4,8 +4,14 @@ import {
   defineLevel,
   LEVEL_02,
   LEVEL_03,
+  type BossDefinition,
   type LevelDefinition,
 } from "../src/data/levels";
+import {
+  applyBossRuntimeDamage,
+  type BossProjectileRuntimeState,
+  transitionBossRuntimeState,
+} from "../src/game/physics";
 import {
   absorbEnergyTarget,
   activateEnergyCore,
@@ -18,6 +24,8 @@ import {
   resetRoomStateForRespawn,
   setInteractiveObjectActive,
   setMovingPlatformFalling,
+  setRoomBossRuntimeState,
+  spawnRoomBossProjectile,
   spawnRoomProjectile,
   updateRoomEnergyTargets,
 } from "../src/game/systems/room-state";
@@ -49,27 +57,138 @@ const LEVEL_WITH_REQUIRED_ITEM = defineLevel({
   },
 } satisfies LevelDefinition);
 
+const RESETTABLE_BOSS = {
+  id: "test-resettable-boss",
+  levelId: "level-02",
+  displayName: "Boss Resetavel",
+  arena: {
+    x: 256,
+    y: 126,
+    width: 176,
+    height: 112,
+  },
+  spawn: {
+    x: 352,
+    y: 190,
+  },
+  initialFacing: "left",
+  health: 3,
+  hitbox: {
+    x: 336,
+    y: 160,
+    width: 34,
+    height: 62,
+  },
+  weakPoint: {
+    x: 344,
+    y: 176,
+    width: 16,
+    height: 16,
+  },
+  resetOnRespawn: true,
+  movement: {
+    kind: "patrol",
+    speedPxPerSecond: 40,
+    anchors: [
+      {
+        x: 304,
+        y: 190,
+      },
+      {
+        x: 400,
+        y: 190,
+      },
+    ],
+  },
+  attacks: [
+    {
+      id: "test-boss-smoke",
+      kind: "smoke-puff",
+      windupMs: 500,
+      activeMs: 600,
+      recoverMs: 800,
+      cooldownMs: 900,
+      contactDamage: 1,
+      opensVulnerabilityWindowId: "test-boss-recover",
+    },
+  ],
+  damageRules: [
+    {
+      power: "cyan-spark",
+      damage: 1,
+      validStates: ["recover"],
+      requiresWeakPoint: true,
+      oncePerAttack: false,
+      consumesHit: true,
+      effects: ["damage"],
+    },
+  ],
+  vulnerabilityWindows: [
+    {
+      id: "test-boss-recover",
+      state: "recover",
+      durationMs: 800,
+      weakPointActive: true,
+      opensAfterAttackIds: ["test-boss-smoke"],
+    },
+  ],
+  entryCheckpointId: "level-02-mid",
+  defeatUnlocks: ["level-02-exit-door"],
+} satisfies BossDefinition;
+
+const PERSISTENT_BOSS = {
+  ...RESETTABLE_BOSS,
+  id: "test-persistent-boss",
+  resetOnRespawn: false,
+} satisfies BossDefinition;
+
+const BOSS_PROJECTILE = {
+  id: "test-boss-projectile",
+  bossId: "test-resettable-boss",
+  attackId: "test-boss-smoke",
+  position: {
+    x: 352,
+    y: 190,
+  },
+  velocity: {
+    x: -80,
+    y: 0,
+  },
+  hitbox: {
+    x: -7,
+    y: -7,
+    width: 14,
+    height: 14,
+  },
+  distanceTraveled: 0,
+  maxRangePx: 128,
+  isDestructibleBy: ["cyan-spark"],
+} satisfies BossProjectileRuntimeState;
+
 describe("room state", () => {
-  it("resets traps, projectiles, falling platforms and interactive objects", () => {
+  it("resets traps, trap projectiles, boss projectiles, falling platforms and interactive objects", () => {
     const initialState = createInitialRoomState(LEVEL_02);
     const changedState = setInteractiveObjectActive(
-      spawnRoomProjectile(
-        setMovingPlatformFalling(
-          markTrapTriggered(initialState, "level-02-falling-platform"),
-          "level-02-falling-platform",
+      spawnRoomBossProjectile(
+        spawnRoomProjectile(
+          setMovingPlatformFalling(
+            markTrapTriggered(initialState, "level-02-falling-platform"),
+            "level-02-falling-platform",
+          ),
+          {
+            id: "test-projectile",
+            sourceId: "level-02-falling-platform",
+            position: {
+              x: 120,
+              y: 160,
+            },
+            velocity: {
+              x: 80,
+              y: 0,
+            },
+          },
         ),
-        {
-          id: "test-projectile",
-          sourceId: "level-02-falling-platform",
-          position: {
-            x: 120,
-            y: 160,
-          },
-          velocity: {
-            x: 80,
-            y: 0,
-          },
-        },
+        BOSS_PROJECTILE,
       ),
       "level-02-lever-exit",
       true,
@@ -77,11 +196,14 @@ describe("room state", () => {
 
     const resetState = resetRoomStateForRespawn(changedState, LEVEL_02);
 
+    expect(changedState.projectiles).toHaveLength(1);
+    expect(changedState.bossProjectiles).toEqual([BOSS_PROJECTILE]);
     expect(resetState.traps["level-02-falling-platform"]).toMatchObject({
       isTriggered: false,
       isResolved: false,
     });
     expect(resetState.projectiles).toEqual([]);
+    expect(resetState.bossProjectiles).toEqual([]);
     expect(
       resetState.movingPlatforms["level-02-falling-platform"],
     ).toMatchObject({
@@ -114,6 +236,201 @@ describe("room state", () => {
       isCollected: false,
       isAvailable: true,
     });
+  });
+
+  it("tracks bosses in room state and resets them on respawn or manual restart", () => {
+    const levelWithBoss = defineLevel({
+      ...LEVEL_02,
+      bosses: [RESETTABLE_BOSS],
+    } satisfies LevelDefinition);
+    const initialState = createInitialRoomState(levelWithBoss);
+    const attackingBoss = transitionBossRuntimeState({
+      state: initialState.bosses["test-resettable-boss"]!,
+      nextState: "recover",
+      durationMs: 800,
+      attackCooldownMs: 300,
+      activeAttackId: "test-boss-smoke",
+      activeVulnerabilityWindowId: "test-boss-recover",
+    });
+    const damagedBoss = applyBossRuntimeDamage({
+      state: attackingBoss,
+      damage: 1,
+      invulnerabilityMs: 650,
+      stunMs: 250,
+      damageHitLockKey: "cyan-burst:test-reset-lock",
+    }).state;
+    const changedState = setRoomBossRuntimeState(initialState, damagedBoss);
+    const resetState = resetRoomStateForRespawn(changedState, levelWithBoss);
+
+    expect(initialState.bosses["test-resettable-boss"]).toMatchObject({
+      id: "test-resettable-boss",
+      health: 3,
+      healthRemaining: 3,
+      state: "inactive",
+      facing: "left",
+      resetOnRespawn: true,
+    });
+    expect(changedState.bosses["test-resettable-boss"]).toMatchObject({
+      healthRemaining: 2,
+      state: "stunned",
+      stateRemainingMs: 250,
+      invulnerabilityRemainingMs: 650,
+      damageHitLockKeys: ["cyan-burst:test-reset-lock"],
+    });
+    expect(resetState.bosses["test-resettable-boss"]).toMatchObject({
+      healthRemaining: 3,
+      state: "inactive",
+      stateElapsedMs: 0,
+      stateRemainingMs: 0,
+      attackCooldownRemainingMs: 0,
+      invulnerabilityRemainingMs: 0,
+      damageHitLockKeys: [],
+    });
+    expect(resetState.bosses["test-resettable-boss"]!.activeAttackId).toBe(
+      undefined,
+    );
+    expect(
+      resetState.bosses["test-resettable-boss"]!.activeVulnerabilityWindowId,
+    ).toBe(undefined);
+  });
+
+  it("preserves bosses that explicitly opt out of respawn reset", () => {
+    const levelWithBoss = defineLevel({
+      ...LEVEL_02,
+      bosses: [PERSISTENT_BOSS],
+    } satisfies LevelDefinition);
+    const initialState = createInitialRoomState(levelWithBoss);
+    const defeatedBoss = applyBossRuntimeDamage({
+      state: {
+        ...initialState.bosses["test-persistent-boss"]!,
+        state: "recover",
+        healthRemaining: 1,
+      },
+      damage: 1,
+      invulnerabilityMs: 650,
+    }).state;
+    const changedState = setRoomBossRuntimeState(initialState, defeatedBoss);
+    const resetState = resetRoomStateForRespawn(changedState, levelWithBoss);
+
+    expect(resetState.bosses["test-persistent-boss"]).toMatchObject({
+      healthRemaining: 0,
+      state: "defeated",
+      resetOnRespawn: false,
+    });
+  });
+
+  it("resets mixed shared boss state independently for each boss", () => {
+    const levelWithBosses = defineLevel({
+      ...LEVEL_02,
+      bosses: [RESETTABLE_BOSS, PERSISTENT_BOSS],
+    } satisfies LevelDefinition);
+    const initialState = createInitialRoomState(levelWithBosses);
+    const damagedResettableBoss = applyBossRuntimeDamage({
+      state: {
+        ...initialState.bosses["test-resettable-boss"]!,
+        state: "recover",
+        healthRemaining: 2,
+        activeAttackId: "test-boss-smoke",
+        activeVulnerabilityWindowId: "test-boss-recover",
+      },
+      damage: 1,
+      invulnerabilityMs: 650,
+      stunMs: 250,
+      damageHitLockKey: "cyan-burst:shared-resettable",
+    }).state;
+    const defeatedPersistentBoss = applyBossRuntimeDamage({
+      state: {
+        ...initialState.bosses["test-persistent-boss"]!,
+        state: "recover",
+        healthRemaining: 1,
+        activeAttackId: "test-boss-smoke",
+        activeVulnerabilityWindowId: "test-boss-recover",
+      },
+      damage: 1,
+      invulnerabilityMs: 650,
+      stunMs: 250,
+      damageHitLockKey: "cyan-burst:shared-persistent",
+    }).state;
+    const changedState = setRoomBossRuntimeState(
+      setRoomBossRuntimeState(initialState, damagedResettableBoss),
+      defeatedPersistentBoss,
+    );
+    const resetState = resetRoomStateForRespawn(changedState, levelWithBosses);
+
+    expect(Object.keys(initialState.bosses)).toEqual([
+      "test-resettable-boss",
+      "test-persistent-boss",
+    ]);
+    expect(changedState.bosses["test-resettable-boss"]).toMatchObject({
+      state: "stunned",
+      healthRemaining: 1,
+      damageHitLockKeys: ["cyan-burst:shared-resettable"],
+    });
+    expect(changedState.bosses["test-persistent-boss"]).toMatchObject({
+      state: "defeated",
+      healthRemaining: 0,
+      damageHitLockKeys: ["cyan-burst:shared-persistent"],
+    });
+    expect(resetState.bosses["test-resettable-boss"]).toMatchObject({
+      state: "inactive",
+      healthRemaining: 3,
+      damageHitLockKeys: [],
+      resetOnRespawn: true,
+    });
+    expect(resetState.bosses["test-persistent-boss"]).toMatchObject({
+      state: "defeated",
+      healthRemaining: 0,
+      damageHitLockKeys: ["cyan-burst:shared-persistent"],
+      resetOnRespawn: false,
+    });
+  });
+
+  it("keeps boss runtime updates isolated from trap and boss projectile collections", () => {
+    const levelWithBoss = defineLevel({
+      ...LEVEL_02,
+      bosses: [RESETTABLE_BOSS],
+    } satisfies LevelDefinition);
+    const trapProjectile = {
+      id: "test-trap-projectile",
+      sourceId: "level-02-falling-platform",
+      position: {
+        x: 120,
+        y: 160,
+      },
+      velocity: {
+        x: 80,
+        y: 0,
+      },
+    };
+    const stateWithProjectiles = spawnRoomBossProjectile(
+      spawnRoomProjectile(
+        createInitialRoomState(levelWithBoss),
+        trapProjectile,
+      ),
+      BOSS_PROJECTILE,
+    );
+    const attackingBoss = transitionBossRuntimeState({
+      state: stateWithProjectiles.bosses["test-resettable-boss"]!,
+      nextState: "attack",
+      durationMs: 600,
+      attackCooldownMs: 900,
+      activeAttackId: "test-boss-smoke",
+    });
+    const changedState = setRoomBossRuntimeState(
+      stateWithProjectiles,
+      attackingBoss,
+    );
+
+    expect(changedState.bosses["test-resettable-boss"]).toMatchObject({
+      state: "attack",
+      activeAttackId: "test-boss-smoke",
+    });
+    expect(changedState.projectiles).toEqual([trapProjectile]);
+    expect(changedState.bossProjectiles).toEqual([BOSS_PROJECTILE]);
+    expect(changedState.projectiles).toBe(stateWithProjectiles.projectiles);
+    expect(changedState.bossProjectiles).toBe(
+      stateWithProjectiles.bossProjectiles,
+    );
   });
 
   it("tracks energy target damage, cracked blocks and respawn reset", () => {

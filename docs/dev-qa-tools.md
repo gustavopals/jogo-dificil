@@ -24,6 +24,20 @@ Iniciar uma fase especifica:
 window.__JOGO_DIFICIL_QA__.startLevel("level-04");
 ```
 
+Listar bosses com atalho direto:
+
+```js
+window.__JOGO_DIFICIL_QA__.bosses;
+```
+
+Iniciar direto no checkpoint de entrada de um boss:
+
+```js
+window.__JOGO_DIFICIL_QA__.startBoss("boss-hirolito-narguilito");
+window.__JOGO_DIFICIL_QA__.startBoss("boss-dr-imports");
+window.__JOGO_DIFICIL_QA__.startBoss("boss-giga-fabio");
+```
+
 Mover o jogador para o primeiro checkpoint da fase atual:
 
 ```js
@@ -82,6 +96,8 @@ O snapshot inclui:
 ## Uso Recomendado
 
 - Para testar o Bloco 2, iniciar direto com `startLevel("level-04")`.
+- Para revisar bosses, usar `startBoss(...)` em vez de iniciar a fase e mover
+  manualmente para o checkpoint da arena.
 - Para revisar um trecho pos-checkpoint, usar `goToCheckpoint()` e repetir a
   sala.
 - Para validar transicoes, usar `completeLevel()` em vez de jogar a fase inteira.

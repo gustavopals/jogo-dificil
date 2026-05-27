@@ -20,6 +20,7 @@ const DEATH_FEEDBACK_COPY = {
   trap: "Armadilha ativada.",
   projectile: "Projetil acertou.",
   crusher: "Esmagado.",
+  boss: "Chefe acertou.",
   "manual-restart": "Reinicio manual.",
   unknown: "Morte registrada.",
 } as const satisfies Record<DeathCause, string>;

@@ -5,6 +5,7 @@ import { clearAllGameEventListeners } from "../src/game/systems/game-events";
 import { gameStateStore } from "../src/game/systems/game-state";
 import {
   DEV_QA_GLOBAL_KEY,
+  getDevQaBossEntries,
   getDevQaLevelIds,
   installDevQaTools,
   isKnownDevQaLevelId,
@@ -31,12 +32,92 @@ describe("dev QA tools", () => {
       "level-07",
       "level-08",
       "level-09",
+      "level-10",
     ]);
   });
 
   it("rejects unknown level ids before starting a QA session", () => {
     expect(isKnownDevQaLevelId("level-04")).toBe(true);
     expect(isKnownDevQaLevelId("missing-level")).toBe(false);
+  });
+
+  it("lists bosses that can be started directly in dev", () => {
+    expect(getDevQaBossEntries()).toEqual([
+      {
+        id: "boss-hirolito-narguilito",
+        displayName: "Hirolito Narguilito",
+        levelId: "level-03",
+        levelName: "Quase Seguro",
+        entryCheckpointId: "level-03-before-hirolito",
+      },
+      {
+        id: "boss-dr-imports",
+        displayName: "Dr. Imports",
+        levelId: "level-06",
+        levelName: "Memoria Em Movimento",
+        entryCheckpointId: "level-06-before-dr-imports",
+      },
+      {
+        id: "boss-giga-fabio",
+        displayName: "Giga Fabio",
+        levelId: "level-10",
+        levelName: "O Ultimo Nucleo",
+        entryCheckpointId: "level-10-before-giga-fabio",
+      },
+    ]);
+  });
+
+  it("starts a boss directly at its entry checkpoint", () => {
+    const levelScene = {
+      scene: {
+        key: "level",
+      },
+      getDevQaLevelSnapshot: vi.fn(() => null),
+    };
+    const game = createFakeGame(levelScene);
+    const targetWindow = {} as Window & Record<string, unknown>;
+    const api = installDevQaTools(game, targetWindow);
+
+    expect(api.bosses.map((boss) => boss.id)).toEqual([
+      "boss-hirolito-narguilito",
+      "boss-dr-imports",
+      "boss-giga-fabio",
+    ]);
+
+    const result = api.startBoss("boss-dr-imports");
+
+    expect(result).toMatchObject({ ok: true });
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      currentLevelId: "level-06",
+      activeCheckpoint: {
+        id: "level-06-before-dr-imports",
+        levelId: "level-06",
+        x: 992,
+        y: 222,
+        initialEnergy: 80,
+      },
+    });
+    expect(game.scene.start).toHaveBeenCalledWith("level");
+  });
+
+  it("rejects unknown boss ids before changing QA state", () => {
+    const game = createFakeGame(null);
+    const targetWindow = {} as Window & Record<string, unknown>;
+    const api = installDevQaTools(game, targetWindow);
+
+    gameStateStore.startLevel("level-02", { x: 80, y: 222 }, 30);
+
+    expect(api.startBoss("missing-boss")).toMatchObject({
+      ok: false,
+      error: 'Boss "missing-boss" nao existe nos dados atuais.',
+    });
+    expect(gameStateStore.getSnapshot()).toMatchObject({
+      currentLevelId: "level-02",
+      activeCheckpoint: {
+        id: "level-02-start",
+      },
+    });
+    expect(game.scene.start).not.toHaveBeenCalled();
   });
 
   it("exposes energy hooks for playtest and smoke tests", () => {
@@ -80,7 +161,9 @@ function createFakeGame(levelScene: unknown): Phaser.Game {
       getScene: vi.fn((sceneKey: string) =>
         sceneKey === "level" ? levelScene : undefined,
       ),
-      getScenes: vi.fn(() => [levelScene]),
+      getScenes: vi.fn(() => (levelScene ? [levelScene] : [])),
+      start: vi.fn(),
+      stop: vi.fn(),
     },
   } as unknown as Phaser.Game;
 }

@@ -11,7 +11,10 @@ import {
 import { PLACEHOLDER_TILESET_ASSET_KEYS } from "../../data/art";
 import { PLAYER_ENERGY_MAX } from "../../shared";
 import type {
+  BossDefinition,
+  BossId,
   CheckpointId,
+  EnergyPowerKind,
   EnergyTargetId,
   FacingDirection,
   InteractiveObjectId,
@@ -43,6 +46,7 @@ import {
   createInitialJumpMovementState,
   createInitialPlayerEnergyState,
   getCyanSparkProjectileHitbox,
+  getBossProjectileHitbox,
   getHorizontalDirection,
   getPlayerEnergyMovementConstraint,
   getWorldHitbox,
@@ -69,6 +73,7 @@ import type {
   DevQaLevelSnapshot,
 } from "../systems/dev-qa-tools";
 import {
+  createLevelCompletionAttemptFromRunCounters,
   recordLevelCompletion,
   type LevelCompletionResult,
 } from "../systems/level-results";
@@ -92,6 +97,29 @@ import {
   getItemCollectionAudioId,
   getTrapActivationAudioId,
 } from "../systems/level-audio-feedback";
+import {
+  getBossAttackCycleAudioIds,
+  getBossDamageAudioId,
+  getBossEntryAudioId,
+} from "../systems/boss-audio-feedback";
+import {
+  applyBossEnergyHit,
+  findBossEntryCheckpoint,
+  findEnteredBossArenas,
+  getBossActiveAttackHitboxes,
+  getBossAttackTellAreas,
+  getBossBodyHealthIndicator,
+  getBossEnergyBlockingHitboxes,
+  getBossProjectileTextureKey,
+  getBossRuntimeHitbox,
+  getBossTextureKey,
+  getBossWeakPointCrystalFeedback,
+  findTouchedBossThreat,
+  isLevelExitBlockedByLivingBosses,
+  lockBossArenaEntrance,
+  updateBossAttackRuntime as updateBossAttackRuntimeState,
+  unlockDefeatedBossObjects,
+} from "../systems/level-bosses";
 import {
   getCyanBurstImpactAudioCues,
   getCyanSparkImpactAudioCues,
@@ -145,6 +173,7 @@ import {
 } from "../systems/player-visual-effects";
 import {
   VISUAL_READABILITY_DEPTHS,
+  VISUAL_READABILITY_SEMANTIC_COLORS,
   clampWideEffectAlpha,
 } from "../systems/visual-readability";
 import {
@@ -187,7 +216,7 @@ const CAMERA_DEADZONE_SIZE = {
   height: TILE_SIZE_PX * 5,
 } as const;
 const MARKER_COLORS = {
-  spawn: 0x80d7c2,
+  spawn: VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary,
 } as const;
 const CYAN_SPARK_PLAYER_ANIMATION_DURATION_MS = 140;
 
@@ -214,6 +243,12 @@ type EnergyTargetMarker = {
   readonly base: Phaser.GameObjects.Rectangle;
   readonly active: Phaser.GameObjects.TileSprite;
   readonly broken: Phaser.GameObjects.TileSprite;
+};
+
+type BossMarker = {
+  readonly sprite: Phaser.GameObjects.Image;
+  readonly health: Phaser.GameObjects.Graphics;
+  readonly weakPoint: Phaser.GameObjects.Graphics;
 };
 
 type PlayerDeathContext = {
@@ -248,6 +283,13 @@ export class LevelScene extends Phaser.Scene {
     EnergyTargetId,
     EnergyTargetMarker
   >();
+  private readonly bossMarkers = new Map<BossId, BossMarker>();
+  private readonly bossTellMarkers: Phaser.GameObjects.Rectangle[] = [];
+  private readonly bossAttackMarkers: Phaser.GameObjects.Rectangle[] = [];
+  private readonly bossProjectileMarkers = new Map<
+    string,
+    Phaser.GameObjects.Image
+  >();
   private readonly projectileMarkers = new Map<
     string,
     Phaser.GameObjects.Image
@@ -261,9 +303,11 @@ export class LevelScene extends Phaser.Scene {
     Phaser.GameObjects.Image
   >();
   private readonly cyanBurstHitBossIds = new Set<string>();
+  private cyanBurstActiveAttackId?: string;
   private cyanBurstBeamMarker?: Phaser.GameObjects.TileSprite;
   private cyanSparkProjectiles: readonly CyanSparkProjectileState[] = [];
   private cyanSparkProjectileSequence = 0;
+  private cyanBurstAttackSequence = 0;
   private cyanSparkAnimationRemainingMs = 0;
   private respawnTimer?: Phaser.Time.TimerEvent;
   private respawnRecoveryTimer?: Phaser.Time.TimerEvent;
@@ -309,6 +353,7 @@ export class LevelScene extends Phaser.Scene {
     this.drawItems(this.level, this.roomState);
     this.drawInteractiveObjects(this.level, this.roomState);
     this.drawEnergyTargets(this.level, this.roomState);
+    this.drawBosses(this.level, this.roomState);
     this.drawLevelMarkers(this.level, activeCheckpoint.id);
 
     this.player = new Player(this, {
@@ -318,7 +363,7 @@ export class LevelScene extends Phaser.Scene {
     });
     this.player.getSprite().setDepth(PLAYER_EFFECT_DEPTHS.sprite);
     this.playerAura = this.add
-      .ellipse(0, 0, 1, 1, 0x80d7c2, 0)
+      .ellipse(0, 0, 1, 1, VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary, 0)
       .setDepth(PLAYER_EFFECT_DEPTHS.aura);
     this.updatePlayerEnergyAura(false);
     this.configureCamera();
@@ -346,6 +391,10 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
+    this.updateBossArenaLocks();
+    this.updateBossAttackRuntime(delta);
+    this.updateBossDefeatUnlocks();
+    this.syncBossMarkers();
     this.updateTrapTriggers();
     if (this.updatePlayerDeath()) {
       return;
@@ -688,7 +737,7 @@ export class LevelScene extends Phaser.Scene {
       .setScale(sprite.scaleX, sprite.scaleY)
       .setAngle(sprite.angle)
       .setAlpha(0.34)
-      .setTint(0x80d7c2)
+      .setTint(VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary)
       .setDepth(PLAYER_EFFECT_DEPTHS.trail);
 
     this.tweens.add({
@@ -991,6 +1040,10 @@ export class LevelScene extends Phaser.Scene {
     roomState: RoomRuntimeState,
   ): void {
     getLevelEnergyTargets(level).forEach((target) => {
+      if (target.kind === "boss-hurtbox") {
+        return;
+      }
+
       const state = roomState.energyTargets[target.id];
 
       if (!state) {
@@ -1046,6 +1099,48 @@ export class LevelScene extends Phaser.Scene {
       });
       this.updateEnergyTargetMarker(target.id);
     });
+  }
+
+  private drawBosses(
+    level: LevelDefinition,
+    roomState: RoomRuntimeState,
+  ): void {
+    (level.bosses ?? []).forEach((boss) => {
+      const state = roomState.bosses[boss.id];
+
+      if (!state) {
+        return;
+      }
+
+      this.bossMarkers.set(boss.id, this.createBossMarker(boss));
+    });
+
+    this.syncBossMarkers();
+  }
+
+  private createBossMarker(boss: BossDefinition): BossMarker {
+    const { hitbox } = boss;
+    const sprite = this.add
+      .image(
+        hitbox.x + hitbox.width / 2,
+        hitbox.y + hitbox.height / 2,
+        getBossTextureKey(boss),
+      )
+      .setOrigin(0.5)
+      .setDisplaySize(hitbox.width, hitbox.height)
+      .setDepth(VISUAL_READABILITY_DEPTHS.bossBody);
+    const health = this.add
+      .graphics()
+      .setDepth(VISUAL_READABILITY_DEPTHS.bossHealth);
+    const weakPoint = this.add
+      .graphics()
+      .setDepth(VISUAL_READABILITY_DEPTHS.bossHealth);
+
+    return {
+      sprite,
+      health,
+      weakPoint,
+    };
   }
 
   private drawLevelMarkers(
@@ -1117,10 +1212,22 @@ export class LevelScene extends Phaser.Scene {
       this.updateCheckpointMarkers(touchedCheckpoint.id);
     }
 
-    if (!this.hasCompletedLevel && isTouchingExit(playerHitbox, this.level)) {
+    if (
+      !this.hasCompletedLevel &&
+      isTouchingExit(playerHitbox, this.level) &&
+      !this.isExitBlockedByBoss()
+    ) {
       this.hasCompletedLevel = true;
       this.completeLevel();
     }
+  }
+
+  private isExitBlockedByBoss(): boolean {
+    if (!this.level || !this.roomState) {
+      return false;
+    }
+
+    return isLevelExitBlockedByLivingBosses(this.level.bosses, this.roomState);
   }
 
   private completeLevel(): void {
@@ -1145,11 +1252,14 @@ export class LevelScene extends Phaser.Scene {
     level: LevelDefinition,
     deathCount: number,
   ): LevelCompletionResult {
-    return recordLevelCompletion({
-      levelId: level.id,
-      elapsedMs: this.time.now - this.levelStartedAtMs,
-      deathCount: deathCount - this.levelStartDeathCount,
-    });
+    return recordLevelCompletion(
+      createLevelCompletionAttemptFromRunCounters({
+        levelId: level.id,
+        elapsedMs: this.time.now - this.levelStartedAtMs,
+        levelStartDeathCount: this.levelStartDeathCount,
+        currentDeathCount: deathCount,
+      }),
+    );
   }
 
   private updatePlayerDeath(): boolean {
@@ -1183,6 +1293,19 @@ export class LevelScene extends Phaser.Scene {
       this.killPlayer({
         cause: touchedTrapThreat.cause,
         sourceId: touchedTrapThreat.sourceId,
+      });
+
+      return true;
+    }
+
+    const touchedBossThreat = this.roomState
+      ? findTouchedBossThreat(playerHitbox, this.level.bosses, this.roomState)
+      : undefined;
+
+    if (touchedBossThreat) {
+      this.killPlayer({
+        cause: touchedBossThreat.cause,
+        sourceId: touchedBossThreat.sourceId,
       });
 
       return true;
@@ -1225,6 +1348,113 @@ export class LevelScene extends Phaser.Scene {
       this.updateTrapMarker(trap.id);
       this.playLevelSfx(getTrapActivationAudioId(trap.kind));
     });
+  }
+
+  private updateBossArenaLocks(): void {
+    if (!this.level || !this.player || !this.roomState) {
+      return;
+    }
+
+    const playerHitbox = getWorldHitbox(
+      this.player.getPhysicsState().position,
+      PLAYER_COLLISION_BODY,
+    );
+    const enteredBossArenas = findEnteredBossArenas(
+      playerHitbox,
+      this.level.bosses,
+      this.roomState,
+    );
+
+    if (enteredBossArenas.length === 0) {
+      return;
+    }
+
+    enteredBossArenas.forEach(({ boss }) => {
+      this.activateBossEntryCheckpoint(boss);
+      this.playLevelSfx(getBossEntryAudioId());
+    });
+
+    const nextRoomState = enteredBossArenas.reduce(
+      (state, { boss }) => lockBossArenaEntrance(state, boss),
+      this.roomState,
+    );
+
+    this.roomState = nextRoomState;
+    this.refreshRoomSolids();
+    this.updateInteractiveObjectMarkers();
+  }
+
+  private activateBossEntryCheckpoint(boss: BossDefinition): void {
+    if (!this.level) {
+      return;
+    }
+
+    const checkpoint = findBossEntryCheckpoint(boss, this.level.checkpoints);
+
+    if (!checkpoint) {
+      return;
+    }
+
+    const { activeCheckpoint } = gameStateStore.getSnapshot();
+
+    if (
+      activeCheckpoint.levelId === this.level.id &&
+      activeCheckpoint.id === checkpoint.id
+    ) {
+      this.updateCheckpointMarkers(checkpoint.id);
+      return;
+    }
+
+    const bossCheckpoint = createActiveCheckpointFromDefinition(
+      this.level,
+      checkpoint,
+    );
+
+    gameStateStore.setActiveCheckpoint(bossCheckpoint);
+    this.updateCheckpointMarkers(bossCheckpoint.id);
+  }
+
+  private updateBossAttackRuntime(delta: number): void {
+    if (!this.level || !this.roomState) {
+      return;
+    }
+
+    const result = updateBossAttackRuntimeState(
+      this.roomState,
+      this.level.bosses,
+      delta,
+      this.level.bounds,
+      this.solids,
+    );
+
+    this.roomState = result.state;
+    this.syncBossMarkers();
+    this.syncBossAttackMarkers();
+    this.syncBossProjectileMarkers();
+    getBossAttackCycleAudioIds(result.events).forEach((audioId) => {
+      this.playLevelSfx(audioId);
+    });
+  }
+
+  private updateBossDefeatUnlocks(): void {
+    if (!this.level || !this.roomState) {
+      return;
+    }
+
+    const nextRoomState = unlockDefeatedBossObjects(
+      this.roomState,
+      this.level.bosses,
+    );
+
+    if (nextRoomState === this.roomState) {
+      return;
+    }
+
+    this.roomState = nextRoomState;
+    this.refreshRoomSolids();
+    this.updateInteractiveObjectMarkers();
+    this.syncBossAttackMarkers();
+    this.syncBossProjectileMarkers();
   }
 
   private updateTrapRuntime(delta: number): void {
@@ -1293,6 +1523,7 @@ export class LevelScene extends Phaser.Scene {
     );
     if (energyResult.effects.includes("cyan-burst-finished")) {
       this.cyanBurstLockedFacing = undefined;
+      this.cyanBurstActiveAttackId = undefined;
       this.cyanBurstHitBossIds.clear();
     }
     this.syncCyanBurstBeamMarker();
@@ -1331,12 +1562,13 @@ export class LevelScene extends Phaser.Scene {
     const projectileUpdate = updateCyanSparkProjectiles({
       projectiles: this.cyanSparkProjectiles,
       deltaMs: delta,
-      solids: this.solids,
+      solids: this.getCyanSparkBlockingSolids(),
       targets:
         this.level && this.roomState
           ? getCyanSparkCollisionTargets(
               getLevelEnergyTargets(this.level),
               this.roomState,
+              this.level.bosses,
             )
           : [],
     });
@@ -1373,16 +1605,28 @@ export class LevelScene extends Phaser.Scene {
   private applyCyanSparkEnergyTargetHits(
     impacts: readonly CyanSparkProjectileImpact[],
   ): void {
-    const targetImpacts = impacts.filter(
-      (impact) => impact.kind === "target" && impact.targetId,
+    const energyImpacts = impacts.filter(
+      (impact) =>
+        (impact.kind === "target" || impact.kind === "boss") && impact.targetId,
     );
 
-    if (!this.level || !this.roomState || targetImpacts.length === 0) {
+    if (!this.level || !this.roomState || energyImpacts.length === 0) {
       return;
     }
 
-    targetImpacts.forEach((impact) => {
+    energyImpacts.forEach((impact) => {
       if (!this.roomState || !impact.targetId) {
+        return;
+      }
+
+      if (
+        impact.kind === "boss" &&
+        this.applyBossEnergyTargetHit({
+          targetId: impact.targetId,
+          power: "cyan-spark",
+          sourceAttackId: impact.projectileId,
+        })
+      ) {
         return;
       }
 
@@ -1537,11 +1781,13 @@ export class LevelScene extends Phaser.Scene {
 
     if (!energyResult.effects.includes("cyan-burst-preparation-started")) {
       this.cyanBurstLockedFacing = undefined;
+      this.cyanBurstActiveAttackId = undefined;
       this.cyanBurstHitBossIds.clear();
       return;
     }
 
     this.cyanBurstLockedFacing = lockedFacing;
+    this.cyanBurstActiveAttackId = undefined;
     this.cyanBurstHitBossIds.clear();
     this.playCyanBurstPreparationFeedback(lockedFacing);
   }
@@ -1580,6 +1826,7 @@ export class LevelScene extends Phaser.Scene {
     }
 
     this.cyanBurstLockedFacing = firingFacing;
+    this.cyanBurstActiveAttackId = this.createCyanBurstAttackId();
     this.applyCyanBurstBeamHits(firingFacing);
     this.syncCyanBurstBeamMarker();
   }
@@ -1597,6 +1844,7 @@ export class LevelScene extends Phaser.Scene {
       targets: getCyanBurstBeamCollisionTargets(
         getLevelEnergyTargets(this.level),
         this.roomState,
+        this.level.bosses,
       ),
     });
 
@@ -1606,6 +1854,17 @@ export class LevelScene extends Phaser.Scene {
 
     beam.impacts.forEach((impact) => {
       if (!this.roomState) {
+        return;
+      }
+
+      if (impact.kind === "boss") {
+        this.applyBossEnergyTargetHit({
+          targetId: impact.targetId,
+          power: "cyan-burst",
+          hitGroupId: impact.hitGroupId,
+          sourceAttackId: this.cyanBurstActiveAttackId,
+        });
+        this.cyanBurstHitBossIds.add(impact.hitGroupId ?? impact.targetId);
         return;
       }
 
@@ -1626,15 +1885,82 @@ export class LevelScene extends Phaser.Scene {
         impact.targetId,
         impact.damage,
       );
-
-      if (impact.kind === "boss") {
-        this.cyanBurstHitBossIds.add(impact.hitGroupId ?? impact.targetId);
-      }
     });
     this.refreshRoomSolids();
     this.updateEnergyTargetMarkers();
     this.playCyanBurstImpactFeedback(beam.impacts);
     this.emitEnergyAudioCues(getCyanBurstImpactAudioCues(beam.impacts));
+  }
+
+  private createCyanBurstAttackId(): string {
+    const id = `cyan-burst-${this.cyanBurstAttackSequence}`;
+
+    this.cyanBurstAttackSequence += 1;
+
+    return id;
+  }
+
+  private applyBossEnergyTargetHit(input: {
+    readonly targetId: string;
+    readonly power: EnergyPowerKind;
+    readonly hitGroupId?: string;
+    readonly sourceAttackId?: string;
+  }): boolean {
+    if (!this.level || !this.roomState) {
+      return false;
+    }
+
+    const bossId = this.resolveBossIdFromEnergyTargetHit(
+      input.targetId,
+      input.hitGroupId,
+    );
+
+    if (!bossId) {
+      return false;
+    }
+
+    const result = applyBossEnergyHit(this.roomState, this.level.bosses, {
+      bossId,
+      power: input.power,
+      didHitWeakPoint: true,
+      sourceAttackId: input.sourceAttackId,
+    });
+    const bossDamageAudioId = getBossDamageAudioId(result);
+
+    this.roomState = result.state;
+    this.syncBossMarkers();
+
+    if (bossDamageAudioId) {
+      this.playLevelSfx(bossDamageAudioId);
+    }
+
+    return true;
+  }
+
+  private resolveBossIdFromEnergyTargetHit(
+    targetId: string,
+    hitGroupId?: string,
+  ): BossId | undefined {
+    if (!this.level) {
+      return undefined;
+    }
+
+    if (
+      hitGroupId &&
+      this.level.bosses?.some((candidate) => candidate.id === hitGroupId)
+    ) {
+      return hitGroupId;
+    }
+
+    const target = getLevelEnergyTargets(this.level).find(
+      (candidate) => candidate.id === targetId,
+    );
+
+    if (target?.kind !== "boss-hurtbox") {
+      return undefined;
+    }
+
+    return target.hitGroupId ?? target.id;
   }
 
   private applyEnergySwitchHit(targetId: string): boolean {
@@ -1739,6 +2065,7 @@ export class LevelScene extends Phaser.Scene {
       }),
     );
     this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstActiveAttackId = undefined;
     this.cyanBurstHitBossIds.clear();
     this.clearCyanBurstBeamMarker();
   }
@@ -1760,7 +2087,7 @@ export class LevelScene extends Phaser.Scene {
         physicsState.position.y - 14,
         18,
         28,
-        0x80d7c2,
+        VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary,
         0.24,
       )
       .setStrokeStyle(1, 0xf5f7fb, 0.52)
@@ -1801,10 +2128,10 @@ export class LevelScene extends Phaser.Scene {
       const { area } = target;
       const color =
         impact.kind === "boss"
-          ? 0xe76f51
+          ? VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary
           : impact.kind === "cracked-block"
-            ? 0xf4d35e
-            : 0x80d7c2;
+            ? VISUAL_READABILITY_SEMANTIC_COLORS.energy.charged
+            : VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary;
       const pulse = this.add
         .image(
           area.x + area.width / 2,
@@ -1864,7 +2191,7 @@ export class LevelScene extends Phaser.Scene {
         physicsState.position.y - 13,
         22,
         24,
-        0xe35d6a,
+        VISUAL_READABILITY_SEMANTIC_COLORS.energy.failure,
         0.22,
       )
       .setDepth(PLAYER_EFFECT_DEPTHS.energyShot);
@@ -1965,6 +2292,9 @@ export class LevelScene extends Phaser.Scene {
     this.updateItemMarkers();
     this.updateInteractiveObjectMarkers();
     this.updateEnergyTargetMarkers();
+    this.syncBossMarkers();
+    this.syncBossAttackMarkers();
+    this.syncBossProjectileMarkers();
     this.updateCheckpointMarkers(activeCheckpointId);
   }
 
@@ -2116,6 +2446,241 @@ export class LevelScene extends Phaser.Scene {
       .setVisible(isBrokenBlock);
   }
 
+  private syncBossMarkers(): void {
+    if (!this.level || !this.roomState) {
+      this.bossMarkers.forEach((marker) => {
+        marker.sprite.destroy();
+        marker.health.destroy();
+        marker.weakPoint.destroy();
+      });
+      this.bossMarkers.clear();
+      return;
+    }
+
+    const activeBossIds = new Set<BossId>();
+
+    (this.level.bosses ?? []).forEach((boss) => {
+      const state = this.roomState?.bosses[boss.id];
+
+      if (!state) {
+        return;
+      }
+
+      activeBossIds.add(boss.id);
+
+      const marker =
+        this.bossMarkers.get(boss.id) ?? this.createBossMarker(boss);
+
+      this.updateBossMarker(boss, state, marker);
+      this.bossMarkers.set(boss.id, marker);
+    });
+
+    this.bossMarkers.forEach((marker, bossId) => {
+      if (activeBossIds.has(bossId)) {
+        return;
+      }
+
+      marker.sprite.destroy();
+      marker.health.destroy();
+      marker.weakPoint.destroy();
+      this.bossMarkers.delete(bossId);
+    });
+  }
+
+  private updateBossMarker(
+    boss: BossDefinition,
+    state: RoomRuntimeState["bosses"][BossId],
+    marker: BossMarker,
+  ): void {
+    const hitbox = getBossRuntimeHitbox(boss, state);
+    const isDefeated = state.state === "defeated" || state.healthRemaining <= 0;
+
+    marker.sprite
+      .setPosition(hitbox.x + hitbox.width / 2, hitbox.y + hitbox.height / 2)
+      .setDisplaySize(hitbox.width, hitbox.height)
+      .setDepth(VISUAL_READABILITY_DEPTHS.bossBody)
+      .setFlipX(state.facing === "left")
+      .setVisible(!isDefeated)
+      .setAlpha(state.state === "inactive" ? 0.45 : 1);
+    marker.sprite.clearTint();
+
+    if (state.invulnerabilityRemainingMs > 0) {
+      marker.sprite.setTint(VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary);
+    }
+
+    this.drawBossHealthIndicator(boss, state, marker.health);
+    this.drawBossWeakPointCrystal(boss, state, marker.weakPoint);
+  }
+
+  private syncBossAttackMarkers(): void {
+    this.clearBossAttackMarkers();
+
+    if (!this.level || !this.roomState) {
+      return;
+    }
+
+    getBossAttackTellAreas(this.level.bosses, this.roomState).forEach(
+      (area) => {
+        this.bossTellMarkers.push(
+          this.add
+            .rectangle(
+              area.x + area.width / 2,
+              area.y + area.height / 2,
+              area.width,
+              area.height,
+              VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary,
+              0.16,
+            )
+            .setStrokeStyle(
+              1,
+              VISUAL_READABILITY_SEMANTIC_COLORS.boss.outline,
+              0.58,
+            )
+            .setDepth(VISUAL_READABILITY_DEPTHS.trapThreat),
+        );
+      },
+    );
+
+    getBossActiveAttackHitboxes(this.level.bosses, this.roomState).forEach(
+      (area) => {
+        this.bossAttackMarkers.push(
+          this.add
+            .rectangle(
+              area.x + area.width / 2,
+              area.y + area.height / 2,
+              area.width,
+              area.height,
+              VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary,
+              0.34,
+            )
+            .setStrokeStyle(
+              1,
+              VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary,
+              0.76,
+            )
+            .setDepth(VISUAL_READABILITY_DEPTHS.directHazard),
+        );
+      },
+    );
+  }
+
+  private syncBossProjectileMarkers(): void {
+    if (!this.level || !this.roomState) {
+      this.bossProjectileMarkers.forEach((marker) => marker.destroy());
+      this.bossProjectileMarkers.clear();
+      return;
+    }
+
+    const activeProjectileIds = new Set<string>();
+    const bosses = this.level.bosses;
+
+    this.roomState.bossProjectiles.forEach((projectile) => {
+      activeProjectileIds.add(projectile.id);
+
+      const hitbox = getBossProjectileHitbox(projectile);
+      const marker =
+        this.bossProjectileMarkers.get(projectile.id) ??
+        this.add
+          .image(
+            hitbox.x + hitbox.width / 2,
+            hitbox.y + hitbox.height / 2,
+            getBossProjectileTextureKey(projectile, bosses),
+          )
+          .setOrigin(0.5)
+          .setAlpha(0.94)
+          .setDepth(VISUAL_READABILITY_DEPTHS.trapProjectile);
+
+      marker
+        .setTexture(getBossProjectileTextureKey(projectile, bosses))
+        .setPosition(hitbox.x + hitbox.width / 2, hitbox.y + hitbox.height / 2)
+        .setDisplaySize(hitbox.width, hitbox.height)
+        .setDepth(VISUAL_READABILITY_DEPTHS.trapProjectile);
+
+      this.bossProjectileMarkers.set(projectile.id, marker);
+    });
+
+    this.bossProjectileMarkers.forEach((marker, projectileId) => {
+      if (activeProjectileIds.has(projectileId)) {
+        return;
+      }
+
+      marker.destroy();
+      this.bossProjectileMarkers.delete(projectileId);
+    });
+  }
+
+  private drawBossHealthIndicator(
+    boss: BossDefinition,
+    state: RoomRuntimeState["bosses"][BossId],
+    marker: Phaser.GameObjects.Graphics,
+  ): void {
+    const indicator = getBossBodyHealthIndicator(boss, state);
+
+    marker.clear();
+
+    if (!indicator.visible) {
+      return;
+    }
+
+    marker
+      .fillStyle(indicator.frameColor, indicator.frameAlpha)
+      .fillRect(
+        indicator.frame.x,
+        indicator.frame.y,
+        indicator.frame.width,
+        indicator.frame.height,
+      )
+      .lineStyle(1, indicator.outlineColor, indicator.outlineAlpha)
+      .strokeRect(
+        indicator.frame.x,
+        indicator.frame.y,
+        indicator.frame.width,
+        indicator.frame.height,
+      );
+
+    indicator.pips.forEach((pip) => {
+      marker
+        .fillStyle(pip.fillColor, pip.alpha)
+        .fillRect(pip.area.x, pip.area.y, pip.area.width, pip.area.height);
+    });
+  }
+
+  private drawBossWeakPointCrystal(
+    boss: BossDefinition,
+    state: RoomRuntimeState["bosses"][BossId],
+    marker: Phaser.GameObjects.Graphics,
+  ): void {
+    const crystal = getBossWeakPointCrystalFeedback(boss, state);
+
+    marker.clear();
+
+    if (!crystal.visible) {
+      return;
+    }
+
+    const { area } = crystal;
+    const centerX = area.x + area.width / 2;
+    const centerY = area.y + area.height / 2;
+
+    if (crystal.pulseAlpha > 0) {
+      marker
+        .fillStyle(crystal.pulseColor, crystal.pulseAlpha)
+        .fillEllipse(centerX, centerY, area.width + 8, area.height + 8);
+    }
+
+    marker
+      .fillStyle(crystal.fillColor, crystal.fillAlpha)
+      .lineStyle(1, crystal.strokeColor, crystal.strokeAlpha)
+      .beginPath()
+      .moveTo(centerX, area.y)
+      .lineTo(area.x + area.width, centerY)
+      .lineTo(centerX, area.y + area.height)
+      .lineTo(area.x, centerY)
+      .closePath()
+      .fillPath()
+      .strokePath();
+  }
+
   private refreshRoomSolids(): void {
     if (!this.level || !this.roomState) {
       this.solids = [];
@@ -2152,7 +2717,22 @@ export class LevelScene extends Phaser.Scene {
   }
 
   private getCyanBurstBlockingSolids(): readonly RectLike[] {
-    return this.getBaseRoomSolidAreas();
+    return [
+      ...this.getBaseRoomSolidAreas(),
+      ...this.getActiveBossEnergyBlockingHitboxes(),
+    ];
+  }
+
+  private getCyanSparkBlockingSolids(): readonly RectLike[] {
+    return [...this.solids, ...this.getActiveBossEnergyBlockingHitboxes()];
+  }
+
+  private getActiveBossEnergyBlockingHitboxes(): readonly RectLike[] {
+    if (!this.level || !this.roomState) {
+      return [];
+    }
+
+    return getBossEnergyBlockingHitboxes(this.level.bosses, this.roomState);
   }
 
   private syncProjectileMarkers(): void {
@@ -2324,7 +2904,7 @@ export class LevelScene extends Phaser.Scene {
     }
 
     crack
-      .lineStyle(1, 0xe35d6a, alpha)
+      .lineStyle(1, VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger, alpha)
       .beginPath()
       .moveTo(area.x + area.width * 0.18, area.y + area.height * 0.28)
       .lineTo(area.x + area.width * 0.44, area.y + area.height * 0.52)
@@ -2502,6 +3082,7 @@ export class LevelScene extends Phaser.Scene {
     this.setPlayerEnergyState(resetPlayerEnergyState(initialEnergy));
     this.secondaryActionIntentState = createInitialSecondaryActionIntentState();
     this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstActiveAttackId = undefined;
     this.cyanBurstHitBossIds.clear();
     this.cyanSparkAnimationRemainingMs = 0;
     this.clearCyanSparkProjectiles();
@@ -2521,6 +3102,7 @@ export class LevelScene extends Phaser.Scene {
     );
     this.secondaryActionIntentState = createInitialSecondaryActionIntentState();
     this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstActiveAttackId = undefined;
     this.cyanBurstHitBossIds.clear();
     this.cyanSparkAnimationRemainingMs = 0;
     this.clearCyanSparkProjectiles();
@@ -2538,6 +3120,13 @@ export class LevelScene extends Phaser.Scene {
   private clearCyanBurstBeamMarker(): void {
     this.cyanBurstBeamMarker?.destroy();
     this.cyanBurstBeamMarker = undefined;
+  }
+
+  private clearBossAttackMarkers(): void {
+    this.bossTellMarkers.forEach((marker) => marker.destroy());
+    this.bossTellMarkers.length = 0;
+    this.bossAttackMarkers.forEach((marker) => marker.destroy());
+    this.bossAttackMarkers.length = 0;
   }
 
   private cleanup(): void {
@@ -2560,11 +3149,13 @@ export class LevelScene extends Phaser.Scene {
     this.setPlayerEnergyState(createInitialPlayerEnergyState());
     this.secondaryActionIntentState = createInitialSecondaryActionIntentState();
     this.cyanBurstLockedFacing = undefined;
+    this.cyanBurstActiveAttackId = undefined;
     this.cyanBurstHitBossIds.clear();
     this.cyanSparkAnimationRemainingMs = 0;
     this.clearCyanSparkProjectiles();
     this.clearCyanBurstBeamMarker();
     this.cyanSparkProjectileSequence = 0;
+    this.cyanBurstAttackSequence = 0;
     this.levelStartedAtMs = 0;
     this.levelStartDeathCount = 0;
     this.checkpointMarkers.clear();
@@ -2579,6 +3170,15 @@ export class LevelScene extends Phaser.Scene {
       marker.broken.destroy();
     });
     this.energyTargetMarkers.clear();
+    this.bossMarkers.forEach((marker) => {
+      marker.sprite.destroy();
+      marker.health.destroy();
+      marker.weakPoint.destroy();
+    });
+    this.bossMarkers.clear();
+    this.clearBossAttackMarkers();
+    this.bossProjectileMarkers.forEach((marker) => marker.destroy());
+    this.bossProjectileMarkers.clear();
     this.projectileMarkers.forEach((marker) => marker.destroy());
     this.projectileMarkers.clear();
     this.projectileTrailMarkers.forEach((marker) => marker.destroy());

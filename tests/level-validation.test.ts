@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { defineLevel, type LevelDefinition } from "../src/data/levels/schema";
+import {
+  defineLevel,
+  type BossDefinition,
+  type LevelDefinition,
+} from "../src/data/levels/schema";
 import { validateLevel, validateLevels } from "../src/data/levels/validation";
 
 const BASE_LEVEL = defineLevel({
@@ -36,6 +40,19 @@ const BASE_LEVEL = defineLevel({
       },
       area: {
         x: 48,
+        y: 184,
+        width: 32,
+        height: 40,
+      },
+    },
+    {
+      id: "checkpoint-before-boss",
+      position: {
+        x: 256,
+        y: 222,
+      },
+      area: {
+        x: 240,
         y: 184,
         width: 32,
         height: 40,
@@ -121,6 +138,18 @@ const BASE_LEVEL = defineLevel({
       startsActive: false,
       resetOnRespawn: true,
     },
+    {
+      id: "door-main",
+      kind: "door",
+      area: {
+        x: 416,
+        y: 174,
+        width: 16,
+        height: 48,
+      },
+      startsActive: true,
+      resetOnRespawn: true,
+    },
   ],
   audio: {
     musicId: "music-test-loop",
@@ -145,6 +174,117 @@ const BASE_LEVEL = defineLevel({
   },
 } satisfies LevelDefinition);
 
+const VALID_BOSS = {
+  id: "boss-validation",
+  levelId: "level-validation-test",
+  displayName: "Boss De Validacao",
+  arena: {
+    x: 288,
+    y: 126,
+    width: 144,
+    height: 112,
+  },
+  spawn: {
+    x: 376,
+    y: 198,
+  },
+  initialFacing: "left",
+  health: 3,
+  hitbox: {
+    x: 360,
+    y: 160,
+    width: 32,
+    height: 62,
+  },
+  weakPoint: {
+    x: 368,
+    y: 176,
+    width: 16,
+    height: 16,
+  },
+  resetOnRespawn: true,
+  movement: {
+    kind: "patrol",
+    speedPxPerSecond: 40,
+    anchors: [
+      {
+        x: 320,
+        y: 198,
+      },
+      {
+        x: 408,
+        y: 198,
+      },
+    ],
+  },
+  attacks: [
+    {
+      id: "boss-validation-smoke",
+      kind: "smoke-puff",
+      windupMs: 500,
+      activeMs: 600,
+      recoverMs: 800,
+      cooldownMs: 900,
+      contactDamage: 1,
+      tellArea: {
+        x: 320,
+        y: 204,
+        width: 80,
+        height: 16,
+      },
+      projectile: {
+        hitbox: {
+          x: 0,
+          y: 0,
+          width: 14,
+          height: 14,
+        },
+        velocity: {
+          x: -52,
+          y: 0,
+        },
+        maxActive: 1,
+        maxRangePx: 128,
+        isDestructibleBy: ["cyan-spark"],
+      },
+      opensVulnerabilityWindowId: "boss-validation-recover",
+    },
+  ],
+  damageRules: [
+    {
+      power: "cyan-spark",
+      damage: 1,
+      validStates: ["recover"],
+      requiresWeakPoint: true,
+      oncePerAttack: false,
+      consumesHit: true,
+      effects: ["damage"],
+    },
+    {
+      power: "cyan-burst",
+      damage: 1,
+      validStates: ["recover"],
+      requiresWeakPoint: true,
+      oncePerAttack: true,
+      consumesHit: true,
+      effects: ["damage"],
+    },
+  ],
+  vulnerabilityWindows: [
+    {
+      id: "boss-validation-recover",
+      state: "recover",
+      durationMs: 800,
+      weakPointActive: true,
+      opensAfterAttackIds: ["boss-validation-smoke"],
+    },
+  ],
+  entryCheckpointId: "checkpoint-before-boss",
+  entryDoorId: "door-main",
+  defeatUnlocks: ["lever-main"],
+  assetId: "boss-validation-sprite",
+} satisfies BossDefinition;
+
 describe("level validation", () => {
   it("accepts a valid level", () => {
     expect(validateLevel(BASE_LEVEL)).toEqual({
@@ -156,6 +296,10 @@ describe("level validation", () => {
   it("validates duplicate ids inside a level and across a level list", () => {
     const duplicateEntityIdLevel = defineLevel({
       ...BASE_LEVEL,
+      assets: {
+        ...BASE_LEVEL.assets,
+        sprites: [...BASE_LEVEL.assets.sprites, "boss-validation-sprite"],
+      },
       energyTargets: [
         {
           id: BASE_LEVEL.terrain[0]!.id,
@@ -177,6 +321,12 @@ describe("level validation", () => {
           id: BASE_LEVEL.terrain[0]!.id,
         },
       ],
+      bosses: [
+        {
+          ...VALID_BOSS,
+          id: BASE_LEVEL.terrain[0]!.id,
+        },
+      ],
     } satisfies LevelDefinition);
 
     expect(validateLevel(duplicateEntityIdLevel).issues).toContainEqual(
@@ -189,6 +339,12 @@ describe("level validation", () => {
       expect.objectContaining({
         code: "duplicate-id",
         path: "energyTargets[0].id",
+      }),
+    );
+    expect(validateLevel(duplicateEntityIdLevel).issues).toContainEqual(
+      expect.objectContaining({
+        code: "duplicate-id",
+        path: "bosses[0].id",
       }),
     );
 
@@ -693,9 +849,376 @@ describe("level validation", () => {
     );
   });
 
+  it("accepts valid declarative boss rules", () => {
+    const validLevel = defineLevel({
+      ...BASE_LEVEL,
+      bosses: [VALID_BOSS],
+      assets: {
+        ...BASE_LEVEL.assets,
+        sprites: [...BASE_LEVEL.assets.sprites, "boss-validation-sprite"],
+      },
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(validLevel)).toEqual({
+      isValid: true,
+      issues: [],
+    });
+  });
+
+  it("validates boss arena entry checkpoint references and placement", () => {
+    const missingCheckpointLevel = defineLevel({
+      ...BASE_LEVEL,
+      bosses: [
+        {
+          ...VALID_BOSS,
+          entryCheckpointId: "missing-checkpoint",
+        },
+      ],
+    } satisfies LevelDefinition);
+    const distantCheckpointLevel = defineLevel({
+      ...BASE_LEVEL,
+      bosses: [
+        {
+          ...VALID_BOSS,
+          entryCheckpointId: "checkpoint-start",
+        },
+      ],
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(missingCheckpointLevel).issues).toContainEqual(
+      expect.objectContaining({
+        code: "missing-reference",
+        path: "bosses[0].entryCheckpointId",
+      }),
+    );
+    expect(validateLevel(distantCheckpointLevel).issues).toContainEqual(
+      expect.objectContaining({
+        code: "invalid-boss",
+        path: "bosses[0].entryCheckpointId",
+      }),
+    );
+  });
+
+  it("validates boss required schema collections and scoped ids", () => {
+    const invalidLevel = defineLevel({
+      ...BASE_LEVEL,
+      bosses: [
+        {
+          ...VALID_BOSS,
+          attacks: [],
+          damageRules: [],
+          vulnerabilityWindows: [],
+          defeatUnlocks: [],
+        },
+        {
+          ...VALID_BOSS,
+          id: "boss-validation-duplicate-scoped-ids",
+          attacks: [
+            VALID_BOSS.attacks[0]!,
+            {
+              ...VALID_BOSS.attacks[0]!,
+            },
+          ],
+          vulnerabilityWindows: [
+            VALID_BOSS.vulnerabilityWindows[0]!,
+            {
+              ...VALID_BOSS.vulnerabilityWindows[0]!,
+            },
+          ],
+        },
+      ],
+      assets: {
+        ...BASE_LEVEL.assets,
+        sprites: [...BASE_LEVEL.assets.sprites, "boss-validation-sprite"],
+      },
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(invalidLevel).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].attacks",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].damageRules",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].vulnerabilityWindows",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].defeatUnlocks",
+        }),
+        expect.objectContaining({
+          code: "duplicate-id",
+          path: "bosses[1].attacks[1].id",
+        }),
+        expect.objectContaining({
+          code: "duplicate-id",
+          path: "bosses[1].vulnerabilityWindows[1].id",
+        }),
+      ]),
+    );
+  });
+
+  it("validates boss projectile, damage rule and arena lock schema details", () => {
+    const invalidLevel = defineLevel({
+      ...BASE_LEVEL,
+      bosses: [
+        {
+          ...VALID_BOSS,
+          entryDoorId: "missing-entry-door",
+          attacks: [
+            {
+              ...VALID_BOSS.attacks[0]!,
+              projectile: {
+                ...VALID_BOSS.attacks[0]!.projectile!,
+                maxRangePx: 0,
+                isDestructibleBy: [],
+              },
+            },
+          ],
+          damageRules: [
+            {
+              ...VALID_BOSS.damageRules[0]!,
+              damage: -1,
+            },
+            {
+              ...VALID_BOSS.damageRules[1]!,
+              damage: 1,
+              effects: ["block"],
+            },
+            {
+              ...VALID_BOSS.damageRules[1]!,
+              damage: 0,
+              effects: [],
+            },
+          ],
+        },
+      ],
+      assets: {
+        ...BASE_LEVEL.assets,
+        sprites: [...BASE_LEVEL.assets.sprites, "boss-validation-sprite"],
+      },
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(invalidLevel).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].attacks[0].projectile.maxRangePx",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].attacks[0].projectile.isDestructibleBy",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].damageRules[0].damage",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].damageRules[1].effects",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].damageRules[2].effects",
+        }),
+        expect.objectContaining({
+          code: "missing-reference",
+          path: "bosses[0].entryDoorId",
+        }),
+      ]),
+    );
+  });
+
+  it("validates boss geometry, attacks, damage rules and unlocks", () => {
+    const invalidLevel = defineLevel({
+      ...BASE_LEVEL,
+      bosses: [
+        {
+          ...VALID_BOSS,
+          levelId: "wrong-level",
+          arena: {
+            x: 400,
+            y: 126,
+            width: 120,
+            height: 112,
+          },
+          spawn: {
+            x: 64,
+            y: 222,
+          },
+          health: 0,
+          weakPoint: {
+            x: 360,
+            y: 176,
+            width: 16,
+            height: 16,
+          },
+          movement: {
+            kind: "patrol",
+            speedPxPerSecond: -1,
+            anchors: [
+              {
+                x: 64,
+                y: 222,
+              },
+            ],
+          },
+          attacks: [
+            {
+              ...VALID_BOSS.attacks[0]!,
+              id: "invalid-boss-attack",
+              windupMs: 0,
+              activeMs: -1,
+              recoverMs: 0,
+              cooldownMs: 0,
+              contactDamage: -1,
+              tellArea: {
+                x: 64,
+                y: 204,
+                width: 80,
+                height: 16,
+              },
+              hitbox: {
+                x: 408,
+                y: 160,
+                width: 0,
+                height: 16,
+              },
+              projectile: {
+                hitbox: {
+                  x: 0,
+                  y: 0,
+                  width: 0,
+                  height: 14,
+                },
+                velocity: {
+                  x: 0,
+                  y: 0,
+                },
+                maxActive: 0,
+                maxRangePx: 0,
+                isDestructibleBy: [],
+              },
+              opensVulnerabilityWindowId: "missing-window",
+            },
+          ],
+          damageRules: [
+            {
+              power: "cyan-spark",
+              damage: -1,
+              validStates: [],
+              requiresWeakPoint: true,
+              oncePerAttack: false,
+              consumesHit: true,
+              effects: [],
+            },
+          ],
+          vulnerabilityWindows: [
+            {
+              id: "invalid-window",
+              state: "recover",
+              durationMs: 0,
+              weakPointActive: true,
+              opensAfterAttackIds: ["missing-attack"],
+            },
+          ],
+          entryDoorId: "lever-main",
+          defeatUnlocks: ["missing-door"],
+        },
+      ],
+    } satisfies LevelDefinition);
+
+    expect(validateLevel(invalidLevel).issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].levelId",
+        }),
+        expect.objectContaining({
+          code: "out-of-bounds",
+          path: "bosses[0].arena",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].spawn",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].health",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].weakPoint",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].movement.speedPxPerSecond",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].movement",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].attacks[0].windupMs",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].attacks[0].contactDamage",
+        }),
+        expect.objectContaining({
+          code: "invalid-rect",
+          path: "bosses[0].attacks[0].hitbox",
+        }),
+        expect.objectContaining({
+          code: "invalid-rect",
+          path: "bosses[0].attacks[0].projectile.hitbox",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].attacks[0].projectile.velocity",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].attacks[0].projectile.maxActive",
+        }),
+        expect.objectContaining({
+          code: "missing-reference",
+          path: "bosses[0].attacks[0].opensVulnerabilityWindowId",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].damageRules[0].validStates",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].vulnerabilityWindows[0].durationMs",
+        }),
+        expect.objectContaining({
+          code: "missing-reference",
+          path: "bosses[0].vulnerabilityWindows[0].opensAfterAttackIds[0]",
+        }),
+        expect.objectContaining({
+          code: "invalid-boss",
+          path: "bosses[0].entryDoorId",
+        }),
+        expect.objectContaining({
+          code: "missing-reference",
+          path: "bosses[0].defeatUnlocks[0]",
+        }),
+      ]),
+    );
+  });
+
   it("validates referenced assets", () => {
     const invalidLevel = defineLevel({
       ...BASE_LEVEL,
+      bosses: [VALID_BOSS],
       assets: {
         sprites: [],
         tilesets: [],
@@ -712,6 +1235,10 @@ describe("level validation", () => {
         expect.objectContaining({
           code: "missing-asset",
           path: "items[0].assetId",
+        }),
+        expect.objectContaining({
+          code: "missing-asset",
+          path: "bosses[0].assetId",
         }),
         expect.objectContaining({
           code: "missing-asset",

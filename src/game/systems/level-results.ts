@@ -10,6 +10,13 @@ export type LevelCompletionAttempt = {
   readonly deathCount: number;
 };
 
+export type LevelCompletionRunCounters = {
+  readonly levelId: LevelId;
+  readonly elapsedMs: number;
+  readonly levelStartDeathCount: number;
+  readonly currentDeathCount: number;
+};
+
 export type LevelResultRecord = {
   readonly bestTimeMs: number;
   readonly fewestDeaths: number;
@@ -32,6 +39,16 @@ export function normalizeLevelCompletionAttempt(
     elapsedMs: normalizeNonNegativeInteger(attempt.elapsedMs),
     deathCount: normalizeNonNegativeInteger(attempt.deathCount),
   };
+}
+
+export function createLevelCompletionAttemptFromRunCounters(
+  counters: LevelCompletionRunCounters,
+): LevelCompletionAttempt {
+  return normalizeLevelCompletionAttempt({
+    levelId: counters.levelId,
+    elapsedMs: counters.elapsedMs,
+    deathCount: counters.currentDeathCount - counters.levelStartDeathCount,
+  });
 }
 
 export function readLevelResultRecords(

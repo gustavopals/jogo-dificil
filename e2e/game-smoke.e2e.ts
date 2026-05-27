@@ -34,6 +34,14 @@ type DevQaCommandResult = {
   readonly snapshot?: DevQaSnapshot;
 };
 
+type DevQaBossEntry = {
+  readonly id: string;
+  readonly displayName: string;
+  readonly levelId: string;
+  readonly levelName: string;
+  readonly entryCheckpointId: string;
+};
+
 type DevQaPlayerSnapshot = {
   readonly position: DebugVector;
   readonly velocity: DebugVector;
@@ -101,8 +109,10 @@ type DevQaSnapshot = {
 };
 
 type DevQaApi = {
+  readonly bosses?: readonly DevQaBossEntry[];
   readonly readSnapshot?: () => DevQaSnapshot;
   readonly startLevel?: (levelId: string) => DevQaCommandResult;
+  readonly startBoss?: (bossId: string) => DevQaCommandResult;
   readonly goToCheckpoint?: (checkpointId?: string) => DevQaCommandResult;
   readonly completeLevel?: () => DevQaCommandResult;
   readonly fillEnergy?: () => DevQaCommandResult;
@@ -187,6 +197,19 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
     x: 64,
     y: 222,
   });
+
+  await page.keyboard.down("Space");
+  await page.waitForTimeout(120);
+  await page.keyboard.up("Space");
+
+  await expect
+    .poll(async () => (await readSmokeSnapshot(page)).player?.y ?? 0)
+    .toBeLessThan((startSnapshot.player?.y ?? 0) - 15);
+  await expect
+    .poll(async () => (await readSmokeSnapshot(page)).player?.isGrounded, {
+      timeout: 1_500,
+    })
+    .toBe(true);
 
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(450);
@@ -444,6 +467,127 @@ test("energia ciano carrega, dispara centelha, solta rajada e ativa alvo", async
   expect(consoleErrors).toEqual([]);
 });
 
+test("ferramentas dev de QA abrem cada arena de boss", async ({ page }) => {
+  await page.goto("/");
+  await waitForQaTools(page);
+
+  const bossEntries = await page.evaluate(
+    () => (window as DebugWindow).__JOGO_DIFICIL_QA__?.bosses ?? [],
+  );
+
+  expect(bossEntries).toEqual([
+    {
+      id: "boss-hirolito-narguilito",
+      displayName: "Hirolito Narguilito",
+      levelId: "level-03",
+      levelName: "Quase Seguro",
+      entryCheckpointId: "level-03-before-hirolito",
+    },
+    {
+      id: "boss-dr-imports",
+      displayName: "Dr. Imports",
+      levelId: "level-06",
+      levelName: "Memoria Em Movimento",
+      entryCheckpointId: "level-06-before-dr-imports",
+    },
+    {
+      id: "boss-giga-fabio",
+      displayName: "Giga Fabio",
+      levelId: "level-10",
+      levelName: "O Ultimo Nucleo",
+      entryCheckpointId: "level-10-before-giga-fabio",
+    },
+  ]);
+
+  for (const boss of [
+    {
+      id: "boss-hirolito-narguilito",
+      levelId: "level-03",
+      checkpointId: "level-03-before-hirolito",
+      entryDoorId: "level-03-hirolito-entry-door",
+      exitDoorId: "level-03-hirolito-exit-door",
+      weakPointId: "level-03-hirolito-crystal",
+    },
+    {
+      id: "boss-dr-imports",
+      levelId: "level-06",
+      checkpointId: "level-06-before-dr-imports",
+      entryDoorId: "level-06-dr-imports-entry-door",
+      exitDoorId: "level-06-dr-imports-exit-door",
+      weakPointId: "level-06-dr-imports-weak-point",
+    },
+    {
+      id: "boss-giga-fabio",
+      levelId: "level-10",
+      checkpointId: "level-10-before-giga-fabio",
+      entryDoorId: "level-10-giga-fabio-entry-door",
+      exitDoorId: "level-10-giga-fabio-exit-door",
+      weakPointId: "level-10-giga-fabio-weak-point",
+    },
+  ] as const) {
+    await startBossWithQa(page, boss.id);
+    await expect
+      .poll(() => readRequiredQaSnapshot(page))
+      .toMatchObject({
+        currentLevelId: boss.levelId,
+        activeCheckpoint: {
+          id: boss.checkpointId,
+        },
+        level: {
+          levelId: boss.levelId,
+          checkpointId: boss.checkpointId,
+          player: {
+            isAlive: true,
+            isGrounded: true,
+          },
+        },
+      });
+
+    expect(
+      findInteractiveObjectSnapshot(
+        await readRequiredQaSnapshot(page),
+        boss.entryDoorId,
+      ),
+    ).toMatchObject({
+      kind: "door",
+      isActive: true,
+    });
+    expect(
+      findInteractiveObjectSnapshot(
+        await readRequiredQaSnapshot(page),
+        boss.exitDoorId,
+      ),
+    ).toMatchObject({
+      kind: "door",
+      isActive: false,
+    });
+    expect(
+      findEnergyTargetSnapshot(
+        await readRequiredQaSnapshot(page),
+        boss.weakPointId,
+      ),
+    ).toMatchObject({
+      kind: "boss-hurtbox",
+      isBroken: false,
+    });
+
+    await page.keyboard.down("KeyD");
+    await expect
+      .poll(
+        async () =>
+          findInteractiveObjectSnapshot(
+            await readRequiredQaSnapshot(page),
+            boss.entryDoorId,
+          )?.isActive,
+        {
+          timeout: 2_000,
+        },
+      )
+      .toBe(false);
+    await page.keyboard.up("KeyD");
+  }
+});
+
 async function readSmokeSnapshot(page: Page): Promise<SmokeSnapshot> {
   return page.evaluate(() => {
     const game = (window as DebugWindow).__JOGO_DIFICIL_GAME__;
@@ -490,7 +634,9 @@ async function waitForQaTools(page: Page): Promise<void> {
 
         return Boolean(
           qa?.readSnapshot &&
+          qa.bosses &&
           qa.startLevel &&
+          qa.startBoss &&
           qa.goToCheckpoint &&
           qa.completeLevel &&
           qa.fillEnergy &&
@@ -507,6 +653,18 @@ async function startLevelWithQa(page: Page, levelId: string): Promise<void> {
     (targetLevelId) =>
       (window as DebugWindow).__JOGO_DIFICIL_QA__?.startLevel?.(targetLevelId),
     levelId,
+  );
+
+  expect(result).toMatchObject({
+    ok: true,
+  });
+}
+
+async function startBossWithQa(page: Page, bossId: string): Promise<void> {
+  const result = await page.evaluate(
+    (targetBossId) =>
+      (window as DebugWindow).__JOGO_DIFICIL_QA__?.startBoss?.(targetBossId),
+    bossId,
   );
 
   expect(result).toMatchObject({

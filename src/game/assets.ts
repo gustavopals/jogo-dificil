@@ -1,6 +1,11 @@
 import mvpLevelCompleteStingUrl from "../../assets/audio/music/mvp-level-complete-sting.wav";
 import mvpLoopUrl from "../../assets/audio/music/mvp-loop.wav";
 import menuLoopUrl from "../../assets/audio/music/menu-loop.wav";
+import bossAttackUrl from "../../assets/audio/sfx/boss-attack.wav";
+import bossDefeatUrl from "../../assets/audio/sfx/boss-defeat.wav";
+import bossEntryUrl from "../../assets/audio/sfx/boss-entry.wav";
+import bossHitUrl from "../../assets/audio/sfx/boss-hit.wav";
+import bossWindupUrl from "../../assets/audio/sfx/boss-windup.wav";
 import energyChargeFullUrl from "../../assets/audio/sfx/energy-charge-full.wav";
 import energyChargeLoopUrl from "../../assets/audio/sfx/energy-charge-loop.wav";
 import energyImpactHeavyUrl from "../../assets/audio/sfx/energy-impact-heavy.wav";
@@ -43,6 +48,13 @@ import playerPinoRespawn02Url from "../../assets/sprites/player-pino-respawn-02.
 import playerPinoRun01Url from "../../assets/sprites/player-pino-run-01.png";
 import playerPinoRun02Url from "../../assets/sprites/player-pino-run-02.png";
 import playerPinoRun03Url from "../../assets/sprites/player-pino-run-03.png";
+import bossDrImportsUrl from "../../assets/sprites/bosses/dr-imports.png";
+import bossGigaFabioUrl from "../../assets/sprites/bosses/giga-fabio.png";
+import bossHirolitoNarguilitoUrl from "../../assets/sprites/bosses/hirolito-narguilito.png";
+import bossImpactBurstUrl from "../../assets/sprites/bosses/boss-impact-burst.png";
+import bossProjectileBoulderUrl from "../../assets/sprites/bosses/boss-projectile-boulder.png";
+import bossProjectileImportBottleUrl from "../../assets/sprites/bosses/boss-projectile-import-bottle.png";
+import bossProjectileSmokePuffUrl from "../../assets/sprites/bosses/boss-projectile-smoke-puff.png";
 import energyCrackedBlockBrokenUrl from "../../assets/sprites/energy-cracked-block-broken.png";
 import energyCyanBurstBeamUrl from "../../assets/sprites/energy-cyan-burst-beam.png";
 import energyCyanSparkProjectileUrl from "../../assets/sprites/energy-cyan-spark-projectile.png";
@@ -64,6 +76,7 @@ import labHazardSpikesUrl from "../../assets/tilesets/lab-hazard-spikes.png";
 import labPlatformUrl from "../../assets/tilesets/lab-platform.png";
 import labSolidBlockUrl from "../../assets/tilesets/lab-solid-block.png";
 import {
+  BOSS_AUDIO_DEFINITIONS,
   ENERGY_AUDIO_DEFINITIONS,
   LEVEL_AUDIO_DEFINITIONS,
   MUSIC_AUDIO_DEFINITIONS,
@@ -113,6 +126,14 @@ export const ASSET_KEYS = {
   MARKER_CHECKPOINT_INACTIVE: GAMEPLAY_SPRITE_KEYS.MARKER_CHECKPOINT_INACTIVE,
   MARKER_CHECKPOINT_ACTIVE: GAMEPLAY_SPRITE_KEYS.MARKER_CHECKPOINT_ACTIVE,
   MARKER_EXIT: GAMEPLAY_SPRITE_KEYS.MARKER_EXIT,
+  BOSS_HIROLITO_NARGUILITO: GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO,
+  BOSS_DR_IMPORTS: GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS,
+  BOSS_GIGA_FABIO: GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO,
+  BOSS_PROJECTILE_SMOKE_PUFF: GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_SMOKE_PUFF,
+  BOSS_PROJECTILE_IMPORT_BOTTLE:
+    GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_IMPORT_BOTTLE,
+  BOSS_PROJECTILE_BOULDER: GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_BOULDER,
+  BOSS_IMPACT_BURST: GAMEPLAY_SPRITE_KEYS.BOSS_IMPACT_BURST,
   TILESET_LAB_SOLID_BLOCK: PLACEHOLDER_TILESET_ASSET_KEYS.SOLID_BLOCK,
   TILESET_LAB_PLATFORM: PLACEHOLDER_TILESET_ASSET_KEYS.PLATFORM,
   TILESET_LAB_HAZARD_SPIKES: PLACEHOLDER_TILESET_ASSET_KEYS.HAZARD_SPIKES,
@@ -265,6 +286,34 @@ export const IMAGE_ASSETS = [
     url: markerExitUrl,
   },
   {
+    key: ASSET_KEYS.BOSS_HIROLITO_NARGUILITO,
+    url: bossHirolitoNarguilitoUrl,
+  },
+  {
+    key: ASSET_KEYS.BOSS_DR_IMPORTS,
+    url: bossDrImportsUrl,
+  },
+  {
+    key: ASSET_KEYS.BOSS_GIGA_FABIO,
+    url: bossGigaFabioUrl,
+  },
+  {
+    key: ASSET_KEYS.BOSS_PROJECTILE_SMOKE_PUFF,
+    url: bossProjectileSmokePuffUrl,
+  },
+  {
+    key: ASSET_KEYS.BOSS_PROJECTILE_IMPORT_BOTTLE,
+    url: bossProjectileImportBottleUrl,
+  },
+  {
+    key: ASSET_KEYS.BOSS_PROJECTILE_BOULDER,
+    url: bossProjectileBoulderUrl,
+  },
+  {
+    key: ASSET_KEYS.BOSS_IMPACT_BURST,
+    url: bossImpactBurstUrl,
+  },
+  {
     key: ASSET_KEYS.TILESET_LAB_SOLID_BLOCK,
     url: labSolidBlockUrl,
   },
@@ -382,5 +431,25 @@ export const AUDIO_ASSETS = [
   {
     key: ENERGY_AUDIO_DEFINITIONS[7].assetKey,
     url: energyImpactHeavyUrl,
+  },
+  {
+    key: BOSS_AUDIO_DEFINITIONS[0].assetKey,
+    url: bossEntryUrl,
+  },
+  {
+    key: BOSS_AUDIO_DEFINITIONS[1].assetKey,
+    url: bossWindupUrl,
+  },
+  {
+    key: BOSS_AUDIO_DEFINITIONS[2].assetKey,
+    url: bossAttackUrl,
+  },
+  {
+    key: BOSS_AUDIO_DEFINITIONS[3].assetKey,
+    url: bossHitUrl,
+  },
+  {
+    key: BOSS_AUDIO_DEFINITIONS[4].assetKey,
+    url: bossDefeatUrl,
   },
 ] as const;

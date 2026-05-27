@@ -177,7 +177,7 @@ export const LEVEL_05 = defineLevel({
       },
       resetOnRespawn: true,
       config: {
-        fallDelayMs: 180,
+        fallDelayMs: 2000,
       },
     },
     {

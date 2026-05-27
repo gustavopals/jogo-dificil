@@ -7,6 +7,7 @@ export { LEVEL_06 } from "./level-06";
 export { LEVEL_07 } from "./level-07";
 export { LEVEL_08 } from "./level-08";
 export { LEVEL_09 } from "./level-09";
+export { LEVEL_10 } from "./level-10";
 export {
   getLevelDefinition,
   getRequiredLevelDefinition,
@@ -14,6 +15,19 @@ export {
 } from "./registry";
 export { defineLevel } from "./schema";
 export type {
+  BossAttackDefinition,
+  BossAttackId,
+  BossAttackKind,
+  BossDamageEffectKind,
+  BossDamageRuleDefinition,
+  BossDefinition,
+  BossId,
+  BossMovementDefinition,
+  BossMovementKind,
+  BossProjectileDefinition,
+  BossStateKind,
+  BossVulnerabilityWindowDefinition,
+  BossVulnerabilityWindowId,
   CheckpointDefinition,
   EnergyPowerKind,
   EnergyTargetDefinition,

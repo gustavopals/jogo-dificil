@@ -748,8 +748,9 @@ Função: combinar dash, centelha, rajada e interação.
   `energy-core` temporario acionado por `Rajada Ciano` e alavanca final com
   `K`/`X`.
 - Encadear `level-06 -> level-07 -> level-08 -> level-09`. Implementado com
-  `nextLevelId` em `level-06`, `level-07` e `level-08`; `level-09` encerra a
-  campanha atual e a tela final comunica 9 fases vencidas.
+  `nextLevelId` em `level-06`, `level-07` e `level-08`; `level-09` encerrou a
+  campanha de 9 fases ate a abertura da Fase 17, quando passou a apontar para
+  `level-10`.
 - Criar checklist manual do Bloco 3. Implementado em
   `docs/block-3-gameplay-checklist.md`, cobrindo validacao automatizada,
   playtest por fase, energia, HUD, audio, reset, cadeia e criterios de ajuste.

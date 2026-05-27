@@ -16,6 +16,7 @@ import {
   markTrapTriggered,
   resetRoomStateForRespawn,
 } from "../src/game/systems/room-state";
+import { VISUAL_READABILITY_SEMANTIC_COLORS } from "../src/game/systems/visual-readability";
 
 describe("level traps", () => {
   it("finds position-triggered traps that overlap the player hitbox", () => {
@@ -185,6 +186,46 @@ describe("level traps", () => {
     expect(resolvedBreakableFeedback.visual.crackAlpha).toBeGreaterThan(
       armedBreakableFeedback.visual.crackAlpha,
     );
+  });
+
+  it("keeps moving trap tells away from Pino energy cyan", () => {
+    const fallingPlatform = LEVEL_02.traps.find(
+      (candidate) => candidate.kind === "falling-platform",
+    )!;
+    const feedback = getTrapFeedback(
+      fallingPlatform,
+      createInitialRoomState(LEVEL_02).traps[fallingPlatform.id]!,
+    );
+
+    expect(feedback.visual.bodyColor).toBe(
+      VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+    );
+    expect(feedback.visual.tellColor).toBe(
+      VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+    );
+    expect(feedback.visual.bodyColor).not.toBe(
+      VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary,
+    );
+  });
+
+  it("keeps trap body and tell colors distinct from boss primary color", () => {
+    const traps = [LEVEL_01, LEVEL_02, LEVEL_03].flatMap((level) =>
+      level.traps.map((trap) => ({ level, trap })),
+    );
+
+    traps.forEach(({ level, trap }) => {
+      const feedback = getTrapFeedback(
+        trap,
+        createInitialRoomState(level).traps[trap.id]!,
+      );
+
+      expect(feedback.visual.bodyColor).not.toBe(
+        VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary,
+      );
+      expect(feedback.visual.tellColor).not.toBe(
+        VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary,
+      );
+    });
   });
 
   it("creates projectile trail feedback behind the projectile direction", () => {

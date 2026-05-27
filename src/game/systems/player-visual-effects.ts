@@ -1,5 +1,8 @@
 import type { FacingDirection, Vector2Like } from "../../shared";
-import { clampWideEffectAlpha } from "./visual-readability";
+import {
+  VISUAL_READABILITY_SEMANTIC_COLORS,
+  clampWideEffectAlpha,
+} from "./visual-readability";
 
 export type PlayerEnergyMode =
   | "idle"
@@ -43,9 +46,9 @@ export const PLAYER_DASH_TRAIL_INTERVAL_MS = 38;
 export const PLAYER_RUN_SPARK_INTERVAL_MS = 90;
 export const PLAYER_RUN_SPARK_SPEED_THRESHOLD = 90;
 
-const ENERGY_COLOR = 0x80d7c2;
-const ENERGY_HOT_COLOR = 0xf4d35e;
-const IMPACT_COLOR = 0xe35d6a;
+const ENERGY_COLOR = VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary;
+const ENERGY_HOT_COLOR = VISUAL_READABILITY_SEMANTIC_COLORS.energy.charged;
+const IMPACT_COLOR = VISUAL_READABILITY_SEMANTIC_COLORS.energy.failure;
 const WHITE_COLOR = 0xf5f7fb;
 
 const AURA_BY_MODE = {

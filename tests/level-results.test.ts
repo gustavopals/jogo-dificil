@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createLevelCompletionAttemptFromRunCounters,
   LEVEL_RESULTS_STORAGE_KEY,
   normalizeLevelCompletionAttempt,
   readLevelResultRecord,
@@ -50,6 +51,36 @@ describe("level results", () => {
       levelId: "level-01",
       elapsedMs: 0,
       deathCount: 0,
+    });
+  });
+
+  it("turns boss-attempt deaths into the local phase result delta", () => {
+    const storage = new MemoryStorage();
+    const bossAttempt = createLevelCompletionAttemptFromRunCounters({
+      levelId: "level-10",
+      elapsedMs: 42_000,
+      levelStartDeathCount: 5,
+      currentDeathCount: 8,
+    });
+
+    expect(bossAttempt).toEqual({
+      levelId: "level-10",
+      elapsedMs: 42_000,
+      deathCount: 3,
+    });
+
+    const result = recordLevelCompletion(bossAttempt, storage);
+
+    expect(result).toMatchObject({
+      levelId: "level-10",
+      deathCount: 3,
+      fewestDeaths: 3,
+      completions: 1,
+    });
+    expect(readLevelResultRecord("level-10", storage)).toEqual({
+      bestTimeMs: 42_000,
+      fewestDeaths: 3,
+      completions: 1,
     });
   });
 

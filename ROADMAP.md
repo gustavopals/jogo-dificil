@@ -1333,8 +1333,8 @@ Chefões planejados:
 - [x] Fechar distribuição em `level-03`, `level-06` e `level-10`.
 - [x] Registrar visual, papel e dificuldade de cada boss.
 - [x] Documentar uso das imagens em `assets/boss/examples/`.
-- [ ] Definir regra de dano por `Centelha Ciano` e `Rajada Ciano`.
-- [ ] Registrar decisões finais em `IDEIA.md`.
+- [x] Definir regra de dano por `Centelha Ciano` e `Rajada Ciano`.
+- [x] Registrar decisões finais em `IDEIA.md`.
 
 Pronto quando:
 
@@ -1342,11 +1342,11 @@ Pronto quando:
 
 ### Task 17.2 - Schema E Estado Compartilhado
 
-- [ ] Criar `BossDefinition` declarativo.
-- [ ] Validar arena, spawn, vida, weak point, ataques e desbloqueios.
-- [ ] Criar runtime state com vida, estado, timers, direção e invulnerabilidade.
-- [ ] Integrar boss ao reset de sala, morte, respawn e reinício manual.
-- [ ] Cobrir estado inicial e reset com testes.
+- [x] Criar `BossDefinition` declarativo.
+- [x] Validar arena, spawn, vida, weak point, ataques e desbloqueios.
+- [x] Criar runtime state com vida, estado, timers, direção e invulnerabilidade.
+- [x] Integrar boss ao reset de sala, morte, respawn e reinício manual.
+- [x] Cobrir estado inicial e reset com testes.
 
 Pronto quando:
 
@@ -1354,11 +1354,11 @@ Pronto quando:
 
 ### Task 17.3 - Arena Lock E Fluxo De Boss
 
-- [ ] Fechar porta ao entrar na arena.
-- [ ] Bloquear saída enquanto boss estiver vivo.
-- [ ] Abrir saída após derrota.
-- [ ] Garantir checkpoint imediatamente antes de cada arena.
-- [ ] Impedir caminhada longa antes de repetir a luta.
+- [x] Fechar porta ao entrar na arena.
+- [x] Bloquear saída enquanto boss estiver vivo.
+- [x] Abrir saída após derrota.
+- [x] Garantir checkpoint imediatamente antes de cada arena.
+- [x] Impedir caminhada longa antes de repetir a luta.
 
 Pronto quando:
 
@@ -1366,12 +1366,12 @@ Pronto quando:
 
 ### Task 17.4 - Ataques, Projéteis E Dano
 
-- [ ] Criar projéteis de boss separados dos projéteis de trap.
-- [ ] Implementar tells, ataque e recover.
-- [ ] Integrar dano por `Centelha Ciano` e `Rajada Ciano`.
-- [ ] Limitar múltiplos hits por ataque.
-- [ ] Matar Pino por contato com projétil, corpo ou hitbox de ataque.
-- [ ] Remover projéteis ao bater em sólido, sair da arena ou resetar a sala.
+- [x] Criar projéteis de boss separados dos projéteis de trap.
+- [x] Implementar tells, ataque e recover.
+- [x] Integrar dano por `Centelha Ciano` e `Rajada Ciano`.
+- [x] Limitar múltiplos hits por ataque.
+- [x] Matar Pino por contato com projétil, corpo ou hitbox de ataque.
+- [x] Remover projéteis ao bater em sólido, sair da arena ou resetar a sala.
 
 Pronto quando:
 
@@ -1379,11 +1379,11 @@ Pronto quando:
 
 ### Task 17.5 - Arte, Audio E HUD Base
 
-- [ ] Criar sprites placeholder para os três bosses.
-- [ ] Criar sprites de projéteis e impactos.
-- [ ] Criar indicador de vida no corpo do boss.
-- [ ] Criar sons originais de entrada, windup, ataque, hit e derrota.
-- [ ] Garantir contraste visual entre boss, energia do Pino e traps.
+- [x] Criar sprites placeholder para os três bosses.
+- [x] Criar sprites de projéteis e impactos.
+- [x] Criar indicador de vida no corpo do boss.
+- [x] Criar sons originais de entrada, windup, ataque, hit e derrota.
+- [x] Garantir contraste visual entre boss, energia do Pino e traps.
 
 Pronto quando:
 
@@ -1391,11 +1391,11 @@ Pronto quando:
 
 ### Task 17.6 - Implementar Hirolito Narguilito
 
-- [ ] Criar arena no fim de `level-03`.
-- [ ] Implementar `smoke-puff` e `hose-snap`.
-- [ ] Implementar weak point de cristal.
-- [ ] Balancear vida 2, patrulha lenta e recover generoso.
-- [ ] Criar checklist manual do boss 1.
+- [x] Criar arena no fim de `level-03`.
+- [x] Implementar `smoke-puff` e `hose-snap`.
+- [x] Implementar weak point de cristal.
+- [x] Balancear vida 2, patrulha lenta e recover generoso.
+- [x] Criar checklist manual do boss 1.
 
 Pronto quando:
 
@@ -1403,11 +1403,11 @@ Pronto quando:
 
 ### Task 17.7 - Implementar Dr. Imports
 
-- [ ] Criar arena no fim de `level-06`.
-- [ ] Implementar `import-bottle`, `paper-wall` e `smoke-swap`.
-- [ ] Implementar movimento por três âncoras.
-- [ ] Balancear vida 3 e máximo de 2 projéteis ativos.
-- [ ] Criar checklist manual do boss 2.
+- [x] Criar arena no fim de `level-06`.
+- [x] Implementar `import-bottle`, `paper-wall` e `smoke-swap`.
+- [x] Implementar movimento por três âncoras.
+- [x] Balancear vida 3 e máximo de 2 projéteis ativos.
+- [x] Criar checklist manual do boss 2.
 
 Pronto quando:
 
@@ -1415,11 +1415,11 @@ Pronto quando:
 
 ### Task 17.8 - Implementar Giga Fabio
 
-- [ ] Criar `level-10` como fase final.
-- [ ] Implementar `floor-slam`, `boulder-toss` e `shoulder-charge`.
-- [ ] Exigir `Rajada Ciano` para dano real.
-- [ ] Adicionar recarga de energia na arena.
-- [ ] Criar checklist manual do boss final.
+- [x] Criar `level-10` como fase final.
+- [x] Implementar `floor-slam`, `boulder-toss` e `shoulder-charge`.
+- [x] Exigir `Rajada Ciano` para dano real.
+- [x] Adicionar recarga de energia na arena.
+- [x] Criar checklist manual do boss final.
 
 Pronto quando:
 
@@ -1427,11 +1427,11 @@ Pronto quando:
 
 ### Task 17.9 - Integrar Progressão Das 10 Fases
 
-- [ ] Encadear `level-03 -> level-04` após Hirolito.
-- [ ] Encadear `level-06 -> level-07` após Dr. Imports.
-- [ ] Encadear `level-09 -> level-10` para o final.
-- [ ] Garantir que resultados locais registram mortes em boss.
-- [ ] Garantir que QA consegue iniciar diretamente cada boss.
+- [x] Encadear `level-03 -> level-04` após Hirolito.
+- [x] Encadear `level-06 -> level-07` após Dr. Imports.
+- [x] Encadear `level-09 -> level-10` para o final.
+- [x] Garantir que resultados locais registram mortes em boss.
+- [x] Garantir que QA consegue iniciar diretamente cada boss.
 
 Pronto quando:
 
@@ -1439,13 +1439,13 @@ Pronto quando:
 
 ### Task 17.10 - Testes E QA Dos Bosses
 
-- [ ] Criar testes unitários de estado compartilhado.
-- [ ] Criar testes unitários de ataques e projéteis.
-- [ ] Criar testes de validação de schema.
-- [ ] Criar testes de conteúdo para `level-03`, `level-06` e `level-10`.
-- [ ] Atualizar smoke Playwright para abrir cada arena.
-- [ ] Criar checklist manual para hit, morte, respawn, reset e vitória.
-- [ ] Rodar lint, testes, build e smoke.
+- [x] Criar testes unitários de estado compartilhado.
+- [x] Criar testes unitários de ataques e projéteis.
+- [x] Criar testes de validação de schema.
+- [x] Criar testes de conteúdo para `level-03`, `level-06` e `level-10`.
+- [x] Atualizar smoke Playwright para abrir cada arena.
+- [x] Criar checklist manual para hit, morte, respawn, reset e vitória.
+- [x] Rodar lint, testes, build e smoke.
 
 Pronto quando:
 
@@ -1922,9 +1922,8 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   temporario abrindo passagem e alavanca com `K`/`X` antes da saida. A fase ja
   entra no registry e nas ferramentas de QA; o encadeamento continua separado.
 - [x] Task 16.8 parcial concluida: campanha encadeada em
-  `level-06 -> level-07 -> level-08 -> level-09`. A tela final agora aparece
-  depois de `level-09` e o texto de conclusao foi atualizado para as 9 fases
-  atuais.
+  `level-06 -> level-07 -> level-08 -> level-09`. Essa era a tela final de 9
+  fases na Fase 16; desde a Fase 17, `level-09` aponta para `level-10`.
 - [x] Task 16.8 concluida: checklist manual do Bloco 3 criado em
   `docs/block-3-gameplay-checklist.md`, cobrindo `level-07`, `level-08`,
   `level-09`, cadeia de campanha, energia, HUD, audio, reset, resultados locais
@@ -1987,3 +1986,262 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `Hirolito Narguilito` fica como leitura compacta de baixa-média dificuldade,
   `Dr. Imports` como teste intermediario de dash/projeteis, e `Giga Fabio` como
   boss final de dificuldade média-alta baseado no kit completo de energia.
+- [x] Task 17.1 parcial concluida: uso das imagens em
+  `assets/boss/examples/` documentado em `docs/phase-17-boss-plan.md`,
+  `IDEIA.md` e `assets/ASSETS.md`. As imagens ficam como referencias locais de
+  tema, silhueta e props, sem importacao no runtime e sem uso como sprites
+  finais.
+- [x] Task 17.1 concluida: regra de dano por `Centelha Ciano` e
+  `Rajada Ciano` fechada em `docs/phase-17-boss-plan.md` e registrada em
+  `IDEIA.md`. Bosses so perdem vida em janela vulneravel com weak point ativo;
+  `Centelha Ciano` causa dano nos bosses 1 e 2, enquanto `Giga Fabio` so perde
+  vida com `Rajada Ciano`.
+- [x] Task 17.2 iniciada: `BossDefinition` declarativo criado em
+  `src/shared/levels.ts`, reexportado por `src/shared/index.ts` e
+  `src/data/levels/schema.ts`, com `LevelDefinition.bosses` opcional. O schema
+  cobre arena, spawn, vida, hitbox, weak point, movimento, ataques, dano,
+  janelas vulneraveis e desbloqueios por derrota; teste focado adicionado em
+  `tests/level-schema.test.ts`.
+- [x] Task 17.2 parcial concluida: validacao declarativa de boss integrada em
+  `src/data/levels/validation.ts`. Agora arena, spawn, vida, hitbox, weak point,
+  movimento, ataques, projeteis, regras de dano, janelas vulneraveis,
+  desbloqueios por derrota, ids duplicados e asset opcional sao verificados com
+  cobertura em `tests/level-validation.test.ts`.
+- [x] Task 17.2 parcial concluida: runtime puro de boss criado em
+  `src/game/physics/boss-state.ts`, exportado por `src/game/physics/index.ts` e
+  coberto em `tests/boss-state.test.ts`. O estado guarda vida, estado atual,
+  posicao, direcao, timers, ataque ativo, janela vulneravel ativa,
+  invulnerabilidade e flag de reset por respawn.
+- [x] Task 17.2 concluida: bosses integrados ao `RoomRuntimeState` em
+  `src/game/systems/room-state.ts`. `createInitialRoomState` cria estado inicial
+  para bosses declarados e `resetRoomStateForRespawn` reseta ou preserva bosses
+  conforme `resetOnRespawn`, cobrindo o fluxo de respawn automatico e reinicio
+  manual com `R` usado por `LevelScene.resetRoomTransientState`. Cobertura
+  adicionada em `tests/room-state.test.ts`.
+- [x] Task 17.3 iniciada: porta de entrada da arena fecha ao jogador entrar na
+  area do boss. `BossDefinition` ganhou `entryDoorId`, validado como
+  `interactiveObject` do tipo `door`; `src/game/systems/level-bosses.ts` inicia
+  boss `inactive` em `intro` e fecha a porta, e `LevelScene` chama o fluxo apos
+  o movimento do jogador. Cobertura em `tests/level-bosses.test.ts`.
+- [x] Task 17.3 parcial concluida: saida da fase fica bloqueada enquanto houver
+  boss vivo. `LevelScene.updateLevelProgress` consulta
+  `isLevelExitBlockedByLivingBosses`; bosses declarados que ainda nao estao
+  `defeated` com vida zerada impedem completar a fase, inclusive antes de
+  iniciar a arena. Cobertura adicionada em `tests/level-bosses.test.ts`.
+- [x] Task 17.3 parcial concluida: saida abre apos derrota do boss. Bosses usam
+  `defeatUnlocks` para listar objetos liberados; `unlockDefeatedBossObjects`
+  ativa esses objetos quando o estado chega em `defeated` ou vida zero, e
+  `LevelScene.updateBossDefeatUnlocks` atualiza solidos e marcadores da sala.
+  Cobertura adicionada em `tests/level-bosses.test.ts`.
+- [x] Task 17.3 parcial concluida: checkpoint imediatamente antes da arena virou
+  contrato declarativo. `BossDefinition` ganhou `entryCheckpointId` obrigatorio
+  e `src/data/levels/validation.ts` valida que ele existe, fica antes da entrada
+  da arena, tem overlap vertical com a arena e esta a no maximo 8 tiles dela.
+  Cobertura adicionada em `tests/level-schema.test.ts` e
+  `tests/level-validation.test.ts`.
+- [x] Task 17.3 concluida: repetir luta de boss nao exige caminhada longa.
+  Quando `LevelScene.updateBossArenaLocks` inicia uma arena, ela ativa
+  automaticamente o `entryCheckpointId` do boss se ainda nao for o checkpoint
+  atual. Morte, respawn automatico e `R` voltam direto para a entrada da arena,
+  sem reemitir checkpoint quando ele ja estiver ativo. Cobertura adicionada em
+  `tests/level-bosses.test.ts`.
+- [x] Task 17.4 iniciada: projeteis de boss foram separados dos projeteis de
+  trap. `RoomRuntimeState` agora tem `bossProjectiles` isolado de
+  `projectiles`, com `spawnRoomBossProjectile`/`setRoomBossProjectiles` e reset
+  proprio de sala. A logica pura em `src/game/physics/boss-projectiles.ts`
+  cria, limita `maxActive`, move, calcula hitbox e remove por alcance/bounds.
+  Cobertura adicionada em `tests/boss-projectiles.test.ts` e
+  `tests/room-state.test.ts`.
+- [x] Task 17.4 parcial concluida: tells, ataque e recover implementados como
+  ciclo puro em `src/game/physics/boss-attacks.ts`. Boss em `patrol` inicia
+  `windup` com tell, entra em `attack` com hitbox/projetil, abre `recover` com
+  janela vulneravel e cooldown, e volta para `patrol`. `LevelScene` agora chama
+  `updateBossAttackRuntime` para avancar o ciclo e spawnar projeteis de boss.
+  Cobertura adicionada em `tests/boss-attacks.test.ts` e
+  `tests/level-bosses.test.ts`.
+- [x] Task 17.4 parcial concluida: dano por `Centelha Ciano` e
+  `Rajada Ciano` integrado ao runtime dos bosses. `applyBossEnergyHit` aplica
+  as regras declarativas de `damageRules`, exige estado valido/weak point,
+  respeita invulnerabilidade e atualiza vida, stun ou derrota. `LevelScene`
+  agora resolve `boss-hurtbox`/`hitGroupId` e evita tratar hurtbox de boss como
+  bloco quebravel comum. Cobertura adicionada em `tests/level-bosses.test.ts`.
+- [x] Task 17.4 parcial concluida: multiplos hits por ataque limitados para
+  regras com `oncePerAttack`. `BossRuntimeState` guarda `damageHitLockKeys`, a
+  cena passa `sourceAttackId` para `Centelha Ciano`/`Rajada Ciano` e
+  `applyBossEnergyHit` bloqueia repeticao do mesmo ataque de energia sem
+  impedir um novo disparo valido. Cobertura adicionada em
+  `tests/boss-state.test.ts` e `tests/level-bosses.test.ts`.
+- [x] Task 17.4 parcial concluida: contato letal de boss integrado ao fluxo de
+  morte do Pino. `findTouchedBossThreat` detecta projeteis de boss, hitbox de
+  ataque ativa e corpo de boss vivo/ativo, retornando `cause` e `sourceId` para
+  `LevelScene.killPlayer`. A causa `boss` entrou no feedback curto de morte.
+  Cobertura adicionada em `tests/level-bosses.test.ts` e
+  `tests/death-feedback.test.ts`.
+- [x] Task 17.4 parcial concluida: remocao de projeteis de boss fechada para
+  colisao com solidos, saida da arena do boss, saida dos bounds e alcance
+  maximo. `LevelScene` passa os solidos reais da sala para
+  `updateBossAttackRuntime`, enquanto respawn, morte e `R` continuam limpando
+  `bossProjectiles` pelo reset de sala. Cobertura adicionada em
+  `tests/boss-projectiles.test.ts`, `tests/level-bosses.test.ts` e
+  `tests/room-state.test.ts`.
+- [x] Task 17.5 iniciada: sprites placeholder dos tres bosses criados como PNGs
+  originais em `assets/sprites/bosses/`: `hirolito-narguilito.png` 48x56,
+  `dr-imports.png` 48x64 e `giga-fabio.png` 64x80. Os sprites foram registrados
+  em `GAMEPLAY_SPRITE_ASSETS`, entram no preload por `IMAGE_ASSETS` e foram
+  documentados em `assets/ASSETS.md`.
+- [x] Task 17.5 parcial concluida: sprites de projeteis e impactos de boss
+  criados em `assets/sprites/bosses/`: fumaca roxa 16x16, garrafa/importacao
+  16x16, pedra pesada 24x24 e impacto coral/amarelo 24x24. As chaves entram em
+  `GAMEPLAY_SPRITE_ASSETS`, no preload de `IMAGE_ASSETS` e na cobertura de
+  `tests/gameplay-sprites.test.ts`.
+- [x] Task 17.5 parcial concluida: indicador de vida no corpo do boss criado
+  como pips pequenos sobre o hitbox do boss, sem texto fixo e abaixo dos depths
+  de hazards pequenos. A cena agora sincroniza sprite/vida de boss declarado,
+  esconde indicador em `inactive`/`defeated` e mostra pips vazios/preenchidos
+  com feedback coral durante invulnerabilidade. Cobertura adicionada em
+  `tests/level-bosses.test.ts`.
+- [x] Task 17.5 parcial concluida: sons originais de boss criados e integrados
+  para entrada, windup, ataque, hit e derrota. Os WAVs ficam em
+  `assets/audio/sfx/boss-*.wav`, entram em `BOSS_AUDIO_DEFINITIONS`, preload,
+  audio manager e eventos da `LevelScene`. Cobertura adicionada em
+  `tests/boss-audio.test.ts`.
+- [x] Task 17.5 concluida: contraste visual entre boss, energia do Pino e traps
+  centralizado em `src/game/systems/visual-readability.ts`. Energia usa ciano,
+  traps usam roxo/vermelho e bosses usam coral/dourado escuro, com tests para
+  distancia minima entre cores primarias e depths que deixam hazards acima dos
+  efeitos/vida de boss. Traps moveis deixaram de usar o ciano da energia.
+- [x] Task 17.6 iniciada: arena do `Hirolito Narguilito` criada no fim de
+  `level-03`. A fase agora tem bounds de 90 tiles, aproximação após o truque da
+  saída, checkpoint `level-03-before-hirolito` com 60 de energia inicial,
+  arena reta de 20 tiles, plataforma baixa central e portas declaradas para a
+  próxima etapa ligar fechamento/abertura pelo boss. Cobertura adicionada em
+  `tests/level-03-content.test.ts`.
+- [x] Task 17.6 parcial concluida: `Hirolito Narguilito` entrou em
+  `level-03` com ataques `smoke-puff` e `hose-snap`. O smoke usa projétil lento
+  destrutível por `Centelha Ciano`, o hose usa tell/hitbox de chão com windup
+  claro, e o runtime de boss agora alterna ataques declarados por sequência
+  determinística em vez de repetir sempre o primeiro. Cobertura adicionada em
+  `tests/level-03-content.test.ts` e `tests/boss-attacks.test.ts`.
+- [x] Task 17.6 parcial concluida: weak point de cristal implementado para
+  bosses. O cristal usa o `weakPoint` declarativo, fica apagado fora da janela
+  vulnerável, acende em ciano/amarelo durante `recover` e substitui o marcador
+  retangular genérico de `boss-hurtbox` na cena. Cobertura adicionada em
+  `tests/level-bosses.test.ts`.
+- [x] Task 17.6 parcial concluida: balanceamento inicial do
+  `Hirolito Narguilito` fechado com 2 de vida, patrulha lenta em `28px/s`,
+  `recover` de `1200ms` e cooldown de `1500ms`. A cobertura de
+  `tests/level-03-content.test.ts` garante que o primeiro boss continue curto,
+  legível e com janela generosa para acertar o cristal.
+- [x] Task 17.6 concluida: checklist manual do boss 1 criado em
+  `docs/boss-1-gameplay-checklist.md`, cobrindo arena lock, tells, projétil,
+  weak point, dano por energia, morte, respawn, reinício com `R`, pausa, mute e
+  transição para `level-04`.
+- [x] Task 17.7 iniciada: arena do `Dr. Imports` criada no fim de `level-06`.
+  A fase agora tem 90 tiles de largura, aproximação após o corredor de memória,
+  checkpoint `level-06-before-dr-imports` com 80 de energia, sala de 22 tiles,
+  duas plataformas laterais baixas, centro limpo para dash e portas declaradas
+  para o fluxo de boss. Cobertura adicionada em
+  `tests/block-2-content.test.ts`.
+- [x] Task 17.7 parcial concluida: `Dr. Imports` entrou em `level-06` com
+  `import-bottle`, `paper-wall` e `smoke-swap`. O frasco vira projétil de boss
+  destrutível por `Centelha Ciano`, a parede de papéis bloqueia energia durante
+  o ataque, e o smoke-swap muda a posição/facing do boss antes do recover
+  vulnerável. Cobertura adicionada em `tests/block-2-content.test.ts`,
+  `tests/boss-attacks.test.ts`, `tests/boss-projectiles.test.ts`,
+  `tests/level-bosses.test.ts` e `tests/level-energy-targets.test.ts`.
+- [x] Task 17.7 parcial concluida: movimento por três âncoras implementado no
+  runtime de boss. `updateBossAnchorMovement` move bosses em `patrol` com a
+  velocidade declarada; `anchor-swap` percorre as três âncoras em sequência e
+  atualiza `facing`, enquanto windup/attack/recover ficam parados para manter
+  leitura. Cobertura adicionada em `tests/boss-state.test.ts`.
+- [x] Task 17.7 parcial concluida: balanceamento do `Dr. Imports` fechado com
+  3 hits e limite de 2 projéteis ativos no `import-bottle`. O limite ficou em
+  constantes de `level-06`, e `tests/block-2-content.test.ts` garante que só o
+  ataque de frasco cria projétil e que nenhum ataque passa de 2 ativos.
+- [x] Task 17.7 concluida: checklist manual do boss 2 criado em
+  `docs/boss-2-gameplay-checklist.md`, cobrindo arena lock, movimento por tres
+  ancoras, `import-bottle`, `paper-wall`, `smoke-swap`, dano por
+  `Centelha Ciano`/`Rajada Ciano`, limite de 2 frascos ativos, morte, respawn,
+  reinicio com `R`, pausa, mute e transicao para `level-07`.
+- [x] Task 17.8 iniciada: `level-10`, `O Ultimo Nucleo`, criado como fase final
+  dedicada para `Giga Fabio`. A fase entra no registry com ordem/dificuldade 10,
+  checkpoint `level-10-before-giga-fabio` com energia cheia, arena de 26 tiles,
+  duas plataformas laterais, assets placeholder do boss final e saída final sem
+  `nextLevelId`.
+- [x] Task 17.9 parcial concluida: `level-09 -> level-10` encadeado para que a
+  campanha atual tenha 10 fases jogáveis e a tela de conclusão apareça depois
+  da arena final. `tests/level-10-content.test.ts` confirma que `level-09`
+  aponta para `level-10` e que `level-10` é a última fase registrada, sem
+  `nextLevelId`.
+- [x] Task 17.8 parcial concluida: `Giga Fabio` entrou em `level-10` com ciclo
+  deterministico de `floor-slam`, `boulder-toss` e `shoulder-charge`.
+  `floor-slam` cria hitbox baixa de impacto no chao, `boulder-toss` cria um
+  projetil de pedra limitado a 1 ativo e destrutivel por energia, e
+  `shoulder-charge` cria uma faixa horizontal telegrafada que força pulo ou
+  plataforma. Cobertura adicionada em `tests/level-10-content.test.ts`.
+- [x] Task 17.8 parcial concluida: dano real do `Giga Fabio` restrito a
+  `Rajada Ciano`. O weak point aceita apenas `cyan-burst`, `damageRules` nao
+  declaram `cyan-spark`, e `tests/level-10-content.test.ts` cobre runtime em
+  `recover`: `Centelha Ciano` nao remove vida e `Rajada Ciano` remove 1 hit.
+- [x] Task 17.8 parcial concluida: recarga de energia da arena final adicionada
+  como duas plataformas laterais declaradas em `level-10`, uma de cada lado do
+  spawn do `Giga Fabio`, com largura suficiente para parar e segurar `L`/`C`.
+  O checkpoint da arena continua entrando com energia cheia para garantir a
+  primeira `Rajada Ciano`.
+- [x] Task 17.8 concluida: checklist manual do boss final criado em
+  `docs/boss-3-gameplay-checklist.md`, cobrindo arena lock, recarga lateral,
+  `floor-slam`, `boulder-toss`, `shoulder-charge`, regra de dano apenas por
+  `Rajada Ciano`, morte, respawn, reinicio com `R`, pausa, mute e tela final da
+  campanha.
+- [x] Task 17.9 parcial concluida: `level-03 -> level-04` confirmado após
+  derrota do `Hirolito Narguilito`. `LEVEL_03.exit.nextLevelId` aponta para
+  `level-04`, a saída permanece bloqueada enquanto o boss vive e
+  `tests/level-03-content.test.ts` cobre a abertura da porta final por
+  `defeatUnlocks`.
+- [x] Task 17.9 parcial concluida: `level-06 -> level-07` confirmado após
+  derrota do `Dr. Imports`. `LEVEL_06.exit.nextLevelId` aponta para `level-07`,
+  a saída permanece bloqueada enquanto o boss vive e
+  `tests/block-2-content.test.ts` cobre a abertura da porta final por
+  `defeatUnlocks`.
+- [x] Task 17.9 parcial concluida: resultados locais por fase agora têm cálculo
+  puro de delta entre o contador global no início da fase e no fim da fase. Como
+  mortes por boss passam por `gameStateStore.registerDeath`, elas entram no
+  `deathCount` salvo por `recordLevelCompletion`; cobertura adicionada em
+  `tests/level-results.test.ts`.
+- [x] Task 17.9 concluida: QA agora lista bosses em
+  `window.__JOGO_DIFICIL_QA__.bosses` e inicia qualquer arena diretamente com
+  `startBoss("boss-hirolito-narguilito")`, `startBoss("boss-dr-imports")` ou
+  `startBoss("boss-giga-fabio")`. O comando usa o `entryCheckpointId`
+  declarativo de cada boss, inicia a fase correta no checkpoint da arena e está
+  coberto em `tests/dev-qa-tools.test.ts`.
+- [x] Task 17.10 parcial concluida: testes unitários de estado compartilhado dos
+  bosses reforçados em `tests/room-state.test.ts`, cobrindo múltiplos bosses no
+  mesmo `RoomRuntimeState`, reset independente entre boss resetável e
+  persistente, e isolamento entre projéteis de trap e `bossProjectiles`.
+- [x] Task 17.10 parcial concluida: testes unitários de ataques e projéteis
+  reforçados em `tests/boss-attacks.test.ts` e
+  `tests/boss-projectiles.test.ts`, cobrindo seletor de ataque, estados
+  `intro`/`stunned`, origem/default de projétil, limite por boss/ataque e
+  remoção isolada de projéteis expirados.
+- [x] Task 17.10 parcial concluida: testes de validação de schema de bosses
+  reforçados em `tests/level-validation.test.ts`, cobrindo coleções
+  obrigatórias, ids duplicados internos, `maxRangePx`, `isDestructibleBy`,
+  regras de dano e porta de entrada ausente.
+- [x] Task 17.10 parcial concluida: testes de conteúdo dos bosses reforçados em
+  `tests/level-03-content.test.ts`, `tests/block-2-content.test.ts` e
+  `tests/level-10-content.test.ts`, cobrindo ligações de boss, `boss-hurtbox`,
+  portas, assets, alcance de projétil e fluxo de vitória do boss final.
+- [x] Task 17.10 parcial concluida: smoke Playwright atualizado em
+  `e2e/game-smoke.e2e.ts` para listar bosses via
+  `window.__JOGO_DIFICIL_QA__.bosses`, chamar `startBoss(...)` para Hirolito,
+  Dr. Imports e Giga Fabio, confirmar checkpoint/weak point/portas e entrar na
+  arena até a porta de entrada fechar.
+- [x] Task 17.10 parcial concluida: checklist manual transversal dos bosses
+  criado em `docs/bosses-qa-checklist.md`, cobrindo hit, morte, respawn, reset
+  com `R`, vitória, pausa, mute e estabilidade para Hirolito, Dr. Imports e
+  Giga Fabio.
+- [x] Task 17.10 concluida: bateria final executada com `npm run lint`,
+  `npm run test`, `npm run build` e
+  `npm run test:e2e -- e2e/game-smoke.e2e.ts`. Resultado: lint sem erros, 63
+  arquivos de teste e 414 testes unitarios passando, build de produção gerado e
+  smoke Playwright com 4 cenarios passando.

@@ -17,6 +17,13 @@ export const GAMEPLAY_SPRITE_KEYS = {
   MARKER_CHECKPOINT_INACTIVE: "marker-checkpoint-inactive",
   MARKER_CHECKPOINT_ACTIVE: "marker-checkpoint-active",
   MARKER_EXIT: "marker-exit",
+  BOSS_HIROLITO_NARGUILITO: "boss-hirolito-narguilito",
+  BOSS_DR_IMPORTS: "boss-dr-imports",
+  BOSS_GIGA_FABIO: "boss-giga-fabio",
+  BOSS_PROJECTILE_SMOKE_PUFF: "boss-projectile-smoke-puff",
+  BOSS_PROJECTILE_IMPORT_BOTTLE: "boss-projectile-import-bottle",
+  BOSS_PROJECTILE_BOULDER: "boss-projectile-boulder",
+  BOSS_IMPACT_BURST: "boss-impact-burst",
 } as const;
 
 export type GameplaySpriteKey =
@@ -46,6 +53,38 @@ const PROJECTILE_SPRITE_SIZE = {
 const ENERGY_EFFECT_SPRITE_SIZE = {
   width: TILE_SIZE,
   height: TILE_SIZE,
+} as const;
+const BOSS_SPRITE_SIZES = {
+  HIROLITO_NARGUILITO: {
+    width: 48,
+    height: 56,
+  },
+  DR_IMPORTS: {
+    width: 48,
+    height: 64,
+  },
+  GIGA_FABIO: {
+    width: 64,
+    height: 80,
+  },
+} as const;
+const BOSS_PROJECTILE_SPRITE_SIZES = {
+  SMOKE_PUFF: {
+    width: 16,
+    height: 16,
+  },
+  IMPORT_BOTTLE: {
+    width: 16,
+    height: 16,
+  },
+  BOULDER: {
+    width: 24,
+    height: 24,
+  },
+  IMPACT_BURST: {
+    width: 24,
+    height: 24,
+  },
 } as const;
 
 export const GAMEPLAY_SPRITE_ASSETS = [
@@ -175,6 +214,69 @@ export const GAMEPLAY_SPRITE_ASSETS = [
     path: "assets/sprites/marker-exit.png",
     sizePx: TILE_SPRITE_SIZE,
     description: "Saida de fase coral com painel vertical claro.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO,
+    path: "assets/sprites/bosses/hirolito-narguilito.png",
+    sizePx: BOSS_SPRITE_SIZES.HIROLITO_NARGUILITO,
+    description:
+      "Placeholder do Hirolito Narguilito com corpo de narguile e cristal ciano.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS,
+    path: "assets/sprites/bosses/dr-imports.png",
+    sizePx: BOSS_SPRITE_SIZES.DR_IMPORTS,
+    description:
+      "Placeholder do Dr. Imports com casaco escuro, maleta e fumaca roxa.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO,
+    path: "assets/sprites/bosses/giga-fabio.png",
+    sizePx: BOSS_SPRITE_SIZES.GIGA_FABIO,
+    description:
+      "Placeholder do Giga Fabio com silhueta grande, punhos dourados e nucleo ciano.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_SMOKE_PUFF,
+    path: "assets/sprites/bosses/boss-projectile-smoke-puff.png",
+    sizePx: BOSS_PROJECTILE_SPRITE_SIZES.SMOKE_PUFF,
+    description:
+      "Projetil placeholder de fumaca roxa para ataques de boss do tipo smoke-puff.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_IMPORT_BOTTLE,
+    path: "assets/sprites/bosses/boss-projectile-import-bottle.png",
+    sizePx: BOSS_PROJECTILE_SPRITE_SIZES.IMPORT_BOTTLE,
+    description:
+      "Projetil placeholder de garrafa importada para ataques de Dr. Imports.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_BOULDER,
+    path: "assets/sprites/bosses/boss-projectile-boulder.png",
+    sizePx: BOSS_PROJECTILE_SPRITE_SIZES.BOULDER,
+    description:
+      "Projetil placeholder de pedra pesada para arremessos do Giga Fabio.",
+    origin: "Gerado no projeto com magick",
+    license: "Original do projeto",
+  },
+  {
+    key: GAMEPLAY_SPRITE_KEYS.BOSS_IMPACT_BURST,
+    path: "assets/sprites/bosses/boss-impact-burst.png",
+    sizePx: BOSS_PROJECTILE_SPRITE_SIZES.IMPACT_BURST,
+    description:
+      "Impacto placeholder coral e amarelo para acertos e colisões de boss.",
     origin: "Gerado no projeto com magick",
     license: "Original do projeto",
   },

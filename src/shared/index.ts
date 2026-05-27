@@ -13,6 +13,19 @@ export type {
 } from "./entities";
 export type { RectLike, Vector2Like } from "./geometry";
 export type {
+  BossAttackDefinition,
+  BossAttackId,
+  BossAttackKind,
+  BossDamageEffectKind,
+  BossDamageRuleDefinition,
+  BossDefinition,
+  BossId,
+  BossMovementDefinition,
+  BossMovementKind,
+  BossProjectileDefinition,
+  BossStateKind,
+  BossVulnerabilityWindowDefinition,
+  BossVulnerabilityWindowId,
   CheckpointDefinition,
   CheckpointId,
   EnergyPowerKind,

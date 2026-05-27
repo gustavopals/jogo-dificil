@@ -1,4 +1,5 @@
 import type { AudioDefinition } from "./audio";
+import type { FacingDirection } from "./entities";
 import type { RectLike, Vector2Like } from "./geometry";
 
 export type LevelId = string;
@@ -10,6 +11,9 @@ export type TrapId = string;
 export type ItemId = string;
 export type InteractiveObjectId = string;
 export type EnergyTargetId = string;
+export type BossId = string;
+export type BossAttackId = string;
+export type BossVulnerabilityWindowId = string;
 export type LevelAssetId = string;
 
 export type TerrainKind = "solid";
@@ -33,6 +37,30 @@ export type EnergyTargetKind =
   | "boss-hurtbox";
 export type EnergyPowerKind = "cyan-spark" | "cyan-burst";
 export type TrapConfig = Readonly<Record<string, unknown>>;
+export type BossStateKind =
+  | "inactive"
+  | "intro"
+  | "patrol"
+  | "windup"
+  | "attack"
+  | "recover"
+  | "stunned"
+  | "defeated";
+export type BossMovementKind = "stationary" | "patrol" | "anchor-swap" | "walk";
+export type BossAttackKind =
+  | "smoke-puff"
+  | "hose-snap"
+  | "import-bottle"
+  | "paper-wall"
+  | "smoke-swap"
+  | "floor-slam"
+  | "boulder-toss"
+  | "shoulder-charge";
+export type BossDamageEffectKind =
+  | "damage"
+  | "block"
+  | "cancel-projectile"
+  | "activate-arena-target";
 
 export interface CheckpointDefinition {
   readonly id: CheckpointId;
@@ -112,6 +140,74 @@ export interface EnergyTargetDefinition {
   readonly absorbsEnergy?: boolean;
 }
 
+export interface BossMovementDefinition {
+  readonly kind: BossMovementKind;
+  readonly speedPxPerSecond?: number;
+  readonly anchors?: readonly Vector2Like[];
+  readonly patrolArea?: RectLike;
+}
+
+export interface BossProjectileDefinition {
+  readonly hitbox: RectLike;
+  readonly velocity: Vector2Like;
+  readonly maxActive: number;
+  readonly maxRangePx?: number;
+  readonly isDestructibleBy?: readonly EnergyPowerKind[];
+}
+
+export interface BossAttackDefinition {
+  readonly id: BossAttackId;
+  readonly kind: BossAttackKind;
+  readonly windupMs: number;
+  readonly activeMs: number;
+  readonly recoverMs: number;
+  readonly cooldownMs: number;
+  readonly contactDamage: number;
+  readonly tellArea?: RectLike;
+  readonly hitbox?: RectLike;
+  readonly projectile?: BossProjectileDefinition;
+  readonly opensVulnerabilityWindowId?: BossVulnerabilityWindowId;
+}
+
+export interface BossDamageRuleDefinition {
+  readonly power: EnergyPowerKind;
+  readonly damage: number;
+  readonly validStates: readonly BossStateKind[];
+  readonly requiresWeakPoint: boolean;
+  readonly oncePerAttack: boolean;
+  readonly consumesHit: boolean;
+  readonly effects: readonly BossDamageEffectKind[];
+}
+
+export interface BossVulnerabilityWindowDefinition {
+  readonly id: BossVulnerabilityWindowId;
+  readonly state: BossStateKind;
+  readonly durationMs: number;
+  readonly weakPointActive: boolean;
+  readonly opensAfterAttackIds?: readonly BossAttackId[];
+}
+
+export interface BossDefinition {
+  readonly id: BossId;
+  readonly levelId: LevelId;
+  readonly displayName: string;
+  readonly arena: RectLike;
+  readonly spawn: Vector2Like;
+  readonly initialFacing: FacingDirection;
+  readonly health: number;
+  readonly hitbox: RectLike;
+  readonly weakPoint: RectLike;
+  readonly resetOnRespawn: boolean;
+  readonly movement: BossMovementDefinition;
+  readonly attacks: readonly BossAttackDefinition[];
+  readonly damageRules: readonly BossDamageRuleDefinition[];
+  readonly vulnerabilityWindows: readonly BossVulnerabilityWindowDefinition[];
+  readonly entryCheckpointId: CheckpointId;
+  readonly entryDoorId?: InteractiveObjectId;
+  readonly defeatUnlocks: readonly InteractiveObjectId[];
+  readonly assetId?: LevelAssetId;
+}
+
 export interface LevelAudioDefinition {
   readonly musicId?: string;
   readonly sounds: readonly AudioDefinition[];
@@ -139,6 +235,7 @@ export interface LevelDefinition {
   readonly items: readonly ItemDefinition[];
   readonly interactiveObjects: readonly InteractiveObjectDefinition[];
   readonly energyTargets?: readonly EnergyTargetDefinition[];
+  readonly bosses?: readonly BossDefinition[];
   readonly audio: LevelAudioDefinition;
   readonly difficulty: number;
   readonly mainChallenge: string;

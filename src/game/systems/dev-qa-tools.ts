@@ -1,11 +1,22 @@
 import type Phaser from "phaser";
 
 import { getLevelDefinition, LEVEL_DEFINITIONS } from "../../data/levels";
-import type { CheckpointId, LevelId, Vector2Like } from "../../shared";
+import type {
+  BossDefinition,
+  BossId,
+  CheckpointDefinition,
+  CheckpointId,
+  LevelDefinition,
+  LevelId,
+  Vector2Like,
+} from "../../shared";
 import { SCENE_KEYS } from "../scenes/scene-keys";
 import { GAME_EVENTS, onGameEvent, type PlayerDiedEvent } from "./game-events";
 import { gameStateStore, type GameStateSnapshot } from "./game-state";
-import { resolveLevelInitialEnergy } from "./level-progress";
+import {
+  createActiveCheckpointFromDefinition,
+  resolveLevelInitialEnergy,
+} from "./level-progress";
 import type {
   EnergyTargetRuntimeState,
   InteractiveObjectRuntimeState,
@@ -42,6 +53,14 @@ export type DevQaEnergyStateSnapshot = {
   readonly burstDurationRemainingMs: number;
   readonly canUseCyanSpark: boolean;
   readonly canPrepareCyanBurst: boolean;
+};
+
+export type DevQaBossEntry = {
+  readonly id: BossId;
+  readonly displayName: string;
+  readonly levelId: LevelId;
+  readonly levelName: string;
+  readonly entryCheckpointId: CheckpointId;
 };
 
 export type DevQaLevelSnapshot = {
@@ -88,8 +107,10 @@ export type DevQaCommandResult =
 
 export type DevQaApi = {
   readonly levels: readonly LevelId[];
+  readonly bosses: readonly DevQaBossEntry[];
   readonly readSnapshot: () => DevQaSnapshot;
   readonly startLevel: (levelId: LevelId) => DevQaCommandResult;
+  readonly startBoss: (bossId: BossId) => DevQaCommandResult;
   readonly goToCheckpoint: (checkpointId?: CheckpointId) => DevQaCommandResult;
   readonly completeLevel: () => DevQaCommandResult;
   readonly fillEnergy: () => DevQaCommandResult;
@@ -116,6 +137,12 @@ export function getDevQaLevelIds(): readonly LevelId[] {
   return LEVEL_DEFINITIONS.map((level) => level.id);
 }
 
+export function getDevQaBossEntries(): readonly DevQaBossEntry[] {
+  return getDevQaLevelDefinitions().flatMap((level) =>
+    (level.bosses ?? []).map((boss) => createDevQaBossEntry(level, boss)),
+  );
+}
+
 export function isKnownDevQaLevelId(levelId: LevelId): boolean {
   return getLevelDefinition(levelId) !== undefined;
 }
@@ -135,6 +162,7 @@ export function installDevQaTools(
 
   const api: DevQaApi = {
     levels: getDevQaLevelIds(),
+    bosses: getDevQaBossEntries(),
     readSnapshot,
     startLevel: (levelId) => {
       if (!isKnownDevQaLevelId(levelId)) {
@@ -146,16 +174,21 @@ export function installDevQaTools(
 
       const level = getLevelDefinition(levelId)!;
 
-      gameStateStore.startLevel(
-        level.id,
-        level.spawn,
-        resolveLevelInitialEnergy(level),
-      );
-      stopSceneIfKnown(game, SCENE_KEYS.PAUSE);
-      stopSceneIfKnown(game, SCENE_KEYS.LEVEL_TRANSITION);
-      stopSceneIfKnown(game, SCENE_KEYS.MENU);
-      stopSceneIfKnown(game, SCENE_KEYS.HUD);
-      game.scene.start(SCENE_KEYS.LEVEL);
+      startDevQaLevel(game, level);
+
+      return createCommandSuccess(readSnapshot());
+    },
+    startBoss: (bossId) => {
+      const bossTarget = findDevQaBossTarget(bossId);
+
+      if (!bossTarget) {
+        return createCommandFailure(
+          `Boss "${bossId}" nao existe nos dados atuais.`,
+          readSnapshot(),
+        );
+      }
+
+      startDevQaLevel(game, bossTarget.level, bossTarget.checkpoint);
 
       return createCommandSuccess(readSnapshot());
     },
@@ -255,6 +288,81 @@ export function installDevQaTools(
   (targetWindow as DevQaWindow)[DEV_QA_GLOBAL_KEY] = api;
 
   return api;
+}
+
+function createDevQaBossEntry(
+  level: LevelDefinition,
+  boss: BossDefinition,
+): DevQaBossEntry {
+  return {
+    id: boss.id,
+    displayName: boss.displayName,
+    levelId: level.id,
+    levelName: level.name,
+    entryCheckpointId: boss.entryCheckpointId,
+  };
+}
+
+function findDevQaBossTarget(bossId: BossId):
+  | {
+      readonly level: LevelDefinition;
+      readonly boss: BossDefinition;
+      readonly checkpoint: CheckpointDefinition;
+    }
+  | undefined {
+  for (const level of getDevQaLevelDefinitions()) {
+    const boss = level.bosses?.find((candidate) => candidate.id === bossId);
+
+    if (!boss) {
+      continue;
+    }
+
+    const checkpoint = level.checkpoints.find(
+      (candidate) => candidate.id === boss.entryCheckpointId,
+    );
+
+    if (!checkpoint) {
+      return undefined;
+    }
+
+    return {
+      level,
+      boss,
+      checkpoint,
+    };
+  }
+
+  return undefined;
+}
+
+function getDevQaLevelDefinitions(): readonly LevelDefinition[] {
+  return LEVEL_DEFINITIONS as readonly LevelDefinition[];
+}
+
+function startDevQaLevel(
+  game: Phaser.Game,
+  level: LevelDefinition,
+  checkpoint?: CheckpointDefinition,
+): void {
+  const activeCheckpoint = checkpoint
+    ? createActiveCheckpointFromDefinition(level, checkpoint)
+    : undefined;
+
+  gameStateStore.startLevel(
+    level.id,
+    activeCheckpoint ?? level.spawn,
+    activeCheckpoint?.initialEnergy ?? resolveLevelInitialEnergy(level),
+  );
+
+  if (activeCheckpoint) {
+    gameStateStore.setActiveCheckpoint(activeCheckpoint);
+  }
+
+  stopSceneIfKnown(game, SCENE_KEYS.PAUSE);
+  stopSceneIfKnown(game, SCENE_KEYS.LEVEL_TRANSITION);
+  stopSceneIfKnown(game, SCENE_KEYS.MENU);
+  stopSceneIfKnown(game, SCENE_KEYS.HUD);
+  game.scene.start(SCENE_KEYS.LEVEL);
 }
 
 function createDevQaSnapshot(

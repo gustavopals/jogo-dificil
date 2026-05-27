@@ -4,6 +4,7 @@ import {
   LEVEL_07,
   LEVEL_08,
   LEVEL_09,
+  LEVEL_10,
   LEVEL_DEFINITIONS,
   type EnergyTargetDefinition,
   type InteractiveObjectDefinition,
@@ -69,13 +70,13 @@ describe("block 3 content", () => {
     });
     expect(LEVEL_09.order).toBe(9);
     expect(LEVEL_09.difficulty).toBe(9);
-    expect("nextLevelId" in LEVEL_09.exit).toBe(false);
+    expect(LEVEL_09.exit.nextLevelId).toBe(LEVEL_10.id);
     expect(isTouchingExit(LEVEL_09.exit.area, LEVEL_09)).toBe(true);
   });
 
-  it("chains block 3 after level 06 and ends on level 09", () => {
+  it("chains block 3 after level 06 and hands off to the final arena", () => {
     expect(
-      LEVEL_DEFINITIONS.slice(5, 9).map((level) => ({
+      LEVEL_DEFINITIONS.slice(5, 10).map((level) => ({
         id: level.id,
         nextLevelId:
           "nextLevelId" in level.exit ? level.exit.nextLevelId : undefined,
@@ -95,6 +96,10 @@ describe("block 3 content", () => {
       },
       {
         id: "level-09",
+        nextLevelId: LEVEL_10.id,
+      },
+      {
+        id: "level-10",
         nextLevelId: undefined,
       },
     ]);

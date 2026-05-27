@@ -1,4 +1,5 @@
 import type {
+  BossDefinition,
   EnergyTargetDefinition,
   EnergyTargetKind,
   LevelDefinition,
@@ -9,6 +10,7 @@ import type {
   CyanSparkProjectileCollisionTarget,
 } from "../physics";
 import type { EnergyTargetRuntimeState, RoomRuntimeState } from "./room-state";
+import { VISUAL_READABILITY_SEMANTIC_COLORS } from "./visual-readability";
 
 export type EnergyTargetVisualFeedback = {
   readonly fillColor: number;
@@ -22,12 +24,12 @@ export type EnergyTargetFeedback = {
 };
 
 const ENERGY_TARGET_COLORS = {
-  "energy-switch": 0x80d7c2,
+  "energy-switch": VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary,
   "energy-cracked-block": 0x5d6f86,
-  "energy-relay": 0x9b5de5,
-  "energy-absorber": 0xe35d6a,
-  "energy-core": 0xf4d35e,
-  "boss-hurtbox": 0xe76f51,
+  "energy-relay": VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
+  "energy-absorber": VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger,
+  "energy-core": VISUAL_READABILITY_SEMANTIC_COLORS.energy.charged,
+  "boss-hurtbox": VISUAL_READABILITY_SEMANTIC_COLORS.boss.primary,
 } as const satisfies Record<EnergyTargetKind, number>;
 
 export function getLevelEnergyTargets(
@@ -58,6 +60,7 @@ export function getEnergyTargetSolidAreas(
 export function getCyanBurstBeamCollisionTargets(
   targets: readonly EnergyTargetDefinition[],
   roomState: RoomRuntimeState,
+  bosses: readonly BossDefinition[] | undefined = [],
 ): readonly CyanBurstBeamCollisionTarget[] {
   return targets.flatMap((target) => {
     const state = roomState.energyTargets[target.id];
@@ -74,7 +77,7 @@ export function getCyanBurstBeamCollisionTargets(
       {
         id: target.id,
         kind: getCyanBurstTargetKind(target.kind),
-        area: { ...target.area },
+        area: resolveEnergyTargetRuntimeArea(target, roomState, bosses),
         ...(target.hitGroupId ? { hitGroupId: target.hitGroupId } : {}),
       },
     ];
@@ -84,6 +87,7 @@ export function getCyanBurstBeamCollisionTargets(
 export function getCyanSparkCollisionTargets(
   targets: readonly EnergyTargetDefinition[],
   roomState: RoomRuntimeState,
+  bosses: readonly BossDefinition[] | undefined = [],
 ): readonly CyanSparkProjectileCollisionTarget[] {
   return targets.flatMap((target) => {
     const state = roomState.energyTargets[target.id];
@@ -101,7 +105,7 @@ export function getCyanSparkCollisionTargets(
       {
         id: target.id,
         kind: target.kind === "boss-hurtbox" ? "boss" : "target",
-        area: { ...target.area },
+        area: resolveEnergyTargetRuntimeArea(target, roomState, bosses),
       },
     ];
   });
@@ -145,6 +149,34 @@ function isEnergyCrackedBlockMovementBlocker(
   return (
     target.kind === "energy-cracked-block" && target.blocksMovement !== false
   );
+}
+
+function resolveEnergyTargetRuntimeArea(
+  target: EnergyTargetDefinition,
+  roomState: RoomRuntimeState,
+  bosses: readonly BossDefinition[],
+): RectLike {
+  if (target.kind !== "boss-hurtbox") {
+    return { ...target.area };
+  }
+
+  const bossId = target.hitGroupId ?? target.id;
+  const boss = bosses.find((candidate) => candidate.id === bossId);
+  const bossState = roomState.bosses[bossId];
+
+  if (!boss || !bossState) {
+    return { ...target.area };
+  }
+
+  const deltaX = bossState.position.x - boss.spawn.x;
+  const deltaY = bossState.position.y - boss.spawn.y;
+
+  return {
+    x: target.area.x + deltaX,
+    y: target.area.y + deltaY,
+    width: target.area.width,
+    height: target.area.height,
+  };
 }
 
 function getEnergyTargetFillAlpha(state: EnergyTargetRuntimeState): number {

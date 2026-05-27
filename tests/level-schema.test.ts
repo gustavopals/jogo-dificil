@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   defineLevel,
+  type BossAttackKind,
+  type BossDamageEffectKind,
+  type BossDefinition,
+  type BossStateKind,
   type EnergyPowerKind,
   type EnergyTargetDefinition,
   type EnergyTargetKind,
@@ -43,6 +47,19 @@ const SAMPLE_LEVEL = defineLevel({
       },
       area: {
         x: 48,
+        y: 184,
+        width: 32,
+        height: 40,
+      },
+    },
+    {
+      id: "level-schema-test-before-boss",
+      position: {
+        x: 608,
+        y: 222,
+      },
+      area: {
+        x: 592,
         y: 184,
         width: 32,
         height: 40,
@@ -120,6 +137,18 @@ const SAMPLE_LEVEL = defineLevel({
     },
   ],
   interactiveObjects: [
+    {
+      id: "door-test",
+      kind: "door",
+      area: {
+        x: 672,
+        y: 174,
+        width: 16,
+        height: 48,
+      },
+      startsActive: true,
+      resetOnRespawn: true,
+    },
     {
       id: "lever-test",
       kind: "lever",
@@ -222,6 +251,118 @@ const SAMPLE_LEVEL = defineLevel({
       hitGroupId: "boss-test",
     },
   ],
+  bosses: [
+    {
+      id: "boss-schema-test",
+      levelId: "level-schema-test",
+      displayName: "Boss De Schema",
+      arena: {
+        x: 640,
+        y: 126,
+        width: 192,
+        height: 112,
+      },
+      spawn: {
+        x: 736,
+        y: 190,
+      },
+      initialFacing: "left",
+      health: 3,
+      hitbox: {
+        x: 720,
+        y: 162,
+        width: 32,
+        height: 60,
+      },
+      weakPoint: {
+        x: 728,
+        y: 174,
+        width: 18,
+        height: 18,
+      },
+      resetOnRespawn: true,
+      movement: {
+        kind: "patrol",
+        speedPxPerSecond: 40,
+        anchors: [
+          {
+            x: 688,
+            y: 190,
+          },
+          {
+            x: 784,
+            y: 190,
+          },
+        ],
+      },
+      attacks: [
+        {
+          id: "boss-schema-smoke",
+          kind: "smoke-puff",
+          windupMs: 500,
+          activeMs: 600,
+          recoverMs: 800,
+          cooldownMs: 900,
+          contactDamage: 1,
+          tellArea: {
+            x: 688,
+            y: 190,
+            width: 96,
+            height: 16,
+          },
+          projectile: {
+            hitbox: {
+              x: 0,
+              y: 0,
+              width: 14,
+              height: 14,
+            },
+            velocity: {
+              x: -52,
+              y: 0,
+            },
+            maxActive: 1,
+            maxRangePx: 128,
+            isDestructibleBy: ["cyan-spark"],
+          },
+          opensVulnerabilityWindowId: "boss-schema-recover",
+        },
+      ],
+      damageRules: [
+        {
+          power: "cyan-spark",
+          damage: 1,
+          validStates: ["recover"],
+          requiresWeakPoint: true,
+          oncePerAttack: false,
+          consumesHit: true,
+          effects: ["damage"],
+        },
+        {
+          power: "cyan-burst",
+          damage: 1,
+          validStates: ["recover"],
+          requiresWeakPoint: true,
+          oncePerAttack: true,
+          consumesHit: true,
+          effects: ["damage"],
+        },
+      ],
+      vulnerabilityWindows: [
+        {
+          id: "boss-schema-recover",
+          state: "recover",
+          durationMs: 800,
+          weakPointActive: true,
+          opensAfterAttackIds: ["boss-schema-smoke"],
+        },
+      ],
+      entryCheckpointId: "level-schema-test-before-boss",
+      entryDoorId: "door-test",
+      defeatUnlocks: ["lever-test"],
+      assetId: "boss-test-sprite",
+    },
+  ],
   audio: {
     musicId: "music-test-loop",
     sounds: [
@@ -239,7 +380,7 @@ const SAMPLE_LEVEL = defineLevel({
   mainChallenge: "Validar autocomplete e campos obrigatorios do schema.",
   progressReward: "Schema pronto para escrever fases declarativas.",
   assets: {
-    sprites: ["item-test-token"],
+    sprites: ["item-test-token", "boss-test-sprite"],
     tilesets: ["tileset-test-solid"],
     audio: ["checkpoint-test", "music-test-loop"],
   },
@@ -250,11 +391,14 @@ describe("level schema", () => {
     expect(SAMPLE_LEVEL).toMatchObject({
       id: "level-schema-test",
       initialEnergy: 55,
-      checkpoints: [
-        {
+      checkpoints: expect.arrayContaining([
+        expect.objectContaining({
           initialEnergy: 80,
-        },
-      ],
+        }),
+        expect.objectContaining({
+          id: "level-schema-test-before-boss",
+        }),
+      ]),
       terrain: [
         {
           id: "floor-main",
@@ -301,6 +445,21 @@ describe("level schema", () => {
           hitGroupId: "boss-test",
         }),
       ]),
+      bosses: [
+        expect.objectContaining({
+          id: "boss-schema-test",
+          levelId: "level-schema-test",
+          health: 3,
+          entryCheckpointId: "level-schema-test-before-boss",
+          entryDoorId: "door-test",
+          damageRules: expect.arrayContaining([
+            expect.objectContaining({
+              power: "cyan-burst",
+              oncePerAttack: true,
+            }),
+          ]),
+        }),
+      ],
     });
   });
 
@@ -329,5 +488,37 @@ describe("level schema", () => {
       ["cyan-burst"],
       ["cyan-spark", "cyan-burst"],
     ]);
+  });
+
+  it("exports the declarative boss schema for attacks and damage rules", () => {
+    const bosses = SAMPLE_LEVEL.bosses satisfies readonly BossDefinition[];
+    const boss = bosses[0]!;
+    const attackKinds: readonly BossAttackKind[] = boss.attacks.map(
+      (attack) => attack.kind,
+    );
+    const validDamageStates: readonly BossStateKind[] =
+      boss.damageRules[0]!.validStates;
+    const burstEffects: readonly BossDamageEffectKind[] =
+      boss.damageRules[1]!.effects;
+
+    expect(boss).toMatchObject({
+      id: "boss-schema-test",
+      displayName: "Boss De Schema",
+      initialFacing: "left",
+      movement: {
+        kind: "patrol",
+        speedPxPerSecond: 40,
+      },
+      vulnerabilityWindows: [
+        {
+          id: "boss-schema-recover",
+          state: "recover",
+          weakPointActive: true,
+        },
+      ],
+    });
+    expect(attackKinds).toEqual(["smoke-puff"]);
+    expect(validDamageStates).toEqual(["recover"]);
+    expect(burstEffects).toEqual(["damage"]);
   });
 });

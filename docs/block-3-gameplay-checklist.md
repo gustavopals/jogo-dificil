@@ -18,7 +18,7 @@ ensinar, distorcer e combinar o kit `Energia Ciano`.
 - [x] `level-06` aponta para `level-07`.
 - [x] `level-07` aponta para `level-08`.
 - [x] `level-08` aponta para `level-09`.
-- [x] `level-09` encerra a campanha atual e leva para a tela final de 9 fases.
+- [x] `level-09` aponta para `level-10` desde a abertura da fase final da Fase 17.
 - [x] As 3 fases novas passam no validador de fase.
 - [x] `level-07` tem energia inicial para duas `Centelha Ciano` e checkpoint de
       recarga com energia 0.
@@ -76,7 +76,8 @@ ensinar, distorcer e combinar o kit `Energia Ciano`.
       interacao abre a porta, sem disparo acidental roubar prioridade.
 - [ ] Concluir `level-07 -> level-08 -> level-09` sem voltar manualmente para o
       menu.
-- [ ] Conferir que `level-09` mostra a tela final atual com 9 fases vencidas.
+- [ ] Conferir que `level-09` transiciona para `level-10`, deixando a tela final
+      para a arena final.
 
 ## Checklist Transversal De Energia
 

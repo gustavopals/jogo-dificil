@@ -13,9 +13,23 @@ import {
   type TrapDefinition,
   validateLevels,
 } from "../src/data/levels";
+import { applyBossRuntimeDamage } from "../src/game/physics";
+import { getInteractiveObjectSolidAreas } from "../src/game/systems/level-interactive-objects";
+import {
+  isLevelExitBlockedByLivingBosses,
+  unlockDefeatedBossObjects,
+} from "../src/game/systems/level-bosses";
 import { isTouchingExit } from "../src/game/systems/level-progress";
+import {
+  createInitialRoomState,
+  setRoomBossRuntimeState,
+} from "../src/game/systems/room-state";
 
 const TILE_SIZE_PX = 16;
+const BASE_HEIGHT_PX = 270;
+const FLOOR_Y = BASE_HEIGHT_PX - TILE_SIZE_PX * 3;
+const LEVEL_06_DR_IMPORTS_ARENA_X = TILE_SIZE_PX * 66;
+const LEVEL_06_DR_IMPORTS_ARENA_WIDTH = TILE_SIZE_PX * 22;
 const BLOCK_2_LEVELS = [LEVEL_04, LEVEL_05, LEVEL_06] as const;
 
 describe("block 2 content", () => {
@@ -46,7 +60,10 @@ describe("block 2 content", () => {
     BLOCK_2_LEVELS.forEach((level) => {
       const checkpoint = level.checkpoints[0]!;
 
-      expect(level.checkpoints, level.id).toHaveLength(1);
+      expect(level.checkpoints.length, level.id).toBeGreaterThanOrEqual(1);
+      expect(level.checkpoints, level.id).toHaveLength(
+        level.id === LEVEL_06.id ? 2 : 1,
+      );
       expect(checkpoint.position.x, level.id).toBeGreaterThan(level.spawn.x);
       expect(level.exit.area.x, level.id).toBeGreaterThan(
         checkpoint.position.x,
@@ -92,6 +109,7 @@ describe("block 2 content", () => {
     ]);
     expect(fallingPlatform.area).toEqual(matchingTerrain.area);
     expect(fallingPlatform.trigger.area.x).toBeLessThan(checkpoint.position.x);
+    expect(fallingPlatform.config?.fallDelayMs).toBe(300);
     expect(projectile.trigger.area.x).toBeGreaterThan(checkpoint.position.x);
     expect(projectile.config?.velocityX).toBeLessThan(0);
     expect(spikePop.area?.x).toBeGreaterThan(projectile.trigger.area.x);
@@ -122,6 +140,308 @@ describe("block 2 content", () => {
     expect(falseFloor.kind).toBe("false-block");
     expect(falseFloor.area?.x).toBeGreaterThan(door.area.x);
     expect(falseFloor.trigger.area.x).toBeLessThan(LEVEL_06.exit.area.x);
+  });
+
+  it("adds the Dr. Imports arena after level 06 memory corridor", () => {
+    const memoryCheckpoint = LEVEL_06.checkpoints.find(
+      (checkpoint) => checkpoint.id === "level-06-before-memory-lock",
+    )!;
+    const bossCheckpoint = LEVEL_06.checkpoints.find(
+      (checkpoint) => checkpoint.id === "level-06-before-dr-imports",
+    )!;
+    const approachFloor = findTerrain(
+      LEVEL_06,
+      "level-06-dr-imports-approach-floor",
+    );
+    const arenaFloor = findTerrain(LEVEL_06, "level-06-dr-imports-arena-floor");
+    const leftPlatform = findTerrain(
+      LEVEL_06,
+      "level-06-dr-imports-left-platform",
+    );
+    const rightPlatform = findTerrain(
+      LEVEL_06,
+      "level-06-dr-imports-right-platform",
+    );
+    const entryDoor = findInteractiveObject(
+      LEVEL_06,
+      "level-06-dr-imports-entry-door",
+    );
+    const exitDoor = findInteractiveObject(
+      LEVEL_06,
+      "level-06-dr-imports-exit-door",
+    );
+
+    expect(LEVEL_06.bounds.width).toBe(TILE_SIZE_PX * 90);
+    expect(memoryCheckpoint.position.x).toBeLessThan(bossCheckpoint.position.x);
+    expect(bossCheckpoint.initialEnergy).toBe(80);
+    expect(bossCheckpoint.position.x).toBeLessThan(entryDoor.area.x);
+    expect(entryDoor.area.x - bossCheckpoint.position.x).toBe(TILE_SIZE_PX * 4);
+    expect(approachFloor.area).toEqual({
+      x: TILE_SIZE_PX * 60,
+      y: FLOOR_Y,
+      width: TILE_SIZE_PX * 6,
+      height: TILE_SIZE_PX,
+    });
+    expect(arenaFloor.area).toEqual({
+      x: LEVEL_06_DR_IMPORTS_ARENA_X,
+      y: FLOOR_Y,
+      width: LEVEL_06_DR_IMPORTS_ARENA_WIDTH,
+      height: TILE_SIZE_PX,
+    });
+    expect(leftPlatform.area.x).toBeGreaterThan(arenaFloor.area.x);
+    expect(rightPlatform.area.x + rightPlatform.area.width).toBeLessThan(
+      arenaFloor.area.x + arenaFloor.area.width,
+    );
+    expect(entryDoor).toMatchObject({
+      kind: "door",
+      startsActive: true,
+    });
+    expect(exitDoor).toMatchObject({
+      kind: "door",
+      startsActive: false,
+    });
+    expect(exitDoor.area.x).toBe(
+      arenaFloor.area.x + arenaFloor.area.width - TILE_SIZE_PX * 2,
+    );
+    expect(LEVEL_06.exit.area.x).toBe(
+      arenaFloor.area.x + arenaFloor.area.width - TILE_SIZE_PX,
+    );
+    expect(isTouchingExit(LEVEL_06.exit.area, LEVEL_06)).toBe(true);
+    expect(
+      LEVEL_06.hazards.every(
+        (hazard) => hazard.area.x + hazard.area.width <= arenaFloor.area.x,
+      ),
+    ).toBe(true);
+  });
+
+  it("declares Dr. Imports attacks in the level 06 arena", () => {
+    const boss = (LEVEL_06.bosses ?? []).find(
+      (candidate) => candidate.id === "boss-dr-imports",
+    )!;
+    const weakPoint = (LEVEL_06.energyTargets ?? []).find(
+      (target) => target.id === "level-06-dr-imports-weak-point",
+    )!;
+
+    expect(boss).toMatchObject({
+      levelId: "level-06",
+      displayName: "Dr. Imports",
+      health: 3,
+      arena: {
+        x: LEVEL_06_DR_IMPORTS_ARENA_X,
+        y: FLOOR_Y - TILE_SIZE_PX * 11,
+        width: LEVEL_06_DR_IMPORTS_ARENA_WIDTH,
+        height: TILE_SIZE_PX * 12,
+      },
+      entryCheckpointId: "level-06-before-dr-imports",
+      entryDoorId: "level-06-dr-imports-entry-door",
+      defeatUnlocks: ["level-06-dr-imports-exit-door"],
+    });
+    expect(boss.assetId).toBe("boss-dr-imports");
+    expect(boss.movement).toMatchObject({
+      kind: "anchor-swap",
+      speedPxPerSecond: 36,
+      anchors: [
+        {
+          x: LEVEL_06_DR_IMPORTS_ARENA_X + TILE_SIZE_PX * 5,
+          y: FLOOR_Y - 24,
+        },
+        {
+          x: LEVEL_06_DR_IMPORTS_ARENA_X + TILE_SIZE_PX * 11,
+          y: FLOOR_Y - 24,
+        },
+        {
+          x: LEVEL_06_DR_IMPORTS_ARENA_X + TILE_SIZE_PX * 17,
+          y: FLOOR_Y - 24,
+        },
+      ],
+    });
+    expect(boss.attacks.map((attack) => attack.kind)).toEqual([
+      "import-bottle",
+      "paper-wall",
+      "smoke-swap",
+    ]);
+    expect(boss.attacks[0]).toMatchObject({
+      id: "level-06-dr-imports-import-bottle",
+      windupMs: 500,
+      recoverMs: 800,
+      projectile: {
+        velocity: {
+          x: -112,
+          y: 0,
+        },
+        maxActive: 2,
+        isDestructibleBy: ["cyan-spark"],
+      },
+      opensVulnerabilityWindowId: "level-06-dr-imports-recover",
+    });
+    expect(boss.attacks[1]).toMatchObject({
+      id: "level-06-dr-imports-paper-wall",
+      activeMs: 520,
+      contactDamage: 0,
+      opensVulnerabilityWindowId: "level-06-dr-imports-recover",
+    });
+    expect(boss.attacks[1]!.hitbox).toEqual(boss.attacks[1]!.tellArea);
+    expect(boss.attacks[2]).toMatchObject({
+      id: "level-06-dr-imports-smoke-swap",
+      activeMs: 220,
+      contactDamage: 0,
+      opensVulnerabilityWindowId: "level-06-dr-imports-recover",
+    });
+    expect(boss.vulnerabilityWindows).toEqual([
+      {
+        id: "level-06-dr-imports-recover",
+        state: "recover",
+        durationMs: 800,
+        weakPointActive: true,
+        opensAfterAttackIds: [
+          "level-06-dr-imports-import-bottle",
+          "level-06-dr-imports-paper-wall",
+          "level-06-dr-imports-smoke-swap",
+        ],
+      },
+    ]);
+    expect(weakPoint).toMatchObject({
+      kind: "boss-hurtbox",
+      acceptedPowers: ["cyan-spark", "cyan-burst"],
+      hitGroupId: "boss-dr-imports",
+    });
+    expect(weakPoint.area).toEqual(boss.weakPoint);
+    expect(LEVEL_06.assets.sprites).toEqual(
+      expect.arrayContaining([
+        "boss-dr-imports",
+        "boss-projectile-import-bottle",
+      ]),
+    );
+  });
+
+  it("keeps Dr. Imports content references wired to boss data and assets", () => {
+    const boss = (LEVEL_06.bosses ?? []).find(
+      (candidate) => candidate.id === "boss-dr-imports",
+    )!;
+    const entryDoor = findInteractiveObject(LEVEL_06, boss.entryDoorId!);
+    const exitDoor = findInteractiveObject(LEVEL_06, boss.defeatUnlocks[0]!);
+    const weakPoint = (LEVEL_06.energyTargets ?? []).find(
+      (target) => target.hitGroupId === boss.id,
+    )!;
+    const bottle = boss.attacks.find(
+      (attack) => attack.kind === "import-bottle",
+    )!;
+    const anchors = boss.movement.anchors ?? [];
+
+    expect(LEVEL_06.bosses).toHaveLength(1);
+    expect(entryDoor).toMatchObject({
+      kind: "door",
+      startsActive: true,
+    });
+    expect(exitDoor).toMatchObject({
+      kind: "door",
+      startsActive: false,
+    });
+    expect(entryDoor.area.x).toBe(boss.arena.x);
+    expect(exitDoor.area.x).toBe(
+      boss.arena.x + boss.arena.width - TILE_SIZE_PX * 2,
+    );
+    expect(weakPoint).toMatchObject({
+      kind: "boss-hurtbox",
+      hitPoints: boss.health,
+      resetOnRespawn: true,
+      hitGroupId: boss.id,
+    });
+    expect(boss.damageRules.map((rule) => rule.power)).toEqual([
+      "cyan-spark",
+      "cyan-burst",
+    ]);
+    expect(boss.vulnerabilityWindows[0]!.opensAfterAttackIds).toEqual(
+      boss.attacks.map((attack) => attack.id),
+    );
+    expect(anchors).toHaveLength(3);
+    anchors.forEach((anchor) => {
+      expect(anchor.x).toBeGreaterThan(entryDoor.area.x);
+      expect(anchor.x).toBeLessThan(exitDoor.area.x);
+      expect(anchor.y).toBeLessThan(FLOOR_Y);
+    });
+    expect(bottle.projectile?.maxActive).toBe(2);
+    expect(bottle.projectile?.maxRangePx).toBeLessThanOrEqual(
+      LEVEL_06_DR_IMPORTS_ARENA_WIDTH,
+    );
+    expect(LEVEL_06.assets.sprites).toEqual(
+      expect.arrayContaining([boss.assetId, "boss-projectile-import-bottle"]),
+    );
+  });
+
+  it("keeps Dr. Imports balanced as the second boss", () => {
+    const boss = (LEVEL_06.bosses ?? []).find(
+      (candidate) => candidate.id === "boss-dr-imports",
+    )!;
+    const projectileAttacks = boss.attacks.filter(
+      (attack) => "projectile" in attack && attack.projectile !== undefined,
+    );
+
+    expect(boss.health).toBe(3);
+    expect(projectileAttacks).toHaveLength(1);
+    expect(
+      projectileAttacks.every(
+        (attack) =>
+          "projectile" in attack && (attack.projectile?.maxActive ?? 0) <= 2,
+      ),
+    ).toBe(true);
+    expect(
+      boss.attacks.find((attack) => attack.kind === "import-bottle"),
+    ).toMatchObject({
+      projectile: {
+        maxActive: 2,
+      },
+    });
+  });
+
+  it("chains level 06 to level 07 only after Dr. Imports is defeated", () => {
+    const roomState = createInitialRoomState(LEVEL_06);
+    const boss = (LEVEL_06.bosses ?? []).find(
+      (candidate) => candidate.id === "boss-dr-imports",
+    )!;
+    const exitDoor = findInteractiveObject(
+      LEVEL_06,
+      "level-06-dr-imports-exit-door",
+    );
+
+    expect(LEVEL_06.exit.nextLevelId).toBe("level-07");
+    expect(isLevelExitBlockedByLivingBosses(LEVEL_06.bosses, roomState)).toBe(
+      true,
+    );
+    expect(roomState.interactiveObjects[exitDoor.id]).toMatchObject({
+      isActive: false,
+    });
+    expect(
+      getInteractiveObjectSolidAreas(LEVEL_06.interactiveObjects, roomState),
+    ).toContainEqual(exitDoor.area);
+
+    const defeatedBoss = applyBossRuntimeDamage({
+      state: {
+        ...roomState.bosses[boss.id]!,
+        state: "recover",
+        healthRemaining: 1,
+      },
+      damage: 1,
+      invulnerabilityMs: 650,
+    }).state;
+    const defeatedState = setRoomBossRuntimeState(roomState, defeatedBoss);
+    const unlockedState = unlockDefeatedBossObjects(
+      defeatedState,
+      LEVEL_06.bosses,
+    );
+
+    expect(
+      isLevelExitBlockedByLivingBosses(LEVEL_06.bosses, unlockedState),
+    ).toBe(false);
+    expect(unlockedState.interactiveObjects[exitDoor.id]).toMatchObject({
+      isActive: true,
+    });
+    expect(
+      getInteractiveObjectSolidAreas(
+        LEVEL_06.interactiveObjects,
+        unlockedState,
+      ),
+    ).not.toContainEqual(exitDoor.area);
   });
 });
 

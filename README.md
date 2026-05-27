@@ -1,7 +1,7 @@
 # jogo-dificil
 
 Jogo de plataforma 2D de navegador, dificil, rapido de reiniciar e baseado em
-surpresa, precisao, tentativa e erro. A versao atual tem 9 fases curtas,
+surpresa, precisao, tentativa e erro. A versao atual tem 10 fases curtas,
 checkpoints, mortes rapidas, respawn automatico, reinicio manual, dash,
 armadilhas, itens, audio basico, resultados locais por fase e tela inicial.
 
@@ -91,7 +91,7 @@ npm run format
 
 1. Abra o jogo.
 2. Na tela inicial, pressione `Enter`, `Espaco` ou clique/toque para iniciar.
-3. Complete as 9 fases atuais em sequencia.
+3. Complete as 10 fases atuais em sequencia.
 4. Ao morrer, o jogador respawna rapidamente no checkpoint ativo.
 5. Use `R` para reiniciar manualmente do checkpoint sem contar morte.
 6. Ao concluir uma fase, a transicao mostra tempo, mortes da fase e recorde local.
@@ -112,3 +112,4 @@ npm run format
 - `docs/phase-15-improvement-plan.md`: analise pos-MVP e plano de melhorias.
 - `docs/phase-16-energy-shot-plan.md`: plano e fechamento do kit `Energia
 Ciano` e do Bloco 3.
+- `docs/phase-17-boss-plan.md`: plano dos tres chefes e da fase final.

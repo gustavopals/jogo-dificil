@@ -801,11 +801,11 @@ Implementação inicial da transição entre fases:
   fase e mortes acumuladas por cerca de 1 segundo antes de iniciar a próxima
   fase.
 - A decisão inicial do MVP era preservar o contador de mortes ao avançar entre
-  as 3 fases; no fluxo atual, a mesma regra vale para as 9 fases da campanha.
+  as 3 fases; no fluxo atual, a mesma regra vale para as 10 fases da campanha.
   O contador só é resetado quando o jogador reinicia a partir da tela final.
 - A tela final simples com mortes totais e `ENTER reinicia` aparece ao concluir
-  a última fase da campanha atual; desde o encadeamento do Bloco 3, isso
-  acontece em `level-09`.
+  a última fase da campanha atual; desde a abertura da Fase 17, isso acontece
+  em `level-10`.
 - A vinheta de fim de fase continua sendo disparada por `AudioScene`; ao entrar
   na próxima fase, a transição pede o loop musical do MVP novamente.
 
@@ -1230,7 +1230,7 @@ Fase 16 - Kit de energia original:
   interacao.
 - Bloco 3 encadeado na campanha: `level-06` agora aponta para `level-07`,
   `level-07` aponta para `level-08`, `level-08` aponta para `level-09` e
-  `level-09` fica como tela final das 9 fases atuais.
+  `level-09` ficou como tela final das 9 fases ate a abertura da Fase 17.
 - O checklist manual do Bloco 3 fica em `docs/block-3-gameplay-checklist.md`,
   cobrindo validacao automatizada, playtest de cada fase, reset, HUD, audio,
   resultados locais e criterios de ajuste para energia.
@@ -1283,6 +1283,11 @@ Fase 17 - Trinca de chefões:
 - As imagens em `assets/boss/examples/` servem como referência visual:
   narguilé/cristal/fumaça para Hirolito, casaco escuro/roxo/importações para
   Dr. Imports e brute grande preto/dourado para Giga Fabio.
+- Uso das imagens de `assets/boss/examples/` fechado na Task 17.1: elas são
+  referência local de tema, silhueta, paleta e props, não assets finais nem
+  textura de runtime. Sprites finais devem ser redesenhados em pixel art
+  original, com fundo transparente, hitbox separada e registro próprio em
+  `assets/ASSETS.md`.
 - Regra geral de boss: checkpoint imediatamente antes da arena, porta de entrada
   fecha ao iniciar, saída abre após derrota, um ataque ativo por vez, vida baixa
   e reset completo em morte, respawn e `R`.
@@ -1301,9 +1306,249 @@ Fase 17 - Trinca de chefões:
   movimento por três âncoras no fim de `level-06`.
 - `Giga Fabio`: ataques `floor-slam`, `boulder-toss` e `shoulder-charge`, arena
   dedicada em `level-10` com recarga de energia.
-- `Centelha Ciano` causa dano nos bosses 1 e 2 durante janela vulnerável;
-  `Rajada Ciano` causa dano em todos, mas é obrigatória para dano real no
-  `Giga Fabio`.
+- Regra de dano fechada na Task 17.1: boss só perde vida quando o weak point
+  declarado estiver aceso e o estado atual aceitar dano, normalmente em
+  `recover`; ataques em `intro`, `patrol`, `windup`, `attack`, `stunned`,
+  `defeated` ou durante invulnerabilidade pós-hit geram feedback de bloqueio,
+  mas não reduzem vida.
+- `Centelha Ciano` causa 1 dano por projétil nos bosses 1 e 2 durante janela
+  vulnerável. Em `Giga Fabio`, ela causa 0 dano e serve para cancelar projéteis
+  fracos, ativar alvos de arena ou mostrar bloqueio.
+- `Rajada Ciano` causa 1 dano em todos os bosses durante janela vulnerável, mas
+  cada rajada ativa só pode acertar o mesmo boss uma vez; ela é obrigatória para
+  remover vida do `Giga Fabio`.
+- Tabela final de vida: `Hirolito Narguilito` tem 2 hits e aceita
+  `Centelha Ciano`/`Rajada Ciano` no cristal; `Dr. Imports` tem 3 hits e aceita
+  os dois poderes no weak point com linha limpa de ataque; `Giga Fabio` tem 4
+  hits e só aceita `Rajada Ciano` no núcleo aceso.
+- Integração runtime fechada: impactos de `Centelha Ciano` e `Rajada Ciano`
+  contra `boss-hurtbox` agora chamam `applyBossEnergyHit`, que usa
+  `damageRules`, estado válido, weak point e invulnerabilidade para reduzir vida
+  do boss, aplicar stun ou declarar derrota.
+- Hurtbox de boss não é mais tratado como bloco quebrável comum durante a
+  `Rajada Ciano`: `LevelScene` resolve `hitGroupId`/`boss-hurtbox` para o
+  boss correto e mantém o dano dentro do estado runtime do boss.
+- Trava de hit por ataque fechada: regras de boss com `oncePerAttack` gravam
+  uma chave em `damageHitLockKeys` usando `sourceAttackId`. A mesma
+  `Rajada Ciano` não duplica dano no boss, mas uma nova rajada com outro id pode
+  causar o próximo hit se a janela vulnerável estiver válida.
+- Contato letal de boss fechado: `findTouchedBossThreat` mata Pino ao tocar
+  projétil de boss, hitbox ativa de ataque ou corpo de boss vivo/ativo. Boss
+  `inactive` ou `defeated` não mata por contato; projéteis usam causa
+  `projectile` e corpo/ataque usam causa `boss`.
+- Remoção de projéteis de boss fechada: projéteis somem ao tocar sólidos da
+  sala, sair da arena do boss, sair dos bounds da fase ou atingir alcance
+  máximo. O reset compartilhado de sala continua limpando `bossProjectiles` em
+  morte, respawn automático e reinício manual com `R`.
+- Sprites placeholder dos três bosses fechados para playtest visual: Hirolito
+  Narguilito usa silhueta compacta de narguile com cristal ciano, Dr. Imports
+  usa casaco escuro/maleta/fumaça roxa, e Giga Fabio usa corpo maior com punhos
+  dourados e núcleo ciano. Os arquivos ficam em `assets/sprites/bosses/` e são
+  placeholders originais até a arte final.
+- Sprites de projéteis e impactos de boss fechados para leitura inicial:
+  fumaça roxa 16x16 para `smoke-puff`, garrafa/importação 16x16 para
+  `import-bottle`, pedra pesada 24x24 para `boulder-toss` e impacto
+  coral/amarelo 24x24. A paleta evita ciano dominante para não confundir com a
+  energia do Pino.
+- Indicador de vida no corpo do boss fechado: cada boss ativo mostra pips
+  pequenos no próprio hitbox, com preenchido/vazio e feedback coral durante
+  invulnerabilidade. O indicador some em `inactive` e `defeated`, fica no mundo
+  da fase em vez de HUD fixo e usa depth abaixo dos hazards pequenos.
+- Sons originais de boss fechados para o kit base: `boss-entry`,
+  `boss-windup`, `boss-attack`, `boss-hit` e `boss-defeat` são WAVs curtos
+  gerados para o projeto. A `LevelScene` toca entrada ao iniciar arena, windup e
+  ataque pelos eventos do ciclo, hit quando o boss perde vida e derrota quando
+  chega a zero, todos passando pelo mute global do audio manager.
+- Contraste visual de boss fechado: `visual-readability` agora centraliza a
+  paleta semântica e a regra mínima de distância entre cores primárias. Energia
+  do Pino fica ciano/amarelo, traps usam roxo/vermelho como leitura principal e
+  bosses usam coral/dourado escuro. O corpo do boss fica abaixo da energia do
+  Pino em depth, a vida do boss fica abaixo de hazards pequenos, e traps móveis
+  não usam mais o ciano primário da energia.
+- Arena do `Hirolito Narguilito` iniciada em `level-03`: o fim da fase foi
+  expandido para uma sala final curta com 20 tiles de largura, chão reto, uma
+  plataforma baixa central e checkpoint `level-03-before-hirolito` a 4 tiles da
+  entrada com 60 de energia inicial. A porta de entrada começa aberta e fecha
+  ao iniciar a luta; a porta de saída começa fechada e fica registrada para
+  desbloqueio por derrota.
+- Ataques do `Hirolito Narguilito` implementados nos dados de `level-03`:
+  `smoke-puff` usa um projétil lento de fumaça, destrutível por
+  `Centelha Ciano`, e `hose-snap` usa tell/hitbox baixo no chão para ensinar
+  leitura de windup. O runtime de boss agora alterna ataques declarados por uma
+  sequência determinística, então bosses com mais de um ataque não repetem
+  sempre o primeiro.
+- Weak point de cristal implementado: o `weakPoint` declarativo do boss agora
+  tem feedback visual próprio no corpo, apagado fora da janela vulnerável e
+  aceso em ciano/amarelo durante `recover`. O `boss-hurtbox` continua servindo
+  para colisão de `Centelha Ciano`/`Rajada Ciano`, mas não desenha mais um
+  retângulo genérico de alvo por cima do boss.
+- Balanceamento final do `Hirolito Narguilito` para primeiro chefe: 2 de vida,
+  patrulha lenta em `28px/s`, `recover` generoso de `1200ms` e cooldown de
+  `1500ms`. A luta deve ensinar o ciclo de tell, ataque e cristal vulnerável
+  sem exigir execução apertada no primeiro boss.
+- Checklist manual do boss 1 criado em
+  `docs/boss-1-gameplay-checklist.md`. Ele cobre entrada da arena, fechamento e
+  abertura de portas, leitura de `smoke-puff`/`hose-snap`, cristal vulnerável,
+  dano por `Centelha Ciano`/`Rajada Ciano`, morte, respawn, reinício com `R`,
+  pausa, mute e transição para `level-04`.
+- Arena do `Dr. Imports` iniciada no fim de `level-06`: a fase ganhou uma
+  terceira tela com aproximação pós-corredor de memória, checkpoint
+  `level-06-before-dr-imports` com 80 de energia, arena de 22 tiles, duas
+  plataformas laterais baixas, centro limpo para dash e portas de entrada/saída
+  já declaradas para o fluxo de boss.
+- Ataques do `Dr. Imports` implementados nos dados e runtime: `import-bottle`
+  arremessa frasco roxo destrutível por `Centelha Ciano`, `paper-wall` cria uma
+  parede temporária que bloqueia `Centelha Ciano` e `Rajada Ciano` durante o
+  ataque, e `smoke-swap` move o boss para a próxima âncora antes do `recover`.
+  O boss agora fecha `level-06` com 3 de vida, weak point de maleta/peito e
+  saída liberada pela derrota.
+- Movimento por três âncoras do `Dr. Imports` fechado: o runtime de boss agora
+  move bosses em `patrol` entre âncoras usando `speedPxPerSecond`. Para
+  `anchor-swap`, as três âncoras são percorridas em sequência, com `facing`
+  atualizado pela direção do deslocamento; windup, ataque, recover e stun não
+  deslocam o boss para manter os tells legíveis.
+- Balanceamento do `Dr. Imports` fechado: 3 hits e limite de 2 projéteis ativos
+  no `import-bottle`. Só esse ataque cria projétil, então a arena continua
+  exigindo dash, reposicionamento e leitura da `paper-wall`, sem virar spam de
+  frascos.
+- Checklist manual do `Dr. Imports` criado em
+  `docs/boss-2-gameplay-checklist.md`: cobre arena lock, movimento por três
+  âncoras, `import-bottle`, limite de 2 frascos ativos, bloqueio da
+  `paper-wall`, `smoke-swap`, dano por `Centelha Ciano`/`Rajada Ciano`,
+  respawn no checkpoint `level-06-before-dr-imports`, reinício com `R`, pausa,
+  mute e transição para `level-07`.
+- `level-10`, `O Ultimo Nucleo`, criado como fase final dedicada para
+  `Giga Fabio`: a campanha agora encadeia `level-09 -> level-10`, a nova fase
+  tem ordem/dificuldade 10, checkpoint `level-10-before-giga-fabio` com energia
+  cheia, arena de 26 tiles, duas plataformas laterais, assets placeholder do
+  boss final e saída final sem `nextLevelId`.
+- `Giga Fabio` entrou no runtime do `level-10` com três ataques declarativos:
+  `floor-slam` avisa e acerta uma faixa baixa no chão, `boulder-toss` arremessa
+  uma pedra horizontal com no máximo 1 projétil ativo e destruição por energia,
+  e `shoulder-charge` avisa uma faixa horizontal larga para cobrar pulo, dash
+  ou uso das plataformas laterais. A janela vulnerável abre depois de
+  `floor-slam` e `shoulder-charge`; `boulder-toss` serve como pressão de
+  reposicionamento.
+- Regra de dano real do `Giga Fabio` fechada no runtime: o weak point aceita
+  apenas `Rajada Ciano`, `Centelha Ciano` nao remove vida mesmo se acertar o
+  núcleo durante `recover`, e cada `Rajada Ciano` valida causa 1 hit antes do
+  stun/invulnerabilidade padrão de boss.
+- Recarga de energia da arena final fechada sem criar mecânica nova: como
+  `Carga Ciano` já recarrega ao segurar `L`/`C` no chão, `level-10` agora usa
+  duas plataformas laterais nomeadas como pontos de recarga, uma à esquerda e
+  outra à direita do boss. Elas também funcionam como escape do `floor-slam` e
+  reduzem risco de softlock depois de gastar uma `Rajada Ciano`.
+- Checklist manual do boss final fechado em
+  `docs/boss-3-gameplay-checklist.md`: cobre entrada curta pelo checkpoint,
+  arena lock, recarga lateral, leitura dos tres ataques, dano apenas por
+  `Rajada Ciano`, hit unico por especial, morte, respawn, reset com `R`, pausa,
+  mute e tela de conclusao da campanha.
+- Progressao da Task 17.9 iniciada: `level-03` segue para `level-04` apenas
+  depois do `Hirolito Narguilito`. O `nextLevelId` ja aponta para `level-04`, a
+  saida fica bloqueada enquanto o boss vive e a porta final abre via
+  `defeatUnlocks` apos a derrota.
+- Progressao de `level-06 -> level-07` fechada para a Task 17.9: o
+  `level-06` segue para o Bloco 3 apenas depois do `Dr. Imports`. O
+  `nextLevelId` ja aponta para `level-07`, a saida fica bloqueada enquanto o
+  boss vive e a porta final abre via `defeatUnlocks` apos a derrota.
+- Progressao de `level-09 -> level-10` fechada para a Task 17.9: o
+  `level-09` deixou de ser a tela final e agora entrega o jogador ao
+  `level-10`, que é a última fase registrada e não declara `nextLevelId`.
+- Resultados locais passam a ter helper puro para o delta de mortes da fase:
+  `createLevelCompletionAttemptFromRunCounters` calcula mortes como diferença
+  entre o contador global no início e no fim da fase. Como mortes de boss usam
+  `gameStateStore.registerDeath`, elas entram no recorde local de
+  `deathCount`/`fewestDeaths`.
+- QA direto de boss fechado para a Task 17.9: `window.__JOGO_DIFICIL_QA__`
+  agora lista os três bosses em `bosses` e expõe `startBoss(bossId)`. O comando
+  usa o `entryCheckpointId` declarativo para abrir `level-03`, `level-06` ou
+  `level-10` já no checkpoint da arena correspondente.
+- Testes unitários de estado compartilhado da Task 17.10 reforçados: o
+  `RoomRuntimeState` agora tem cobertura para múltiplos bosses simultâneos,
+  reset seletivo por `resetOnRespawn` e isolamento entre projéteis comuns e
+  `bossProjectiles`.
+- Testes unitários de ataques e projéteis da Task 17.10 reforçados: o ciclo de
+  boss cobre seletor de ataque e estados `intro`/`stunned`, enquanto projéteis
+  cobrem origem declarada, default de destruição, limite por boss/ataque e
+  remoção isolada de projéteis expirados.
+- Testes de validação de schema da Task 17.10 reforçados: bosses agora têm
+  cobertura explícita para coleções obrigatórias, ids duplicados internos,
+  `maxRangePx`, `isDestructibleBy`, regras de dano e `entryDoorId` ausente.
+- Testes de conteúdo dos bosses da Task 17.10 reforçados: `level-03`,
+  `level-06` e `level-10` agora têm cobertura extra para ligações de boss,
+  `boss-hurtbox`, portas, assets, alcance de projétil e fluxo de vitória do
+  boss final.
+- Smoke Playwright de bosses da Task 17.10 atualizado: o teste usa
+  `window.__JOGO_DIFICIL_QA__.bosses` e `startBoss(...)` para abrir Hirolito,
+  Dr. Imports e Giga Fabio direto no checkpoint da arena, validar weak point e
+  portas, e caminhar até a entrada da arena fechar.
+- Checklist manual transversal dos bosses da Task 17.10 criado em
+  `docs/bosses-qa-checklist.md`, cobrindo hit, morte, respawn, reset com `R`,
+  vitória, pausa, mute e estabilidade nos três encontros.
+- Bateria final da Task 17.10 executada: `npm run lint`, `npm run test`,
+  `npm run build` e `npm run test:e2e -- e2e/game-smoke.e2e.ts` passaram. O
+  resultado final foi lint limpo, 63 arquivos de teste e 414 testes unitários,
+  build de produção gerado e smoke Playwright com 4 cenários passando.
+- Task 17.2 iniciada: `BossDefinition` declarativo criado em
+  `src/shared/levels.ts` e exposto por `src/shared/index.ts` e
+  `src/data/levels/schema.ts`. `LevelDefinition` agora aceita
+  `bosses?: readonly BossDefinition[]`, com campos para identidade, arena,
+  spawn, direção inicial, vida, hitbox, weak point, movimento, ataques, regras
+  de dano, janelas vulneráveis, checkpoint de entrada, porta de entrada,
+  desbloqueios por derrota e asset opcional.
+- Validação de boss integrada em `src/data/levels/validation.ts`: ids de boss
+  entram na checagem de duplicidade, `levelId` precisa bater com a fase, arena
+  fica dentro dos bounds, spawn/hitbox/weak point ficam dentro da arena, vida
+  precisa ser inteiro positivo, ataques/projéteis precisam ter timers e valores
+  válidos, regras de dano e janelas vulneráveis não podem ficar vazias,
+  checkpoint de entrada precisa existir e ficar imediatamente antes da arena,
+  desbloqueios precisam apontar para `interactiveObjects` existentes e `assetId`
+  precisa existir em `assets.sprites`.
+- Runtime puro de boss criado em `src/game/physics/boss-state.ts`: o estado
+  guarda vida total/restante, estado atual, posição, direção, timers de estado,
+  cooldown e invulnerabilidade, ataque ativo, janela vulnerável ativa e regra de
+  reset por respawn. Os helpers criam estado inicial, fazem transição de estado,
+  avançam timers, aplicam dano com invulnerabilidade e entram em
+  `stunned`/`defeated`.
+- Integração de boss com estado de sala criada em `src/game/systems/room-state.ts`:
+  `RoomRuntimeState` agora guarda `bosses`, `createInitialRoomState` cria estado
+  inicial para cada boss declarativo e `resetRoomStateForRespawn` reseta vida,
+  estado, timers, ataque ativo, janela vulnerável e invulnerabilidade em
+  respawn automático e reinício manual com `R`. Bosses com
+  `resetOnRespawn: false` preservam o estado, seguindo o padrão dos demais
+  elementos persistentes.
+- Task 17.3 iniciada: arena lock de entrada implementado com `entryDoorId`
+  opcional em `BossDefinition`. Quando o hitbox do Pino entra na arena de um
+  boss `inactive`, `src/game/systems/level-bosses.ts` troca o boss para `intro`
+  e fecha a porta de entrada marcando o objeto `door` como inativo/solido; a
+  `LevelScene` chama esse fluxo após o movimento do jogador e atualiza colisão e
+  marcador visual da porta.
+- Saída bloqueada enquanto boss estiver vivo: `LevelScene.updateLevelProgress`
+  só completa a fase se `isLevelExitBlockedByLivingBosses` retornar falso.
+  Qualquer boss declarado que ainda não esteja `defeated` com vida zerada
+  bloqueia a saída, incluindo boss ainda `inactive` para impedir pular a arena.
+- Saída aberta após derrota: `defeatUnlocks` em cada boss lista portas/travas
+  liberadas, `unlockDefeatedBossObjects` ativa esses objetos quando o boss chega
+  em `defeated` ou vida zero, e a `LevelScene` atualiza colisão e marcador
+  visual para a arena terminar sem passagem bloqueada.
+- Checkpoint antes da arena garantido por dados: cada boss declara
+  `entryCheckpointId`; o validador exige referência existente, posição antes da
+  entrada da arena, overlap vertical e distância máxima de 8 tiles até a borda
+  esquerda da arena.
+- Repetição curta de luta garantida em runtime: ao iniciar uma arena de boss,
+  `LevelScene.updateBossArenaLocks` ativa automaticamente o checkpoint
+  `entryCheckpointId` se ele ainda não for o atual. Morte, respawn automático e
+  reinício com `R` passam a voltar direto para a entrada da arena.
+- Projéteis de boss separados dos projéteis de trap: `RoomRuntimeState` guarda
+  `bossProjectiles` em coleção própria, resetada com a sala, enquanto
+  `projectiles` continua exclusivo para traps. `boss-projectiles.ts` cria
+  projéteis a partir do ataque, limita `maxActive`, move, calcula hitbox e
+  remove por alcance, sólido, arena do boss ou bounds.
+- Tells, ataque e recover implementados no runtime base: `boss-attacks.ts`
+  avança o boss de `patrol` para `windup`, expõe `tellArea`, entra em `attack`
+  com hitbox/projétil, abre `recover` com janela vulnerável/cooldown e retorna
+  para `patrol`. A `LevelScene` já avança esse ciclo por frame via
+  `updateBossAttackRuntime`.
 - Documento completo: `docs/phase-17-boss-plan.md`.
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
@@ -2413,12 +2658,12 @@ Direção pendente:
   ferramentas de QA como combinacao de dash, relay de `Centelha Ciano`, core
   temporario de `Rajada Ciano` e alavanca final, ainda sem encadear a campanha.
 - Encadeamento do Bloco 3 implementado: a campanha atual roda
-  `level-06 -> level-07 -> level-08 -> level-09`, e a tela final foi movida
-  para depois de `level-09`.
+  `level-06 -> level-07 -> level-08 -> level-09`. A partir da Fase 17,
+  `level-09` passou a apontar para `level-10`, deixando de ser a tela final.
 - Checklist manual do Bloco 3 criado em
   `docs/block-3-gameplay-checklist.md`, com roteiro de playtest para
   `Centelha Ciano`, `Carga Ciano`, `Rajada Ciano`, absorvedor, bloco rachado,
-  relay, core temporario, alavanca final e tela final de 9 fases.
+  relay, core temporario, alavanca final e transicao para a fase final.
 - Testes unitarios do estado de energia reforcados em
   `tests/player-energy.test.ts`, fechando a primeira subtask de QA da Fase 16.9.
 - Testes unitarios de input tap/hold/carga reforcados em

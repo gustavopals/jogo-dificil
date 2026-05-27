@@ -1,6 +1,19 @@
 import type { LevelDefinition } from "../../shared";
 
 export type {
+  BossAttackDefinition,
+  BossAttackId,
+  BossAttackKind,
+  BossDamageEffectKind,
+  BossDamageRuleDefinition,
+  BossDefinition,
+  BossId,
+  BossMovementDefinition,
+  BossMovementKind,
+  BossProjectileDefinition,
+  BossStateKind,
+  BossVulnerabilityWindowDefinition,
+  BossVulnerabilityWindowId,
   CheckpointDefinition,
   EnergyPowerKind,
   EnergyTargetDefinition,

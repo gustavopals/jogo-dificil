@@ -35,7 +35,10 @@ expandir a campanha linear depois do MVP inicial.
 - [ ] `level-05`: perceber que o spike-pop pune pouso automatico perto da saida.
 - [ ] `level-06`: coletar a chave, acionar a alavanca com `K`/`X` e abrir a porta.
 - [ ] `level-06`: atravessar o gap da porta com o projetil ativo sem softlock.
-- [ ] `level-06`: reconhecer o falso piso final em segunda tentativa e concluir.
+- [ ] `level-06`: reconhecer o falso piso antes da arena em segunda tentativa.
+- [ ] `level-06`: ativar o checkpoint `level-06-before-dr-imports`, entrar na
+      arena do Dr. Imports e confirmar que ela tem espaço central suficiente
+      para dash.
 - [ ] Concluir `level-04 -> level-05 -> level-06` sem voltar manualmente para o
       menu.
 - [ ] Conferir que `level-06` transiciona para `level-07`, nao para tela final.

@@ -17,6 +17,7 @@ describe("death feedback", () => {
       "Projetil acertou.",
     );
     expect(formatDeathFeedback({ cause: "crusher" })).toBe("Esmagado.");
+    expect(formatDeathFeedback({ cause: "boss" })).toBe("Chefe acertou.");
     expect(formatDeathFeedback({ cause: "unknown" })).toBe("Morte registrada.");
   });
 

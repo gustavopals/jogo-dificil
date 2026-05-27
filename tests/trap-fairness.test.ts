@@ -77,10 +77,16 @@ describe("trap fairness", () => {
           const energyOpeners = (level.energyTargets ?? []).filter(
             (target) => target.activatesObjectId === door.id,
           );
+          const bossOpeners = (level.bosses ?? []).filter((boss) =>
+            boss.defeatUnlocks.includes(door.id),
+          );
 
           expect(door.resetOnRespawn, `${level.id}:${door.id}`).toBe(true);
           expect(
-            itemOpeners.length + objectOpeners.length + energyOpeners.length,
+            itemOpeners.length +
+              objectOpeners.length +
+              energyOpeners.length +
+              bossOpeners.length,
             `${level.id}:${door.id}`,
           ).toBeGreaterThan(0);
         });
