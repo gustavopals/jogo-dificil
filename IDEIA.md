@@ -1028,46 +1028,77 @@ Expansao pos-MVP e Fase 15:
   - Audio continua como arquivos externos; sprites pequenos seguem inlinados
     pelo Vite porque o chunk do app ficou pequeno.
 
-Fase 16 - Poder de energia original:
+Fase 16 - Kit de energia original:
 
-- O poder planejado se chama provisoriamente `Rajada Ciano`.
-- A referência é o arquétipo de golpe de energia carregado de anime shonen, mas
-  o jogo não deve copiar nome, pose, grito, composição visual ou identidade de
-  Dragon Ball ou de qualquer obra existente.
+- O kit fechado se chama `Energia Ciano`, com ID interno `cyan-energy`.
+- A referência é o arquétipo de golpes de energia de anime shonen e jogos
+  clássicos de luta, mas o jogo não deve copiar nome, pose, grito, composição
+  visual ou identidade de Dragon Ball ou de qualquer obra existente.
+- O kit tem três poderes fechados para implementação: `Centelha Ciano`
+  (`cyan-spark`) como tiro simples, `Carga Ciano` (`cyan-charge`) como botão
+  segurado para encher energia e `Rajada Ciano` (`cyan-burst`) como especial de
+  feixe carregado.
+- Diferença operacional fechada: `Centelha Ciano` é gasto rápido e frequente,
+  `Carga Ciano` é recuperação manual vulnerável e `Rajada Ciano` é especial de
+  alto compromisso. Elas devem comunicar, respectivamente, velocidade,
+  vulnerabilidade e recompensa.
 - Função de gameplay: ferramenta de precisão para ativar alvos, quebrar blocos
-  específicos e criar timing de fase, não arma livre para resolver tudo.
-- Controle proposto: `K`/`X` continua como ação secundária. Toque curto perto de
-  objeto interage; segurar carrega a rajada; soltar após carga mínima dispara na
-  direção atual do Pino.
-- Valores iniciais para teste: carga mínima de 280 ms, cooldown de 700 ms,
-  velocidade de 360 px/s, alcance de 160 px, hitbox de cerca de 14x6 px e no
-  máximo um disparo ativo.
-- Movimento durante carga: Pino reduz deslocamento horizontal, mas continua
-  caindo e obedecendo gravidade. A rajada não cancela morte, queda ou colisão.
+  específicos, preparar o boss da fase 17 e criar timing de fase, não arma livre
+  para resolver tudo.
+- Controle planejado: `K`/`X` continua como ação secundária. Toque curto perto
+  de objeto interage; toque curto sem interação dispara `Centelha Ciano`;
+  segurar `K`/`X` com energia cheia prepara a `Rajada Ciano`; `L`/`C` fica como
+  novo botão segurado para carregar energia.
+- Valores fechados da energia: máximo 100, energia inicial configurável por
+  fase/checkpoint com padrão 40, carga no chão de 45 energia/s e sem carga no ar
+  no MVP da fase 16.
+- Valores fechados da `Centelha Ciano`: custo 10, cooldown de 180 ms,
+  velocidade de 420 px/s, alcance de 128 px, hitbox de cerca de 8x5 px e no
+  máximo dois disparos ativos.
+- Valores fechados da `Carga Ciano`: sem custo direto, movimento horizontal a
+  30%, dash bloqueado durante carga e pulo cancelando a carga antes de sair.
+- Valores fechados da `Rajada Ciano`: custo 100, preparação mínima de 500 ms,
+  duração de 280 ms, cooldown de 1.200 ms, alcance de 192 px, feixe horizontal
+  travado na direção inicial e no máximo um hit por boss por rajada.
+- Movimento durante `Carga Ciano`: Pino fica vulnerável, anda a 30% da
+  velocidade, não pode dar dash e cancela carga ao pular.
 - Tipos de alvo planejados: `energy-switch`, `energy-cracked-block`,
-  `energy-relay` e `energy-absorber`.
-- O Bloco 3 deve seguir a regra de expansão: `level-07` ensina a rajada,
-  `level-08` distorce com alvo falso/trap conhecida e `level-09` combina rajada,
-  dash e interação.
+  `energy-relay`, `energy-absorber` e `energy-core`.
+- Animações planejadas: carregar energia, energia cheia, tiro simples, especial
+  em preparação, especial disparando, projétil, feixe, impactos e estados de
+  alvo/bloco quebrado.
+- O HUD deve ganhar medidor pequeno de energia, com feedback discreto para
+  energia cheia e energia insuficiente.
+- O Bloco 3 deve seguir a regra de expansão: `level-07` ensina `Centelha Ciano`
+  e recarga, `level-08` distorce com absorvedor/bloco rachado e `level-09`
+  combina dash, tiro simples, especial e interação.
 - Documento completo: `docs/phase-16-energy-shot-plan.md`.
 
-Fase 17 - Primeiro boss:
+Fase 17 - Trinca de chefões:
 
-- O boss planejado se chama provisoriamente `Sentinela Prisma`.
-- Papel de gameplay: fechar o aprendizado de dash, interação e `Rajada Ciano`
-  em uma arena curta, com leitura clara e checkpoint antes da luta.
-- O boss deve se mover na arena, parar para telegrafar ataques e disparar
-  projéteis contra o Pino.
-- A `Rajada Ciano` deve ser a forma principal de causar dano no boss.
-- Valores iniciais para teste: 3 acertos de vida, tell de 450 ms, cooldown de
-  900 ms entre ataques, projéteis a 150-190 px/s, invulnerabilidade pós-hit de
-  500 ms e no máximo 3 projéteis ativos do boss.
-- Estados planejados: `idle`, `patrol`, `windup`, `shoot`, `recover`,
-  `stunned` e `defeated`.
-- O boss deve resetar junto da sala ao morrer, respawnar ou apertar `R`; os
-  projéteis do boss também devem ser limpos.
-- Arena proposta: `level-10`, depois do Bloco 3, com saída bloqueada até o boss
-  ser derrotado. Alternativa a decidir: inserir a arena no final de `level-09`.
+- A fase 17 foi redesenhada para planejar três chefões dentro da campanha de 10
+  fases, usando um sistema compartilhado de arena, estado, ataques, dano e
+  reset.
+- Distribuição planejada: `Hirolito Narguilito` fecha `level-03`,
+  `Dr. Imports` fecha `level-06` e `Giga Fabio` é o boss final de `level-10`.
+- As imagens em `assets/boss/examples/` servem como referência visual:
+  narguilé/cristal/fumaça para Hirolito, casaco escuro/roxo/importações para
+  Dr. Imports e brute grande preto/dourado para Giga Fabio.
+- Regra geral de boss: checkpoint imediatamente antes da arena, porta de entrada
+  fecha ao iniciar, saída abre após derrota, um ataque ativo por vez, vida baixa
+  e reset completo em morte, respawn e `R`.
+- Estados planejados para todos: `inactive`, `intro`, `patrol`, `windup`,
+  `attack`, `recover`, `stunned` e `defeated`.
+- `Hirolito Narguilito`: primeiro boss, 2 hits, ataques `smoke-puff` e
+  `hose-snap`, weak point de cristal, arena simples no fim de `level-03`.
+- `Dr. Imports`: segundo boss, 3 hits, ataques `import-bottle`, `paper-wall` e
+  `smoke-swap`, movimento por três âncoras no fim de `level-06`.
+- `Giga Fabio`: boss final, 4 hits de `Rajada Ciano`, ataques `floor-slam`,
+  `boulder-toss` e `shoulder-charge`, arena dedicada em `level-10` com recarga
+  de energia.
+- `Centelha Ciano` causa dano nos bosses 1 e 2 durante janela vulnerável;
+  `Rajada Ciano` causa dano em todos, mas é obrigatória para dano real no
+  `Giga Fabio`.
 - Documento completo: `docs/phase-17-boss-plan.md`.
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
@@ -2159,14 +2190,17 @@ Direção pendente:
   em três frames, pulo em dois frames, queda, dash dedicado, morte em dois
   frames e respawn em dois frames. A hitbox continua 10x22px; a mudança é
   somente visual.
-- Fase 16 planejada para adicionar `Rajada Ciano`, um poder original de energia
-  com carga, cooldown, disparo horizontal curto, alvos declarativos e integração
-  com a ação secundária sem copiar Dragon Ball.
+- Fase 16 planejada para adicionar `Energia Ciano`, um kit original com
+  `Centelha Ciano` para tiros simples, `Carga Ciano` em `L`/`C` segurado,
+  `Rajada Ciano` como especial de feixe carregado, alvos declarativos, medidor
+  de energia e novas animações sem copiar Dragon Ball.
 - Bloco 3 planejado como `level-07`, `level-08` e `level-09`, ensinando,
-  distorcendo e combinando a `Rajada Ciano` com dash e interação.
-- Fase 17 planejada para adicionar o primeiro boss, `Sentinela Prisma`, com
-  movimento em arena, projéteis contra o Pino, dano por `Rajada Ciano`, vida
-  simples e saída bloqueada até a derrota.
+  distorcendo e combinando tiro simples, carga de energia, especial, dash e
+  interação.
+- Fase 17 redesenhada para adicionar três chefões na campanha de 10 fases:
+  `Hirolito Narguilito` em `level-03`, `Dr. Imports` em `level-06` e
+  `Giga Fabio` como boss final em `level-10`, todos usando arenas curtas,
+  tells claros, vida baixa, reset completo e dano integrado à Energia Ciano.
 - Arte inicial de traps, itens e marcadores criada para o MVP: espinhos,
   bloco falso, plataforma que cai, piso quebrável, projétil, chip obrigatório,
   chave, token opcional, checkpoint inativo/ativo e saída de fase. Todos são
