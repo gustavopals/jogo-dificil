@@ -20,16 +20,16 @@ export function getLevelCameraProfile(
 ): LevelCameraProfile {
   const normalizedDifficulty = clamp01((level.difficulty - 1) / 9);
   const hasBossArena = (level.bosses?.length ?? 0) > 0;
-  const baseDeadzoneWidth = scaleLegacyX(160);
-  const baseDeadzoneHeight = scaleLegacyY(96);
+  const baseDeadzoneWidth = scaleLegacyX(60);    // 120px — ~19% do viewport 640px
+  const baseDeadzoneHeight = scaleLegacyY(40);   // 80px  — ~22% do viewport 360px
   const deadzoneWidth = clamp(
-    Math.round(baseDeadzoneWidth - scaleLegacyX(44) * normalizedDifficulty),
-    scaleLegacyX(96),
+    Math.round(baseDeadzoneWidth - scaleLegacyX(16) * normalizedDifficulty),
+    scaleLegacyX(40),
     Math.min(level.bounds.width, GAME_RESOLUTION.width),
   );
   const deadzoneHeight = clamp(
-    Math.round(baseDeadzoneHeight - scaleLegacyY(24) * normalizedDifficulty),
-    scaleLegacyY(64),
+    Math.round(baseDeadzoneHeight - scaleLegacyY(8) * normalizedDifficulty),
+    scaleLegacyY(28),
     Math.min(level.bounds.height, GAME_RESOLUTION.height),
   );
 
@@ -43,11 +43,11 @@ export function getLevelCameraProfile(
       ? 0.2
       : 0.12 + normalizedDifficulty * 0.1,
     lookAheadMaxX: hasBossArena
-      ? scaleLegacyX(80)
-      : Math.round(scaleLegacyX(44) + scaleLegacyX(28) * normalizedDifficulty),
+      ? scaleLegacyX(120)
+      : Math.round(scaleLegacyX(72) + scaleLegacyX(20) * normalizedDifficulty),
     lookAheadMaxY: hasBossArena
       ? scaleLegacyY(24)
-      : Math.round(scaleLegacyY(12) + scaleLegacyY(10) * normalizedDifficulty),
+      : Math.round(scaleLegacyY(16) + scaleLegacyY(6) * normalizedDifficulty),
   };
 }
 
