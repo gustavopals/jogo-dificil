@@ -211,6 +211,7 @@ import {
 } from "../systems/level-terrain";
 import {
   drawLevelDecorations,
+  drawLevelHints,
   drawThemedLevelBackground,
   getPlatformTintForLevel,
   getTerrainTintForLevel,
@@ -381,6 +382,7 @@ export class LevelScene extends Phaser.Scene {
 
     this.drawLevelBackground(this.level);
     drawLevelDecorations(this, this.level);
+    drawLevelHints(this, this.level);
     this.drawTerrain(this.level);
     this.drawHazards(this.level);
     this.drawTraps(this.level, this.roomState);

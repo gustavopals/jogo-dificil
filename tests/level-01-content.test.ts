@@ -27,12 +27,14 @@ describe("level 01 content", () => {
     );
 
     expect(floorIds).toEqual([
-      "level-01-floor-start",
-      "level-01-floor-after-first-gap",
-      "level-01-floor-checkpoint",
-      "level-01-floor-finish",
+      "l01-floor-1",
+      "l01-floor-2a",
+      "l01-floor-2b",
+      "l01-floor-3",
+      "l01-floor-4a",
+      "l01-floor-5",
     ]);
-    expect(fallHazards).toHaveLength(3);
+    expect(fallHazards).toHaveLength(4);
     fallHazards.forEach((hazard) => {
       expect(hazard.area.width).toBeLessThanOrEqual(TILE_SIZE_PX * 3);
     });
@@ -44,8 +46,9 @@ describe("level 01 content", () => {
       (candidate) => candidate.kind === "spike-pop",
     )!;
 
+    // Surpresa é DEPOIS do checkpoint — jogador se sente confortável e toma susto
     expect(spikePop.trigger.area.x).toBeGreaterThan(LEVEL_01.spawn.x);
-    expect(spikePop.area?.x).toBeLessThan(checkpoint.position.x);
+    expect(spikePop.trigger.area.x).toBeGreaterThan(checkpoint.position.x);
     expect(spikePop.resetOnRespawn).toBe(true);
   });
 
@@ -64,7 +67,7 @@ describe("level 01 content", () => {
     expect(isTouchingExit(LEVEL_01.exit.area, LEVEL_01)).toBe(true);
 
     const finishFloor = LEVEL_01.terrain.find(
-      (terrain) => terrain.id === "level-01-floor-finish",
+      (terrain) => terrain.id === "l01-floor-5",
     )!;
 
     expect(LEVEL_01.exit.area.x).toBeGreaterThanOrEqual(finishFloor.area.x);

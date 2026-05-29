@@ -52,6 +52,10 @@ export function migrateLegacyLevelDefinition<TLevel extends LevelDefinition>(
     interactiveObjects: level.interactiveObjects.map((interactiveObject) =>
       scaleInteractiveObject(interactiveObject, factor),
     ),
+    hints: level.hints?.map((hint) => ({
+      ...hint,
+      position: scaleVector(hint.position, factor),
+    })),
     energyTargets: level.energyTargets?.map((target) => ({
       ...target,
       area: scaleRect(target.area, factor),

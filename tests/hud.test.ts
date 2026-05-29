@@ -13,7 +13,7 @@ import {
 
 describe("HUD", () => {
   it("formats the current level as a readable phase label", () => {
-    expect(formatHudLevel(LEVEL_01)).toBe("Fase 1: Entrada Cruel");
+    expect(formatHudLevel(LEVEL_01)).toBe("Fase 1: Bem-vindo, Pino!");
   });
 
   it("only shows mute status when audio is muted", () => {
@@ -38,7 +38,7 @@ describe("HUD", () => {
       ),
     ).toEqual({
       deaths: "Mortes 3",
-      level: "Fase 1: Entrada Cruel",
+      level: "Fase 1: Bem-vindo, Pino!",
       music: "♪",
       mute: "MUDO",
     });

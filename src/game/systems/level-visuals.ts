@@ -279,6 +279,70 @@ export function drawLevelDecorations(
   });
 }
 
+// Dica de controle flutuante no mundo (posições já em coordenadas HD migridas).
+export function drawLevelHints(
+  scene: Phaser.Scene,
+  level: LevelDefinition,
+): void {
+  if (!level.hints?.length) return;
+
+  const D = DEPTH_LAYERS.background + 3;
+  const padX = 10;
+  const padY = 6;
+  const lineH = 13;
+  const fontSize = "9px";
+
+  level.hints.forEach((hint) => {
+    const { x, y } = hint.position;
+    const [keyLine, actionLine] = hint.lines;
+
+    // Mede a linha mais longa para dimensionar o painel
+    const charWidth = 6.2; // px por caracter em monospace 9px
+    const longestLen = Math.max(keyLine.length, actionLine.length);
+    const panelW = longestLen * charWidth + padX * 2;
+    const panelH = lineH * 2 + padY * 2 + 6; // +6 para arrow
+
+    // Painel escuro semi-transparente com borda ciano-azul
+    scene.add
+      .rectangle(x, y, panelW, panelH, 0x060914, 220)
+      .setOrigin(0.5, 1)
+      .setStrokeStyle(1, 0x3a6a9a, 0.85)
+      .setDepth(D);
+
+    // Linha 1: teclas (dourado)
+    scene.add
+      .text(x, y - panelH + padY, keyLine, {
+        fontFamily: "monospace",
+        fontSize,
+        color: "#ffc840",
+        align: "center",
+      })
+      .setOrigin(0.5, 0)
+      .setDepth(D + 1);
+
+    // Linha 2: ação (branco azulado)
+    scene.add
+      .text(x, y - panelH + padY + lineH, actionLine, {
+        fontFamily: "monospace",
+        fontSize,
+        color: "#a8c8e0",
+        align: "center",
+      })
+      .setOrigin(0.5, 0)
+      .setDepth(D + 1);
+
+    // Seta apontando para baixo
+    scene.add
+      .text(x, y + 1, "▼", {
+        fontFamily: "monospace",
+        fontSize: "8px",
+        color: "#ffc840",
+      })
+      .setOrigin(0.5, 0)
+      .setDepth(D + 1);
+  });
+}
+
 export function getTerrainTintForLevel(level: LevelDefinition): number {
   return getLevelVisualTheme(level.id).terrainTint;
 }

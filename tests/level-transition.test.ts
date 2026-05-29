@@ -14,7 +14,7 @@ describe("level transition UI", () => {
   it("formats the next-level transition with completed and upcoming phases", () => {
     expect(createLevelTransitionLabels(LEVEL_01, LEVEL_02, 4)).toMatchObject({
       title: "Fase concluida",
-      detail: "Fase 1: Entrada Cruel -> Fase 2: O Caminho Nao Confia Em Voce",
+      detail: "Fase 1: Bem-vindo, Pino! -> Fase 2: O Caminho Nao Confia Em Voce",
       result: "",
       deaths: "Mortes 4",
       prompt: "",

@@ -113,6 +113,14 @@ export interface ItemDefinition {
   readonly assetId?: LevelAssetId;
 }
 
+export interface HintDefinition {
+  readonly id: string;
+  /** Posição no mundo (legacy coords — migrado 2x no runtime). */
+  readonly position: Vector2Like;
+  /** Linha 1 = teclas (dourado), linha 2 = ação (claro). */
+  readonly lines: readonly [string, string];
+}
+
 export interface InteractiveObjectDefinition {
   readonly id: InteractiveObjectId;
   readonly kind: InteractiveObjectKind;
@@ -237,6 +245,7 @@ export interface LevelDefinition {
   readonly traps: readonly TrapDefinition[];
   readonly items: readonly ItemDefinition[];
   readonly interactiveObjects: readonly InteractiveObjectDefinition[];
+  readonly hints?: readonly HintDefinition[];
   readonly energyTargets?: readonly EnergyTargetDefinition[];
   readonly bosses?: readonly BossDefinition[];
   readonly audio: LevelAudioDefinition;

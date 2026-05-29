@@ -45,7 +45,7 @@ describe("initial curve balance", () => {
     expect(LEVEL_01.interactiveObjects).toEqual([]);
     expect(LEVEL_01.items.some((item) => item.kind === "required")).toBe(true);
     expect(LEVEL_01.traps.map((trap) => trap.kind)).toEqual(["spike-pop"]);
-    expect(fallHazards).toHaveLength(3);
+    expect(fallHazards).toHaveLength(4);
     fallHazards.forEach((hazard) => {
       expect(hazard.area.width).toBeLessThanOrEqual(TILE_SIZE_PX * 3);
     });
@@ -119,7 +119,7 @@ describe("initial curve balance", () => {
     const firstChallenges = [
       {
         level: LEVEL_01,
-        x: findHazard(LEVEL_01, "level-01-pit-first").area.x,
+        x: findHazard(LEVEL_01, "l01-pit-1").area.x,
       },
       {
         level: LEVEL_02,
@@ -133,7 +133,7 @@ describe("initial curve balance", () => {
     const postCheckpointChallenges = [
       {
         level: LEVEL_01,
-        x: findHazard(LEVEL_01, "level-01-pit-final").area.x,
+        x: findHazard(LEVEL_01, "l01-pit-3").area.x,
       },
       {
         level: LEVEL_02,

@@ -37,6 +37,7 @@ export type {
   HazardDefinition,
   HazardId,
   HazardKind,
+  HintDefinition,
   InteractiveObjectAction,
   InteractiveObjectDefinition,
   InteractiveObjectId,
