@@ -149,55 +149,77 @@ class Canvas {
 // Tilesets 32x32 (repetiveis em grade)
 // ---------------------------------------------------------------------------
 
-function drawSolidBlock() {
-  const c = new Canvas(32, 32);
-  const base = PALETTE.metal;
-  const light = shade(base, 1.22);
-  const dark = shade(base, 0.68);
-  const grass = PALETTE.grass;
-  const grassLight = PALETTE.grassLight;
+// Helper: preenche uma célula de tijolo com bevel e textura sutil.
+function fillBrick(c, x, y, w, h) {
+  const face  = [0x78, 0x64, 0x50];
+  const tex   = [0x6c, 0x58, 0x48];
+  const eTop  = [0x9c, 0x88, 0x72];
+  const eLight= [0x8a, 0x76, 0x62];
+  const eDark = [0x44, 0x36, 0x2a];
+  c.rect(x, y, w, h, face);
+  // textura granulada sutil
+  for (let iy = y + 2; iy < y + h - 1; iy++) {
+    for (let ix = x + 2; ix < x + w - 1; ix++) {
+      if ((ix * 7 + iy * 11) % 13 === 0) c.px(ix, iy, tex, 140);
+    }
+  }
+  // bevel direcional: luz no topo/esquerda, sombra na base/direita
+  c.hline(x, y, w, eTop);
+  c.vline(x, y + 1, h - 1, eLight);
+  c.hline(x + 1, y + h - 1, w - 1, eDark);
+  c.vline(x + w - 1, y + 1, h - 2, eDark);
+}
 
-  c.rect(0, 0, 32, 32, base);
-  // grama no topo (Stardew: blocos de chao com capa verde)
-  c.rect(0, 0, 32, 6, grass);
-  c.hline(0, 0, 32, grassLight);
-  for (let x = 2; x < 32; x += 5) {
-    c.px(x, 1, grassLight);
-    c.px(x + 1, 2, shade(grass, 1.1));
-  }
-  // textura de terra/pedra
-  for (let y = 8; y < 30; y += 5) {
-    c.hline(3, y, 26, shade(base, y % 10 === 3 ? 1.05 : 0.92), 80);
-  }
-  c.hline(0, 31, 32, dark);
-  c.vline(31, 6, 26, shade(base, 0.55), 100);
-  c.hline(6, 6, 26, light, 60);
-  // detalhe simpatico: flor pequena
-  c.px(24, 4, [0xff, 0x6b, 0x9d]);
-  c.px(25, 3, PALETTE.hero);
+function drawSolidBlock() {
+  // Pedra em padrão de tijolos offset — funciona em caverna, floresta e templo.
+  const c = new Canvas(32, 32);
+  const mortar = [0x1e, 0x16, 0x10];
+  c.rect(0, 0, 32, 32, mortar);
+  // Fileira 1 (y 0-12): dois tijolos
+  fillBrick(c,  0,  0, 14, 13);
+  fillBrick(c, 15,  0, 17, 13);
+  // Fileira 2 (y 14-31): três tijolos offset (meio | inteiro | meio)
+  fillBrick(c,  0, 14,  8, 18);
+  fillBrick(c,  9, 14, 14, 18);
+  fillBrick(c, 24, 14,  8, 18);
   return c;
 }
 
 function drawPlatform() {
+  // Prancha de madeira escura com acabamento metálico.
   const c = new Canvas(32, 32);
-  const wood = PALETTE.wood;
-  const woodLight = PALETTE.woodLight;
-  const dark = shade(wood, 0.55);
+  const wood      = [0x5a, 0x3c, 0x20];
+  const woodGrain = [0x72, 0x50, 0x2e];
+  const woodDark  = [0x36, 0x22, 0x10];
+  const woodEdge  = [0x84, 0x5c, 0x38];
+  const metal     = [0xa8, 0xb0, 0xb8];
+  const metalDark = [0x68, 0x70, 0x78];
+  const support   = [0x3c, 0x26, 0x14];
 
-  c.rect(0, 0, 32, 32, shade(wood, 0.75));
-  // tabuas de madeira (Stardew-style)
-  c.rect(0, 0, 32, 8, wood);
-  c.hline(0, 0, 32, woodLight);
-  c.hline(0, 7, 32, dark);
-  for (let x = 0; x < 32; x += 8) {
-    c.vline(x, 0, 8, dark, 120);
-  }
-  c.hline(0, 4, 32, shade(wood, 0.85), 80);
-  // suporte inferior
-  for (let x = 4; x < 32; x += 8) {
-    c.rect(x, 10, 3, 20, shade(wood, 0.45));
-  }
-  c.hline(0, 31, 32, PALETTE.shadow);
+  // Superfície da plataforma (y 0-11): 3 pranchas com grão horizontal
+  c.rect(0, 0, 32, 12, wood);
+  for (let y = 2; y <= 9; y += 2) c.hline(0, y, 32, woodGrain, 110);
+  // Divisórias entre pranchas
+  c.vline(10, 0, 12, woodDark, 230);
+  c.vline(21, 0, 12, woodDark, 230);
+  // Highlight na borda esquerda de cada prancha
+  c.vline( 0, 1, 10, woodEdge, 160);
+  c.vline(11, 1, 10, woodEdge, 130);
+  c.vline(22, 1, 10, woodEdge, 130);
+  // Trim metálico no topo (a aresta mais visível ao jogador)
+  c.hline(0, 0, 32, metal);
+  c.px( 4, 0, metalDark);
+  c.px(15, 0, metalDark);
+  c.px(27, 0, metalDark);
+  // Sombra na base da superfície
+  c.hline(0, 11, 32, woodDark);
+  c.hline(0, 12, 32, [0x24, 0x16, 0x08], 180);
+  // Pilar de suporte central (y 14-30)
+  c.rect(12, 14, 8, 17, support);
+  c.vline(12, 14, 17, shade(support, 1.35), 200);
+  c.vline(19, 14, 17, shade(support, 0.60), 200);
+  c.hline(12, 14,  8, shade(support, 1.40), 180);
+  c.hline(0, 31, 32, PALETTE.shadow, 90);
   return c;
 }
 
@@ -226,29 +248,47 @@ function drawBackgroundPanel() {
 }
 
 function drawSpikes() {
+  // Espinhos metálicos ameaçadores com pontas vermelho-sangue.
   const c = new Canvas(32, 32);
-  const red = PALETTE.hazard;
-  const light = shade(red, 1.2);
-  const dark = shade(red, 0.65);
-  const base = mix(PALETTE.dirt, PALETTE.metal, 0.4);
+  const baseFill    = [0x1e, 0x1a, 0x16];
+  const baseEdge    = [0x34, 0x2e, 0x2a];
+  const spikeDark   = [0x70, 0x0c, 0x0c];
+  const spikeMid    = [0xac, 0x1e, 0x1e];
+  const spikeBright = [0xd2, 0x38, 0x2a];
+  const spikeTip    = [0xf0, 0x74, 0x5e];
 
-  c.rect(0, 26, 32, 6, base);
-  c.hline(0, 26, 32, shade(base, 1.15));
-  c.hline(0, 31, 32, PALETTE.shadow);
+  // Base metálica (y 26-31)
+  c.rect(0, 26, 32, 6, baseFill);
+  c.hline(0, 26, 32, baseEdge);
+  c.hline(0, 31, 32, shade(baseFill, 0.6));
+  for (let x = 3; x < 30; x += 5) c.px(x, 28, baseEdge, 120);
 
   const teeth = 4;
-  const w = 32 / teeth;
-  for (let t = 0; t < teeth; t += 1) {
-    const cx = Math.round(t * w + w / 2);
-    for (let y = 0; y < 26; y += 1) {
-      const half = Math.round(((y / 25) * (w / 2 - 1)) + 0.0001);
-      for (let x = cx - half; x <= cx + half; x += 1) {
-        c.px(x, y, red);
+  const tw = 32 / teeth;
+  for (let t = 0; t < teeth; t++) {
+    const cx = t * tw + tw / 2; // centros: 4, 12, 20, 28
+    for (let y = 0; y < 26; y++) {
+      const half = Math.max(0.5, (y / 25) * (tw / 2 - 1));
+      const x0 = Math.round(cx - half);
+      const x1 = Math.round(cx + half);
+      for (let x = x0; x <= x1; x++) {
+        let col;
+        if (y <= 2) {
+          col = spikeTip;
+        } else if (x === x0) {
+          col = spikeBright; // borda esquerda iluminada
+        } else if (x === x1) {
+          col = spikeDark;   // borda direita em sombra
+        } else if (x <= cx) {
+          col = spikeMid;    // interior esquerdo (mais claro)
+        } else {
+          col = spikeDark;   // interior direito (mais escuro)
+        }
+        c.px(x, y, col);
       }
-      c.px(cx - half, y, light);
-      c.px(cx + half, y, dark);
     }
-    c.px(cx, 0, mix(red, PALETTE.text, 0.4));
+    // Ponto extra brilhante na ponta absoluta
+    c.px(Math.round(cx), 0, mix(spikeTip, [0xff, 0xff, 0xff], 0.35));
   }
   return c;
 }
@@ -263,79 +303,70 @@ function drawTrapSpikes() {
 }
 
 function drawFalseBlock() {
+  // Tijolo idêntico ao normal com uma costura roxa quase imperceptível.
   const c = drawSolidBlock();
-  // tell discreto de armadilha: costura roxa interna
   const trap = PALETTE.specialTrap;
-  c.hline(9, 16, 14, trap, 150);
-  c.px(8, 16, shade(trap, 0.6), 150);
-  c.px(23, 16, shade(trap, 0.6), 150);
-  c.px(16, 15, shade(trap, 1.3), 120);
+  c.hline(9, 16, 14, trap, 130);
+  c.px( 8, 16, shade(trap, 0.55), 120);
+  c.px(23, 16, shade(trap, 0.55), 120);
+  c.px(16, 15, shade(trap, 1.35), 100);
   return c;
 }
 
 function drawFallingPlatform() {
-  const c = new Canvas(32, 32);
-  const base = PALETTE.metal;
-  const light = shade(base, 1.3);
-
-  c.rect(0, 0, 32, 14, base);
-  c.bevel(0, 0, 32, 14, light, shade(base, 0.5));
-  // borda ciano (instavel)
-  c.outline(0, 0, 32, 14, mix(PALETTE.safe, base, 0.15));
-  // alerta inferior: tracejado de perigo
-  for (let x = 1; x < 32; x += 4) {
-    c.rect(x, 15, 2, 2, PALETTE.hazard);
-  }
-  // pino central de fixacao soltando
-  c.rect(14, 16, 4, 3, shade(base, 0.4));
+  // Plataforma instável: superfície igual à normal mas com alertas de queda.
+  const c = drawPlatform();
+  const crack = PALETTE.hazard;
+  const cyan  = PALETTE.safe;
+  // Contorno de alerta (borda oscila entre ciano e perigo)
+  c.outline(0, 0, 32, 12, mix(cyan, crack, 0.45), 170);
+  // Micro-fendas na superfície
+  c.px( 6, 3, crack, 200); c.px( 7, 6, crack, 200); c.px( 8, 9, crack, 180);
+  c.px(25, 2, crack, 200); c.px(24, 5, crack, 200); c.px(26, 8, crack, 180);
+  // Pontos de alerta abaixo da superfície
+  for (let x = 2; x < 32; x += 5) c.px(x, 13, crack, 150);
   return c;
 }
 
 function drawBreakableFloor() {
-  const c = new Canvas(32, 32);
-  const base = shade(PALETTE.metal, 0.92);
-  const light = shade(base, 1.25);
-  const dark = shade(base, 0.5);
+  // Tijolo que vai quebrar: rachaduras vermelhas atravessam o padrão de pedra.
+  const c = drawSolidBlock();
+  const crack      = PALETTE.hazard;
+  const crackDark  = shade(PALETTE.hazard, 0.50);
+  const crackLight = mix(PALETTE.hazard, PALETTE.text, 0.42);
 
-  c.rect(0, 0, 32, 32, base);
-  c.bevel(0, 0, 32, 32, light, dark);
-  c.hline(0, 31, 32, PALETTE.shadow);
-
-  // rachaduras vermelhas legiveis (vai quebrar)
-  const crack = PALETTE.hazard;
-  const cracks = [
-    [6, 2],
-    [7, 6],
-    [10, 9],
-    [9, 14],
-    [12, 18],
-    [11, 23],
-    [14, 28],
-    [20, 3],
-    [22, 8],
-    [19, 12],
-    [23, 16],
-    [21, 21],
-    [24, 26],
-  ];
-  let prev = null;
-  for (const [x, y] of cracks) {
-    c.px(x, y, crack);
-    c.px(x, y + 1, shade(crack, 0.7));
-    if (prev) {
-      const steps = Math.max(Math.abs(x - prev[0]), Math.abs(y - prev[1]));
-      for (let s = 1; s < steps; s += 1) {
-        const t = s / steps;
-        c.px(
-          Math.round(prev[0] + (x - prev[0]) * t),
-          Math.round(prev[1] + (y - prev[1]) * t),
-          crack,
-          200,
-        );
+  // Interpolação suave entre pontos de rachadura
+  function drawCrack(pts, alpha) {
+    let prev = null;
+    for (const [x, y] of pts) {
+      c.px(x, y, crack, alpha);
+      if (prev) {
+        const [px, py] = prev;
+        const steps = Math.max(Math.abs(x - px), Math.abs(y - py));
+        for (let s = 1; s < steps; s++) {
+          c.px(
+            Math.round(px + (x - px) * s / steps),
+            Math.round(py + (y - py) * s / steps),
+            crack,
+            Math.round(alpha * 0.8),
+          );
+        }
       }
+      prev = [x, y];
     }
-    prev = [x, y];
   }
+
+  // Rachadura principal (diagonal esquerda)
+  drawCrack([[8, 0], [8, 4], [10, 8], [9, 13], [11, 18], [10, 24], [12, 31]], 230);
+  // Rachadura secundária (diagonal direita)
+  drawCrack([[22, 2], [21, 7], [23, 12], [22, 18], [24, 25]], 200);
+  // Pontos brilhantes nas origens das rachaduras (leitura imediata)
+  c.px(8,  0, crackLight, 230);
+  c.px(22, 2, crackLight, 200);
+  // Sombra ao lado das fissuras
+  c.px( 9, 4, crackDark, 160);
+  c.px(11, 8, crackDark, 140);
+  c.px(23, 7, crackDark, 140);
   return c;
 }
 
