@@ -36,7 +36,7 @@ export const START_SCREEN_LAYOUT = {
   statsY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3 + scaleLegacyY(16),
   vibeTagY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3 - scaleLegacyY(18),
   groundY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3,
-  playerX: scaleLegacyX(104),
+  playerX: scaleLegacyX(130),
   exitX: GAME_RESOLUTION.width - scaleLegacyX(92),
   musicButtonX: GAME_RESOLUTION.width - scaleLegacyX(38),
   musicButtonY: scaleLegacyY(10),

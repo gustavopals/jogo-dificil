@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 
 import type { PersistedAudioSettings } from "../systems/audio-settings-persistence";
-import { scaleLegacyFontPx, scaleLegacyX, scaleLegacyY } from "../scale";
+import { scaleLegacyX } from "../scale";
 import {
   resolveAudioSettingsHitArea,
   type AudioSettingsControlsLayout,
@@ -71,7 +71,7 @@ export function createAudioSettingsControls(
       .text(0, row.y, row.label, {
         color: AUDIO_SETTINGS_UI_STYLE.labelColor,
         fontFamily: AUDIO_SETTINGS_UI_STYLE.fontFamily,
-        fontSize: scaleLegacyFontPx(9),
+        fontSize: layout.fontSize,
       })
       .setOrigin(0, 0.5);
 
@@ -99,14 +99,14 @@ export function createAudioSettingsControls(
       .setOrigin(0, 0.5);
 
     const thumb = scene.add
-      .circle(trackX, row.y, scaleLegacyY(5), AUDIO_SETTINGS_UI_STYLE.thumbColor, 1)
+      .circle(trackX, row.y, layout.thumbRadius, AUDIO_SETTINGS_UI_STYLE.thumbColor, 1)
       .setInteractive({ useHandCursor: true });
 
     const valueText = scene.add
       .text(trackX + layout.trackWidth + scaleLegacyX(8), row.y, "", {
         color: AUDIO_SETTINGS_UI_STYLE.valueColor,
         fontFamily: AUDIO_SETTINGS_UI_STYLE.fontFamily,
-        fontSize: scaleLegacyFontPx(9),
+        fontSize: layout.fontSize,
       })
       .setOrigin(0, 0.5);
 

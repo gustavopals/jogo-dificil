@@ -2,9 +2,9 @@ import Phaser from "phaser";
 
 import {
   applyPinoSpriteFrame,
-  applyPinoVisualDisplaySize,
   PINO_ANIMATIONS,
   PINO_FRAME_IDS,
+  type PinoFrameId,
   resolveInitialPinoSpriteFrame,
 } from "../../data/characters/pino-animations";
 import { MUSIC_AUDIO_IDS } from "../../data/audio";
@@ -73,85 +73,216 @@ export class MenuScene extends Phaser.Scene {
   private drawBackdrop(): void {
     const { width, height, groundY } = START_SCREEN_LAYOUT;
 
-    this.add.rectangle(0, 0, width, height, 0x111217).setOrigin(0);
+    // Deterministic pseudo-random for reproducible visuals
+    const rng = (seed: number): number => {
+      const s = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+      return s - Math.floor(s);
+    };
 
-    const skyline = this.add.graphics();
-    skyline.fillStyle(0x171923, 1);
-    skyline.fillRect(0, groundY - TILE_SIZE_PX * 3, width, TILE_SIZE_PX * 3);
-    skyline.fillStyle(0x20232d, 1);
+    // ── Sky gradient ──────────────────────────────────────────────────────
+    const skyGfx = this.add.graphics();
+    skyGfx.fillGradientStyle(0x06080e, 0x06080e, 0x0d1824, 0x0d1824, 1);
+    skyGfx.fillRect(0, 0, width, groundY);
 
-    for (let x = 0; x < width; x += TILE_SIZE_PX * 2) {
-      const heightOffset =
-        x % (TILE_SIZE_PX * 4) === 0 ? scaleLegacyY(18) : scaleLegacyY(8);
-
-      skyline.fillRect(
-        x,
-        groundY - TILE_SIZE_PX * 3 - heightOffset,
-        TILE_SIZE_PX,
-        heightOffset,
-      );
+    // ── Stars ─────────────────────────────────────────────────────────────
+    const starGfx = this.add.graphics();
+    for (let i = 0; i < 65; i++) {
+      const sx = Math.round(rng(i * 7 + 1) * width);
+      const sy = Math.round(rng(i * 7 + 2) * (groundY * 0.72));
+      const ss = rng(i * 7 + 3) > 0.88 ? 2 : 1;
+      const sa = 0.12 + rng(i * 7 + 4) * 0.62;
+      starGfx.fillStyle(0xdce8f6, sa);
+      starGfx.fillRect(sx, sy, ss, ss);
+    }
+    for (let i = 0; i < 12; i++) {
+      const sx = Math.round(rng(i * 13 + 91) * (width - 40)) + 20;
+      const sy = Math.round(rng(i * 13 + 92) * (groundY * 0.6)) + 10;
+      const sa = 0.5 + rng(i * 13 + 93) * 0.4;
+      const star = this.add.rectangle(sx, sy, 1, 1, 0xdce8f6).setAlpha(sa);
+      this.tweens.add({
+        targets: star,
+        alpha: sa * 0.08,
+        duration: 800 + Math.round(rng(i * 13 + 94) * 2200),
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+        delay: Math.round(rng(i * 13 + 95) * 3000),
+      });
     }
 
-    this.add.rectangle(
-      width / 2,
-      groundY + scaleLegacyY(16),
-      width,
-      scaleLegacyY(32),
-      0x242630,
+    // ── Moon ──────────────────────────────────────────────────────────────
+    const moonX = Math.round(width * 0.79);
+    const moonCY = 68;
+    const moonGfx = this.add.graphics();
+    const moonRings: Array<[number, number]> = [
+      [50, 0.025],
+      [36, 0.05],
+      [26, 0.09],
+      [18, 0.17],
+    ];
+    for (const [r, a] of moonRings) {
+      moonGfx.fillStyle(0x6aaac2, a);
+      moonGfx.fillCircle(moonX, moonCY, r);
+    }
+    moonGfx.fillStyle(0xaacee0, 0.62);
+    moonGfx.fillCircle(moonX, moonCY, 13);
+    moonGfx.fillStyle(0xc8e2f2, 0.84);
+    moonGfx.fillCircle(moonX, moonCY, 10);
+    moonGfx.fillStyle(0x0d1824, 0.44);
+    moonGfx.fillCircle(moonX + 5, moonCY - 3, 10);
+    const moonPulse = this.add.circle(moonX, moonCY, 13, 0xaacee0, 0.52);
+    this.tweens.add({
+      targets: moonPulse,
+      alpha: 0.24,
+      duration: 3400,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+    });
+
+    // ── Procedural city buildings ─────────────────────────────────────────
+    type Building = { x: number; top: number; w: number };
+    const genLayer = (
+      minW: number,
+      maxW: number,
+      minH: number,
+      maxH: number,
+      gapMin: number,
+      gapMax: number,
+      seed: number,
+    ): Building[] => {
+      const out: Building[] = [];
+      let bx = 0;
+      let bi = 0;
+      while (bx < width + maxW) {
+        const bw = minW + Math.round(rng(seed + bi * 5) * (maxW - minW));
+        const bh = minH + Math.round(rng(seed + bi * 5 + 1) * (maxH - minH));
+        const gap =
+          gapMin + Math.round(rng(seed + bi * 5 + 2) * (gapMax - gapMin));
+        out.push({ x: bx, top: groundY - bh, w: bw });
+        bx += bw + gap;
+        bi++;
+      }
+      return out;
+    };
+
+    const farLayer = genLayer(
+      TILE_SIZE_PX,
+      TILE_SIZE_PX * 3,
+      TILE_SIZE_PX * 2,
+      TILE_SIZE_PX * 4,
+      4,
+      TILE_SIZE_PX,
+      10,
     );
-    this.add.rectangle(width / 2, groundY, width, 2, 0x80d7c2).setAlpha(0.45);
+    const midLayer = genLayer(
+      TILE_SIZE_PX + 8,
+      TILE_SIZE_PX * 3,
+      TILE_SIZE_PX * 3,
+      TILE_SIZE_PX * 7,
+      2,
+      TILE_SIZE_PX - 6,
+      100,
+    );
+    const nearLayer = genLayer(
+      TILE_SIZE_PX * 2,
+      TILE_SIZE_PX * 4,
+      TILE_SIZE_PX * 4,
+      TILE_SIZE_PX * 9,
+      0,
+      14,
+      200,
+    );
 
-    const hazards = this.add.graphics();
-    hazards.fillStyle(0xe35d6a, 1);
+    const farGfx = this.add.graphics();
+    farGfx.fillStyle(0x0d1020, 1);
+    for (const b of farLayer) farGfx.fillRect(b.x, b.top, b.w, groundY - b.top);
 
-    for (
-      let x = width - scaleLegacyX(158);
-      x < width - scaleLegacyX(90);
-      x += scaleLegacyX(12)
-    ) {
-      hazards.fillTriangle(
-        x,
-        groundY,
-        x + scaleLegacyX(6),
-        groundY - scaleLegacyY(14),
-        x + scaleLegacyX(12),
-        groundY,
-      );
+    const midGfx = this.add.graphics();
+    midGfx.fillStyle(0x090c16, 1);
+    for (const b of midLayer) midGfx.fillRect(b.x, b.top, b.w, groundY - b.top);
+
+    const nearGfx = this.add.graphics();
+    nearGfx.fillStyle(0x060912, 1);
+    for (const b of nearLayer)
+      nearGfx.fillRect(b.x, b.top, b.w, groundY - b.top);
+
+    // ── Window lights ─────────────────────────────────────────────────────
+    const winGfx = this.add.graphics();
+    const addWindows = (buildings: Building[], seed: number) => {
+      buildings.forEach((b, bi) => {
+        if (rng(seed + bi * 7) < 0.38) return;
+        for (let wy = b.top + 8; wy < groundY - TILE_SIZE_PX - 2; wy += 10) {
+          for (let wx = b.x + 4; wx < b.x + b.w - 4; wx += 8) {
+            if (rng(seed + wx * 0.1 + wy * 0.05 + bi) > 0.58) {
+              const warm = rng(seed + wx + wy) > 0.35;
+              winGfx.fillStyle(
+                warm ? 0xf0d878 : 0x80d7c2,
+                0.18 + rng(seed + wx * 2 + wy) * 0.28,
+              );
+              winGfx.fillRect(wx, wy, 2, 3);
+            }
+          }
+        }
+      });
+    };
+    addWindows(midLayer, 300);
+    addWindows(nearLayer, 400);
+
+    // ── Horizon atmosphere ────────────────────────────────────────────────
+    for (let i = 0; i < 8; i++) {
+      const fogY = groundY - TILE_SIZE_PX * (8 - i);
+      this.add
+        .rectangle(0, fogY, width, TILE_SIZE_PX, 0x1e3d52)
+        .setAlpha(0.02 + i * 0.007)
+        .setOrigin(0);
     }
+
+    // ── Ground platform ───────────────────────────────────────────────────
+    this.add
+      .rectangle(0, groundY, width, height - groundY + 2, 0x07090f)
+      .setOrigin(0);
+    this.add.rectangle(0, groundY, width, 3, 0x80d7c2).setOrigin(0).setAlpha(0.62);
+    const groundGfx = this.add.graphics();
+    groundGfx.lineStyle(1, 0x18223a, 0.35);
+    for (let gx = TILE_SIZE_PX; gx < width; gx += TILE_SIZE_PX) {
+      groundGfx.lineBetween(gx, groundY + 1, gx, groundY + TILE_SIZE_PX * 3);
+    }
+    groundGfx.lineBetween(0, groundY + TILE_SIZE_PX, width, groundY + TILE_SIZE_PX);
+    groundGfx.lineBetween(
+      0,
+      groundY + TILE_SIZE_PX * 2,
+      width,
+      groundY + TILE_SIZE_PX * 2,
+    );
   }
 
   private drawParticles(): void {
     const { width, groundY } = START_SCREEN_LAYOUT;
-    const particleCount = 18;
-    const particles: Phaser.GameObjects.Rectangle[] = [];
 
-    for (let i = 0; i < particleCount; i++) {
-      const size = 1 + Math.random() * 2;
+    for (let i = 0; i < 28; i++) {
+      const size = i % 5 === 0 ? 3 : i % 2 === 0 ? 2 : 1;
       const x = Math.random() * width;
-      const y = Math.random() * (groundY - scaleLegacyY(20));
-      const color = Math.random() > 0.5 ? 0x80d7c2 : 0xf5f7fb;
-      const alpha = 0.08 + Math.random() * 0.18;
+      const y = Math.random() * (groundY - scaleLegacyY(30));
+      const color = Math.random() > 0.38 ? 0x80d7c2 : 0xdce8f6;
+      const alpha = 0.14 + Math.random() * 0.3;
 
-      const particle = this.add
-        .rectangle(x, y, size, size, color)
-        .setAlpha(alpha);
-
-      particles.push(particle);
+      const particle = this.add.rectangle(x, y, size, size, color).setAlpha(alpha);
 
       this.tweens.add({
         targets: particle,
-        y: y - scaleLegacyY(15) - Math.random() * scaleLegacyY(25),
-        x: x + (Math.random() - 0.5) * scaleLegacyX(30),
+        y: y - scaleLegacyY(18) - Math.random() * scaleLegacyY(32),
+        x: x + (Math.random() - 0.5) * scaleLegacyX(38),
         alpha: 0,
-        duration: 3000 + Math.random() * 4000,
-        delay: Math.random() * 3000,
+        duration: 2500 + Math.random() * 4000,
+        delay: Math.random() * 3500,
         repeat: -1,
-        repeatDelay: Math.random() * 2000,
-        ease: "Sine.easeInOut",
+        repeatDelay: Math.random() * 1800,
+        ease: "Sine.easeIn",
         onRepeat: () => {
           particle.setPosition(
             Math.random() * width,
-            groundY - Math.random() * scaleLegacyY(20),
+            groundY - Math.random() * scaleLegacyY(30),
           );
           particle.setAlpha(alpha);
         },
@@ -291,10 +422,11 @@ export class MenuScene extends Phaser.Scene {
       )
       .setOrigin(0.5, 1);
 
-    applyPinoVisualDisplaySize(player);
+    // Escala maior para o herói ficar prominente na tela inicial (3× o tamanho de jogo)
+    player.setScale(3);
     player.setAlpha(0.95);
 
-    this.playDanceLoop(player, playerX, groundY);
+    this.playDanceLoop(player, playerX, groundY, 3);
   }
 
   private drawMusicButton(): void {
@@ -376,143 +508,277 @@ export class MenuScene extends Phaser.Scene {
     player: Phaser.GameObjects.Sprite,
     originX: number,
     groundY: number,
+    scale = 2,
   ): void {
-    const baseScale = 1;
-    const hopOffset = scaleLegacyX(18);
-    const bigJumpHeight = scaleLegacyY(38);
-    const smallHopHeight = scaleLegacyY(8);
+    const s = scale;
+    const runWidth = scaleLegacyX(44);
+    const bigJumpH = scaleLegacyY(48);
+    const idleBobH = scaleLegacyY(4);
+    const hopH = scaleLegacyY(10);
 
-    const resetPose = () => {
-      applyPinoSpriteFrame(player, PINO_FRAME_IDS.IDLE);
-      player.setScale(baseScale, baseScale);
-      player.setFlipX(false);
+    // Troca de frame preservando a escala do menu (não usa applyPinoVisualDisplaySize)
+    const setFrame = (id: PinoFrameId, flipX = false) => {
+      applyPinoSpriteFrame(player, id);
+      player.setScale(s);
+      player.setFlipX(flipX);
     };
 
+    const idle = () => setFrame(PINO_FRAME_IDS.IDLE);
+
     const sequence = [
-      // 1. idle bounce - "getting ready"
+      // ── 1. idle breath A ─────────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          y: groundY - smallHopHeight,
-          scaleX: baseScale * 1.075,
-          scaleY: baseScale * 0.925,
-          duration: 180,
+          y: groundY - idleBobH,
+          scaleX: s * 1.04,
+          scaleY: s * 0.97,
+          duration: 250,
+          yoyo: true,
+          ease: "Sine.easeInOut",
+          onStart: idle,
+          onComplete: idle,
+        }),
+      // ── 2. idle breath B ─────────────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          y: groundY - idleBobH,
+          scaleX: s * 1.04,
+          scaleY: s * 0.97,
+          duration: 250,
+          yoyo: true,
+          ease: "Sine.easeInOut",
+          onStart: idle,
+          onComplete: idle,
+        }),
+      // ── 3. pause ─────────────────────────────────────────────────────────
+      () => this.time.delayedCall(180, () => advance()),
+      // ── 4. run right: step 1 ─────────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          x: originX + runWidth * 0.35,
+          duration: 75,
+          ease: "Linear",
+          onStart: () => setFrame(PINO_FRAME_IDS.RUN_01),
+        }),
+      // ── 5. run right: step 2 ─────────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          x: originX + runWidth * 0.67,
+          duration: 75,
+          ease: "Linear",
+          onStart: () => setFrame(PINO_FRAME_IDS.RUN_02),
+        }),
+      // ── 6. run right: step 3 ─────────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          x: originX + runWidth,
+          duration: 75,
+          ease: "Linear",
+          onStart: () => setFrame(PINO_FRAME_IDS.RUN_03),
+        }),
+      // ── 7. skid/turnaround ────────────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          scaleX: s * 1.08,
+          scaleY: s * 0.93,
+          duration: 90,
           yoyo: true,
           ease: "Quad.easeOut",
-          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
-          onComplete: () => resetPose(),
+          onStart: idle,
         }),
-      // 2. pause
-      () => this.time.delayedCall(200, () => advance()),
-      // 3. hop left
+      // ── 8. run left: step 1 ──────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          x: originX - hopOffset,
-          y: groundY - smallHopHeight,
-          duration: 220,
-          yoyo: true,
-          ease: "Sine.easeOut",
-          onStart: () => {
-            applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_01);
-            player.setFlipX(true);
-          },
-          onYoyo: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_02),
-          onComplete: () => {
-            player.setX(originX);
-            resetPose();
-          },
+          x: originX + runWidth * 0.65,
+          duration: 75,
+          ease: "Linear",
+          onStart: () => setFrame(PINO_FRAME_IDS.RUN_01, true),
         }),
-      // 4. hop right
+      // ── 9. run left: step 2 ──────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          x: originX + hopOffset,
-          y: groundY - smallHopHeight,
-          duration: 220,
-          yoyo: true,
-          ease: "Sine.easeOut",
-          onStart: () => {
-            applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_01);
-            player.setFlipX(false);
-          },
-          onYoyo: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_02),
-          onComplete: () => {
-            player.setX(originX);
-            resetPose();
-          },
+          x: originX + runWidth * 0.33,
+          duration: 75,
+          ease: "Linear",
+          onStart: () => setFrame(PINO_FRAME_IDS.RUN_02, true),
         }),
-      // 5. pause before big jump
-      () => this.time.delayedCall(120, () => advance()),
-      // 6. squat down (anticipation)
+      // ── 10. run left: step 3 ─────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          scaleY: baseScale * 0.8,
-          scaleX: baseScale * 1.15,
-          duration: 150,
+          x: originX,
+          duration: 75,
+          ease: "Linear",
+          onStart: () => setFrame(PINO_FRAME_IDS.RUN_03, true),
+        }),
+      // ── 11. settle + pause ────────────────────────────────────────────────
+      () => this.time.delayedCall(100, () => { idle(); advance(); }),
+      // ── 12. squat (jump anticipation) ────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          scaleY: s * 0.78,
+          scaleX: s * 1.18,
+          duration: 110,
           ease: "Quad.easeIn",
-          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.IDLE),
+          onStart: idle,
         }),
-      // 7. big jump + spin
+      // ── 13. jump ascent ───────────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          y: groundY - bigJumpHeight,
-          scaleY: baseScale * 1.05,
-          scaleX: baseScale * 0.95,
-          angle: 360,
-          duration: 420,
-          ease: "Sine.easeOut",
-          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
+          y: groundY - bigJumpH * 0.55,
+          scaleY: s * 1.12,
+          scaleX: s * 0.9,
+          duration: 210,
+          ease: "Quad.easeOut",
+          onStart: () => setFrame(PINO_FRAME_IDS.JUMP),
         }),
-      // 8. fall down
+      // ── 14. peak (slow float at apex) ────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          y: groundY - bigJumpH,
+          scaleY: s,
+          scaleX: s,
+          duration: 170,
+          ease: "Quad.easeOut",
+          onStart: () => setFrame(PINO_FRAME_IDS.JUMP_PEAK),
+        }),
+      // ── 15. fall ──────────────────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
           y: groundY,
-          duration: 280,
+          scaleY: s * 0.94,
+          scaleX: s * 1.04,
+          duration: 270,
           ease: "Quad.easeIn",
-          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.FALL),
+          onStart: () => setFrame(PINO_FRAME_IDS.FALL),
         }),
-      // 9. land squash
+      // ── 16. land squash ───────────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          scaleY: baseScale * 0.75,
-          scaleX: baseScale * 1.25,
-          duration: 80,
+          scaleY: s * 0.73,
+          scaleX: s * 1.27,
+          duration: 72,
           yoyo: true,
           ease: "Quad.easeOut",
-          onStart: () => {
-            applyPinoSpriteFrame(player, PINO_FRAME_IDS.IDLE);
-            player.setAngle(0);
-          },
-          onComplete: () => resetPose(),
+          onStart: () => setFrame(PINO_FRAME_IDS.IDLE),
+          onComplete: idle,
         }),
-      // 10. victory pose - little hops
+      // ── 17. pause ─────────────────────────────────────────────────────────
+      () => this.time.delayedCall(90, () => advance()),
+      // ── 18. charge 01: gathering energy ──────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          y: groundY - scaleLegacyY(6),
+          scaleX: s * 0.93,
+          scaleY: s * 1.1,
+          alpha: 0.8,
+          duration: 210,
+          yoyo: true,
+          ease: "Sine.easeInOut",
+          onStart: () => setFrame(PINO_FRAME_IDS.CHARGE_01),
+          onComplete: () => { player.setScale(s); player.setAlpha(0.95); },
+        }),
+      // ── 19. charge 02: energy rising (cyan tint) ─────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          scaleX: s * 0.9,
+          scaleY: s * 1.14,
+          alpha: 0.75,
+          duration: 200,
+          yoyo: true,
+          ease: "Sine.easeInOut",
+          onStart: () => { setFrame(PINO_FRAME_IDS.CHARGE_02); player.setTint(0x80d7c2); },
+          onComplete: () => { player.setScale(s); player.clearTint(); player.setAlpha(0.95); },
+        }),
+      // ── 20. spark: rapid flicker ──────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          alpha: 0.45,
+          duration: 55,
+          yoyo: true,
+          repeat: 2,
+          ease: "Linear",
+          onStart: () => { setFrame(PINO_FRAME_IDS.CYAN_SPARK_01); player.setTint(0x80d7c2); },
+          onComplete: () => { player.clearTint(); player.setAlpha(0.95); },
+        }),
+      // ── 21. burst prepare: coil ───────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          scaleX: s * 1.1,
+          scaleY: s * 0.88,
+          duration: 100,
+          ease: "Quad.easeOut",
+          onStart: () => setFrame(PINO_FRAME_IDS.CYAN_BURST_PREPARE_01),
+        }),
+      // ── 22. burst fire: white flash ───────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          scaleX: s * 1.42,
+          scaleY: s * 0.66,
+          alpha: 1,
+          duration: 65,
+          yoyo: true,
+          ease: "Expo.easeOut",
+          onStart: () => { setFrame(PINO_FRAME_IDS.CYAN_BURST_FIRE_01); player.setTint(0xffffff); },
+          onComplete: () => { idle(); player.clearTint(); player.setAlpha(0.95); },
+        }),
+      // ── 23. pause ─────────────────────────────────────────────────────────
+      () => this.time.delayedCall(80, () => advance()),
+      // ── 24. dash: lunge right ─────────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          x: originX + scaleLegacyX(42),
+          scaleX: s * 1.2,
+          scaleY: s * 0.84,
+          duration: 115,
+          ease: "Expo.easeOut",
+          onStart: () => setFrame(PINO_FRAME_IDS.DASH),
+          onComplete: () => { player.setX(originX); idle(); },
+        }),
+      // ── 25. pause ─────────────────────────────────────────────────────────
+      () => this.time.delayedCall(65, () => advance()),
+      // ── 26. celebration hop A ─────────────────────────────────────────────
+      () =>
+        this.tweens.add({
+          targets: player,
+          y: groundY - hopH,
           duration: 130,
           yoyo: true,
           ease: "Quad.easeOut",
-          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
-          onComplete: () => resetPose(),
+          onStart: () => setFrame(PINO_FRAME_IDS.JUMP),
+          onComplete: idle,
         }),
+      // ── 27. celebration hop B ─────────────────────────────────────────────
       () =>
         this.tweens.add({
           targets: player,
-          y: groundY - scaleLegacyY(6),
+          y: groundY - hopH,
           duration: 130,
           yoyo: true,
           ease: "Quad.easeOut",
-          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
-          onComplete: () => resetPose(),
+          onStart: () => setFrame(PINO_FRAME_IDS.JUMP),
+          onComplete: idle,
         }),
-      // 11. rest before loop
-      () => this.time.delayedCall(800, () => advance()),
+      // ── 28. rest before loop ──────────────────────────────────────────────
+      () => this.time.delayedCall(940, () => advance()),
     ];
 
     let step = 0;
