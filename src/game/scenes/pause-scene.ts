@@ -1,18 +1,25 @@
 import Phaser from "phaser";
 
 import { gameStateStore } from "../systems/game-state";
+import { readPersistedAudioSettings } from "../systems/audio-settings-persistence";
 import { scaleLegacyFontPx } from "../scale";
+import {
+  createAudioSettingsControls,
+  createPauseAudioSettingsLayout,
+} from "../ui/audio-settings-controls";
 import {
   formatPauseMuteStatus,
   PAUSE_OVERLAY_COPY,
   PAUSE_OVERLAY_LAYOUT,
   PAUSE_OVERLAY_STYLE,
 } from "../ui/pause-overlay";
+import { emitAudioVolumeSettingsChanged } from "../systems/audio-settings-events";
 import { SCENE_KEYS } from "./scene-keys";
 
 export class PauseScene extends Phaser.Scene {
   private unsubscribeState?: () => void;
   private isResuming = false;
+  private audioSettingsControls?: import("../ui/audio-settings-controls").AudioSettingsControls;
 
   public constructor() {
     super(SCENE_KEYS.PAUSE);
@@ -75,6 +82,17 @@ export class PauseScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    const persistedSettings = readPersistedAudioSettings();
+    this.audioSettingsControls = createAudioSettingsControls({
+      scene: this,
+      layout: createPauseAudioSettingsLayout(),
+      initialSettings: persistedSettings,
+      onChange: (settings) => {
+        emitAudioVolumeSettingsChanged(settings);
+      },
+    });
+    this.audioSettingsControls.container.setDepth(30);
+
     this.unsubscribeState = gameStateStore.subscribe((state) => {
       muteText.setText(formatPauseMuteStatus(state.isMuted));
     });
@@ -100,6 +118,8 @@ export class PauseScene extends Phaser.Scene {
   }
 
   private cleanup(): void {
+    this.audioSettingsControls?.destroy();
+    this.audioSettingsControls = undefined;
     this.input.keyboard?.off("keydown-ESC", this.resumeLevel, this);
     this.input.keyboard?.off("keydown-M", this.toggleMute, this);
     this.unsubscribeState?.();

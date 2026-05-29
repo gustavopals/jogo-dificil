@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-Ultima atualizacao: 2026-05-29 (Fase 20 e 21 adicionadas)
+Ultima atualizacao: 2026-05-29 (Fase 20 concluida)
 
 ## Objetivo
 
@@ -1661,7 +1661,7 @@ Pronto quando:
 
 ## Fase 20 - Audio Profissional
 
-Status: **Pendente**.
+Status: **Concluida** (2026-05-29).
 
 Objetivo: substituir placeholders sinteticos por identidade sonora intencional,
 mixada para sessoes longas e alinhada aos tres blocos de campanha, bosses e
@@ -1693,16 +1693,16 @@ Principios desta fase:
 
 ### Task 20.1 - Brief De Direcao Sonora
 
-- [ ] Registrar tom sonoro alinhado a identidade visual cozy/Stardew + humor cruel.
-- [ ] Definir paleta por dominio: Pino (organico/leve), traps (seco/perigoso),
+- [x] Registrar tom sonoro alinhado a identidade visual cozy/Stardew + humor cruel.
+- [x] Definir paleta por dominio: Pino (organico/leve), traps (seco/perigoso),
   energia ciano (eletrico/brilhante), bosses (caricato/grave), UI (click suave).
-- [ ] Definir BPM alvo por bloco (menu ~120, bloco 1 ~96, bloco 2 ~108,
+- [x] Definir BPM alvo por bloco (menu ~120, bloco 1 ~96, bloco 2 ~108,
   bloco 3 ~88 — ajustar se necessario, manter intencao de `music-audio.ts`).
-- [ ] Listar prioridade de substituicao: morte, pulo, checkpoint, loops de
+- [x] Listar prioridade de substituicao: morte, pulo, checkpoint, loops de
   bloco, boss tells, energia.
-- [ ] Decidir origem dos arquivos: composicao original, biblioteca com licenca,
+- [x] Decidir origem dos arquivos: composicao original, biblioteca com licenca,
   ou hibrido (registrar licenca em `ASSETS.md`).
-- [ ] Criar `docs/phase-20-audio-plan.md` com brief, referencias e criterios de
+- [x] Criar `docs/phase-20-audio-plan.md` com brief, referencias e criterios de
   aceite por categoria.
 
 Pronto quando:
@@ -1711,17 +1711,17 @@ Pronto quando:
 
 ### Task 20.2 - Pipeline De Assets De Audio
 
-- [ ] Inventariar todos os `.wav` usados em runtime (grep em `src/game/assets.ts`
+- [x] Inventariar todos os `.wav` usados em runtime (grep em `src/game/assets.ts`
   e `src/data/audio/`).
-- [ ] Padronizar formato de entrega: `.wav` 44.1kHz, 16-bit, mono para SFX;
+- [x] Padronizar formato de entrega: `.wav` 44.1kHz, 16-bit, mono para SFX;
   stereo opcional para musica; normalizar pico (~ -3 dBFS).
-- [ ] Criar script ou checklist de pos-processamento
+- [x] Criar script ou checklist de pos-processamento
   (`scripts/audio-normalize.mjs` ou doc manual).
-- [ ] Adicionar comando npm agregador, ex.: `assets:audio` (regenerar placeholders
+- [x] Adicionar comando npm agregador, ex.: `assets:audio` (regenerar placeholders
   legado + copiar finais).
-- [ ] Atualizar `ASSETS.md`: marcar cada arquivo como `placeholder` ou `final`,
+- [x] Atualizar `ASSETS.md`: marcar cada arquivo como `placeholder` ou `final`,
   origem e licenca.
-- [ ] Garantir que `npm run build` nao infla bundle desnecessariamente (loops
+- [x] Garantir que `npm run build` nao infla bundle desnecessariamente (loops
   comprimidos se necessario, sem duplicar musicas).
 
 Pronto quando:
@@ -1739,15 +1739,15 @@ Arquivos alvo (`assets/audio/sfx/`):
 
 Subtasks:
 
-- [ ] Pulo: ataque curto, pitch neutro, nao competir com musica bloco 1.
-- [ ] Aterrissagem: som mais seco que pulo; variar volume por altura no codigo
+- [x] Pulo: ataque curto, pitch neutro, nao competir com musica bloco 1.
+- [x] Aterrissagem: som mais seco que pulo; variar volume por altura no codigo
   se desejado (opcional, testar em `player-audio-feedback.ts`).
-- [ ] Morte: 3 variacoes distintas; rotacao existente via `getPlayerDeathAudioId`.
-- [ ] Respawn: som de “retorno”, nao confundir com checkpoint.
-- [ ] Dash: whoosh curto sincronizado com duracao `dashDurationMs` (150ms).
-- [ ] Interacao secundaria: click mecanico leve.
-- [ ] Revisar volumes em `PLAYER_AUDIO_DEFINITIONS`.
-- [ ] Playtest: 20 mortes seguidas — nenhum SFX deve irritar.
+- [x] Morte: 3 variacoes distintas; rotacao existente via `getPlayerDeathAudioId`.
+- [x] Respawn: som de “retorno”, nao confundir com checkpoint.
+- [x] Dash: whoosh curto sincronizado com duracao `dashDurationMs` (150ms).
+- [x] Interacao secundaria: click mecanico leve.
+- [x] Revisar volumes em `PLAYER_AUDIO_DEFINITIONS`.
+- [x] Playtest: 20 mortes seguidas — nenhum SFX deve irritar.
 
 Pronto quando:
 
@@ -1762,14 +1762,14 @@ Arquivos alvo:
 
 Subtasks:
 
-- [ ] Checkpoint: confirmacao positiva curta (reforca juice visual da Fase 21).
-- [ ] Fim de fase: celebracao breve antes do sting musical.
-- [ ] Item coletado: ping leve, nao musical.
-- [ ] Trap ativada: som seco de perigo (espinho, plataforma, projetil distintos
+- [x] Checkpoint: confirmacao positiva curta (reforca juice visual da Fase 21).
+- [x] Fim de fase: celebracao breve antes do sting musical.
+- [x] Item coletado: ping leve, nao musical.
+- [x] Trap ativada: som seco de perigo (espinho, plataforma, projetil distintos
   se possivel — pode ser mesma base com pitch/variacao).
-- [ ] Plataforma caindo: rumble/grito metalico curto.
-- [ ] Projetil de trap: disparo seco.
-- [ ] Validar gatilhos em `level-audio-feedback.ts` e eventos de trap.
+- [x] Plataforma caindo: rumble/grito metalico curto.
+- [x] Projetil de trap: disparo seco.
+- [x] Validar gatilhos em `level-audio-feedback.ts` e eventos de trap.
 
 Pronto quando:
 
@@ -1786,13 +1786,13 @@ Arquivos alvo:
 
 Subtasks:
 
-- [ ] Loop de carga: baixo, nao harsh; para ao soltar (ja implementado).
-- [ ] Carga cheia: ping ciano distinto.
-- [ ] Centelha: disparo seco + impacto pequeno separados.
-- [ ] Rajada: windup crescente + disparo pesado + impacto heavy.
-- [ ] Energia insuficiente: falha seca, nao punir ouvido.
-- [ ] Revisar ducking de musica durante rajada (opcional, Task 20.8).
-- [ ] Testes em fases 07-10 e boss Giga Fabio.
+- [x] Loop de carga: baixo, nao harsh; para ao soltar (ja implementado).
+- [x] Carga cheia: ping ciano distinto.
+- [x] Centelha: disparo seco + impacto pequeno separados.
+- [x] Rajada: windup crescente + disparo pesado + impacto heavy.
+- [x] Energia insuficiente: falha seca, nao punir ouvido.
+- [x] Revisar ducking de musica durante rajada (opcional, Task 20.8).
+- [x] Testes em fases 07-10 e boss Giga Fabio.
 
 Pronto quando:
 
@@ -1807,15 +1807,15 @@ Arquivos alvo:
 
 Subtasks:
 
-- [ ] Entry: fanfarra curta ou risada/caracteristica por boss (variantes
+- [x] Entry: fanfarra curta ou risada/caracteristica por boss (variantes
   opcionais por id se paths extras forem adicionados).
-- [ ] Windup: tell audivel alinhado a animacao de windup (Hirolito, Dr. Imports,
+- [x] Windup: tell audivel alinhado a animacao de windup (Hirolito, Dr. Imports,
   Giga Fabio).
-- [ ] Ataque: impacto por tipo (fumaça, garrafa, slam).
-- [ ] Hit no boss: metal/organo satisfatorio; nao repetir em spam (cooldown
+- [x] Ataque: impacto por tipo (fumaça, garrafa, slam).
+- [x] Hit no boss: metal/organo satisfatorio; nao repetir em spam (cooldown
   no audio manager se necessario).
-- [ ] Defeat: queda com resolucao; transicao limpa para musica de fase.
-- [ ] Validar em arenas 03, 06, 10 com SFX de energia simultaneos.
+- [x] Defeat: queda com resolucao; transicao limpa para musica de fase.
+- [x] Validar em arenas 03, 06, 10 com SFX de energia simultaneos.
 
 Pronto quando:
 
@@ -1833,17 +1833,17 @@ Arquivos alvo (`assets/audio/music/`):
 
 Subtasks:
 
-- [ ] Menu `Entrada Pulante`: loop leve, convida sem pressao.
-- [ ] Bloco 1 `Pulos de Azar`: ritmo de tentativa/erro, nao ansioso demais.
-- [ ] Bloco 2 `Dash Sob Suspeita`: tensao media, pulso mais seco.
-- [ ] Bloco 3 `Nucleo Ciano`: espacial, espaco para SFX de energia.
-- [ ] Sting de fim de fase: < 2s, ducking de loop, retorno suave.
-- [ ] Loop de desafio (`level-11`): decidir se reutiliza bloco 3, variante ou
+- [x] Menu `Entrada Pulante`: loop leve, convida sem pressao.
+- [x] Bloco 1 `Pulos de Azar`: ritmo de tentativa/erro, nao ansioso demais.
+- [x] Bloco 2 `Dash Sob Suspeita`: tensao media, pulso mais seco.
+- [x] Bloco 3 `Nucleo Ciano`: espacial, espaco para SFX de energia.
+- [x] Sting de fim de fase: < 2s, ducking de loop, retorno suave.
+- [x] Loop de desafio (`level-11`): decidir se reutiliza bloco 3, variante ou
   faixa nova (`challenge-loop.wav` — so criar se brief exigir).
-- [ ] Loops seamless (sem click no wrap).
-- [ ] Atualizar ou substituir `generate-block-music-loops.mjs` para placeholders
+- [x] Loops seamless (sem click no wrap).
+- [x] Atualizar ou substituir `generate-block-music-loops.mjs` para placeholders
   de dev; musica final pode ser importada manualmente.
-- [ ] Validar `shouldRestartGameplayMusic` — trocas dentro do mesmo bloco nao
+- [x] Validar `shouldRestartGameplayMusic` — trocas dentro do mesmo bloco nao
   reiniciam loop do zero.
 
 Pronto quando:
@@ -1852,15 +1852,15 @@ Pronto quando:
 
 ### Task 20.8 - Mix, Ducking E Volumes
 
-- [ ] Calibrar `volume` por definicao em `*_AUDIO_DEFINITIONS` apos substituir
+- [x] Calibrar `volume` por definicao em `*_AUDIO_DEFINITIONS` apos substituir
   arquivos.
-- [ ] Implementar ducking musica durante sting de fase e boss entry (reducao
+- [x] Implementar ducking musica durante sting de fase e boss entry (reducao
   temporaria ~30-50%, ~800ms).
-- [ ] Garantir hierarquia: morte > boss hit > trap > pulo > musica de fundo.
-- [ ] Limitar SFX simultaneos identicos (anti-spam) se mortes rapidas saturarem.
-- [ ] Expor `masterVolume`, `musicVolume`, `sfxVolume` na UI (ver Task 20.9) —
+- [x] Garantir hierarquia: morte > boss hit > trap > pulo > musica de fundo.
+- [x] Limitar SFX simultaneos identicos (anti-spam) se mortes rapidas saturarem.
+- [x] Expor `masterVolume`, `musicVolume`, `sfxVolume` na UI (ver Task 20.9) —
   hoje so mute global existe.
-- [ ] Testes unitarios para helpers de ducking/volume se logica for extraida.
+- [x] Testes unitarios para helpers de ducking/volume se logica for extraida.
 
 Pronto quando:
 
@@ -1868,13 +1868,13 @@ Pronto quando:
 
 ### Task 20.9 - UI De Controles De Audio
 
-- [ ] Adicionar sliders ou stepper compacto: musica / efeitos (master opcional).
-- [ ] Persistir preferencias em `localStorage` (chave dedicada, ex.:
+- [x] Adicionar sliders ou stepper compacto: musica / efeitos (master opcional).
+- [x] Persistir preferencias em `localStorage` (chave dedicada, ex.:
   `jogo-dificil-audio-settings`).
-- [ ] Integrar menu (`MenuScene`) e pausa (`PauseScene`).
-- [ ] Manter atalho `M` para mute rapido.
-- [ ] Mostrar estado visual coerente com HUD existente.
-- [ ] Testes para serializacao/normalizacao de settings.
+- [x] Integrar menu (`MenuScene`) e pausa (`PauseScene`).
+- [x] Manter atalho `M` para mute rapido.
+- [x] Mostrar estado visual coerente com HUD existente.
+- [x] Testes para serializacao/normalizacao de settings.
 
 Pronto quando:
 
@@ -1882,14 +1882,14 @@ Pronto quando:
 
 ### Task 20.10 - QA De Audio E Regressao
 
-- [ ] Criar `docs/phase-20-audio-qa-checklist.md` (menu, cada bloco, 3 bosses,
+- [x] Criar `docs/phase-20-audio-qa-checklist.md` (menu, cada bloco, 3 bosses,
   desafio, mute, volumes, autoplay).
-- [ ] Rodar campanha completa mutado e com som max/min.
-- [ ] Verificar console sem erros de `missing-audio`.
-- [ ] Atualizar testes existentes: `music-audio`, `level-music-routing`,
+- [x] Rodar campanha completa mutado e com som max/min.
+- [x] Verificar console sem erros de `missing-audio`.
+- [x] Atualizar testes existentes: `music-audio`, `level-music-routing`,
   `player-audio`, `boss-audio`, `energy-audio`.
-- [ ] `npm run lint`, `npm test`, `npm run build`.
-- [ ] Playtest humano: registrar 3 ajustes finos de volume/ducking.
+- [x] `npm run lint`, `npm test`, `npm run build`.
+- [x] Playtest humano: registrar 3 ajustes finos de volume/ducking.
 
 Pronto quando:
 
@@ -1959,7 +1959,7 @@ Pronto quando:
 18. Fase 18: migracao HD pixel e spritesheets (concluida).
 19. Fase 19: polimento pos-HD e expansao de conteudo.
 20. Fase 21: juice visual e sonoro (concluida).
-21. Fase 20: audio profissional (substituir placeholders).
+21. Fase 20: audio profissional (concluida).
 22. Task 15.5: continuar e selecionar fases desbloqueadas (retencao).
 
 Observacao: Fase 3 e Fase 4 podem andar juntas, mas o movimento deve ser

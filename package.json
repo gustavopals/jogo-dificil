@@ -14,7 +14,8 @@
     "assets:pino-sheets": "node scripts/extract-pino-frames-from-hero-examples.mjs && node scripts/generate-pino-spritesheets.mjs",
     "assets:boss-sheets": "node scripts/extract-boss-spritesheets-from-examples.mjs && node scripts/extract-boss-projectiles-from-examples.mjs",
     "assets:environment": "node scripts/generate-environment-sprites.mjs",
-    "assets:block-music": "node scripts/generate-block-music-loops.mjs"
+    "assets:block-music": "node scripts/generate-block-music-loops.mjs",
+    "assets:audio": "node scripts/generate-sfx.mjs && node scripts/generate-music.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

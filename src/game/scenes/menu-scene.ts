@@ -18,7 +18,13 @@ import {
 import { emitGameEvent, GAME_EVENTS } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
 import { resolveLevelInitialEnergy } from "../systems/level-progress";
+import { emitAudioVolumeSettingsChanged } from "../systems/audio-settings-events";
 import { formatMusicMuteStatus } from "../ui/hud";
+import {
+  createAudioSettingsControls,
+  createMenuAudioSettingsLayout,
+} from "../ui/audio-settings-controls";
+import { readPersistedAudioSettings } from "../systems/audio-settings-persistence";
 import {
   START_SCREEN_COPY,
   START_SCREEN_LAYOUT,
@@ -36,6 +42,7 @@ import { SCENE_KEYS } from "./scene-keys";
 export class MenuScene extends Phaser.Scene {
   private hasStarted = false;
   private unsubscribeState?: () => void;
+  private audioSettingsControls?: import("../ui/audio-settings-controls").AudioSettingsControls;
 
   public constructor() {
     super(SCENE_KEYS.MENU);
@@ -58,6 +65,7 @@ export class MenuScene extends Phaser.Scene {
     this.drawParticles();
     this.drawStartScreen();
     this.drawMusicButton();
+    this.drawAudioSettingsControls();
     this.bindStartInput();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
@@ -529,9 +537,24 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
+  private drawAudioSettingsControls(): void {
+    const persistedSettings = readPersistedAudioSettings();
+
+    this.audioSettingsControls = createAudioSettingsControls({
+      scene: this,
+      layout: createMenuAudioSettingsLayout(),
+      initialSettings: persistedSettings,
+      onChange: (settings) => {
+        emitAudioVolumeSettingsChanged(settings);
+      },
+    });
+    this.audioSettingsControls.container.setDepth(25);
+  }
+
   private bindStartInput(): void {
     this.input.keyboard?.once("keydown-ENTER", this.startLevel, this);
     this.input.keyboard?.once("keydown-SPACE", this.startLevel, this);
+    this.input.keyboard?.on("keydown-M", this.toggleMute, this);
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
       this.startLevelFromPointer,
@@ -541,6 +564,10 @@ export class MenuScene extends Phaser.Scene {
 
   private startLevelFromPointer(pointer: Phaser.Input.Pointer): void {
     if (isPointInsideStartScreenMusicButton(pointer.x, pointer.y)) {
+      return;
+    }
+
+    if (this.audioSettingsControls?.containsPoint(pointer.x, pointer.y)) {
       return;
     }
 
@@ -565,6 +592,10 @@ export class MenuScene extends Phaser.Scene {
     this.scene.start(SCENE_KEYS.LEVEL);
   }
 
+  private toggleMute(): void {
+    gameStateStore.toggleMuted();
+  }
+
   private playMenuMusic(): void {
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
       audioId: MUSIC_AUDIO_IDS.MENU_LOOP,
@@ -573,8 +604,11 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private cleanup(): void {
+    this.audioSettingsControls?.destroy();
+    this.audioSettingsControls = undefined;
     this.unsubscribeState?.();
     this.unsubscribeState = undefined;
+    this.input.keyboard?.off("keydown-M", this.toggleMute, this);
     this.input.off(
       Phaser.Input.Events.POINTER_DOWN,
       this.startLevelFromPointer,

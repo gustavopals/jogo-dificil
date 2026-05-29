@@ -13,7 +13,15 @@ import {
 } from "../../data/audio";
 import { LEVEL_DEFINITIONS } from "../../data/levels";
 import type { AudioDefinition } from "../../shared";
-import { AudioManager, DEFAULT_AUDIO_SETTINGS } from "../systems/audio-manager";
+import { shouldDuckMusicForAudioId } from "../systems/audio-ducking";
+import {
+  AudioManager,
+  DEFAULT_AUDIO_SETTINGS,
+} from "../systems/audio-manager";
+import {
+  readPersistedAudioSettings,
+  writePersistedAudioSettings,
+} from "../systems/audio-settings-persistence";
 import {
   GAME_EVENTS,
   onGameEvent,
@@ -27,22 +35,28 @@ import { SCENE_KEYS } from "./scene-keys";
 export class AudioScene extends Phaser.Scene {
   private audioManager?: AudioManager;
   private unsubscribeEvents: readonly (() => void)[] = [];
+  private storedMusicVolume: number = DEFAULT_AUDIO_SETTINGS.musicVolume;
 
   public constructor() {
     super(SCENE_KEYS.AUDIO);
   }
 
   public create(): void {
+    const persistedSettings = readPersistedAudioSettings();
+    this.storedMusicVolume = persistedSettings.musicVolume;
+
     this.audioManager = new AudioManager(
       new PhaserAudioEngine(this),
-      DEFAULT_AUDIO_SETTINGS,
+      {
+        ...DEFAULT_AUDIO_SETTINGS,
+        ...persistedSettings,
+      },
     );
     this.audioManager.registerAudio(getInitialAudioDefinitions());
+
     const initialAudioState = gameStateStore.getSnapshot();
     this.audioManager.setMuted(initialAudioState.isMuted);
-    this.audioManager.setMusicVolume(
-      getMusicVolumeForMuteState(initialAudioState.isMusicMuted),
-    );
+    this.applyMusicMuteState(initialAudioState.isMusicMuted);
 
     this.unsubscribeEvents = [
       onGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, (payload) => {
@@ -55,8 +69,17 @@ export class AudioScene extends Phaser.Scene {
         this.audioManager?.setMuted(isMuted);
       }),
       onGameEvent(GAME_EVENTS.AUDIO_MUSIC_MUTE_CHANGED, ({ isMusicMuted }) => {
+        this.applyMusicMuteState(isMusicMuted);
+      }),
+      onGameEvent(GAME_EVENTS.AUDIO_VOLUME_SETTINGS_CHANGED, (settings) => {
+        this.storedMusicVolume = settings.musicVolume;
+        writePersistedAudioSettings(settings);
+        this.audioManager?.setMasterVolume(settings.masterVolume);
+        this.audioManager?.setSfxVolume(settings.sfxVolume);
+
+        const isMusicMuted = gameStateStore.getSnapshot().isMusicMuted;
         this.audioManager?.setMusicVolume(
-          getMusicVolumeForMuteState(isMusicMuted),
+          isMusicMuted ? 0 : settings.musicVolume,
         );
       }),
       onGameEvent(GAME_EVENTS.PLAYER_DIED, ({ deathCount }) => {
@@ -69,6 +92,7 @@ export class AudioScene extends Phaser.Scene {
         this.audioManager?.play(LEVEL_AUDIO_IDS.CHECKPOINT);
       }),
       onGameEvent(GAME_EVENTS.LEVEL_COMPLETED, () => {
+        this.audioManager?.requestMusicDuck();
         this.audioManager?.play(LEVEL_AUDIO_IDS.COMPLETE);
         this.audioManager?.play(MUSIC_AUDIO_IDS.LEVEL_COMPLETE_STING);
       }),
@@ -80,7 +104,15 @@ export class AudioScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
   }
 
+  public override update(): void {
+    this.audioManager?.syncMusicDuck();
+  }
+
   private handlePlayRequested(payload: AudioPlayRequestedEvent): void {
+    if (shouldDuckMusicForAudioId(payload.audioId)) {
+      this.audioManager?.requestMusicDuck();
+    }
+
     this.audioManager?.play(payload.audioId, {
       volume: payload.volume,
       loop: payload.loop,
@@ -95,6 +127,12 @@ export class AudioScene extends Phaser.Scene {
     }
 
     this.audioManager?.stop(payload.audioId);
+  }
+
+  private applyMusicMuteState(isMusicMuted: boolean): void {
+    this.audioManager?.setMusicVolume(
+      isMusicMuted ? 0 : this.storedMusicVolume,
+    );
   }
 
   private unlockAudio(): void {
@@ -127,8 +165,4 @@ function getInitialAudioDefinitions(): readonly AudioDefinition[] {
   });
 
   return audioDefinitions;
-}
-
-function getMusicVolumeForMuteState(isMusicMuted: boolean): number {
-  return isMusicMuted ? 0 : DEFAULT_AUDIO_SETTINGS.musicVolume;
 }

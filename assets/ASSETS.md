@@ -28,7 +28,7 @@ jogo.
 - Export de sheets: PNG sem compressao lossy, dimensoes oficiais `512x512` ou
   `1024x1024`, celulas `128x128`, pixel art sem antialias.
 - Audio final deve usar `.ogg`; placeholders gerados localmente podem usar
-  `.wav` ate a etapa de mixagem/exportacao final.
+  `.wav` 44.1 kHz mono (SFX) via `npm run assets:audio`; substituir por composicao final mantendo paths.
 - Assets temporarios ficam em `assets/temp/`.
 - Assets finais ficam nas pastas de dominio correspondentes.
 
@@ -71,9 +71,9 @@ jogo.
 | `assets/legacy/pino/player-pino-death-02.png`             | Gerado no projeto por script   | Original do projeto | Frame legado 2 de morte do Pino.                                 |
 | `assets/legacy/pino/player-pino-respawn-01.png`           | Gerado no projeto por script   | Original do projeto | Frame legado 1 de respawn do Pino.                               |
 | `assets/legacy/pino/player-pino-respawn-02.png`           | Gerado no projeto por script   | Original do projeto | Frame legado 2 de respawn do Pino.                               |
-| `assets/legacy/bosses/hirolito-narguilito.png`            | Gerado no projeto com `magick` | Original do projeto | Placeholder legado do Hirolito; substituido por sheet HD.        |
-| `assets/legacy/bosses/dr-imports.png`                     | Gerado no projeto com `magick` | Original do projeto | Placeholder legado do Dr. Imports; substituido por sheet HD.     |
-| `assets/legacy/bosses/giga-fabio.png`                     | Gerado no projeto com `magick` | Original do projeto | Placeholder legado do Giga Fabio; substituido por sheet HD.      |
+| `assets/legacy/bosses/hirolito-narguilito.png`            | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Hirolito; substituido por sheet HD.        |
+| `assets/legacy/bosses/dr-imports.png`                     | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Dr. Imports; substituido por sheet HD.     |
+| `assets/legacy/bosses/giga-fabio.png`                     | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Giga Fabio; substituido por sheet HD.      |
 | `assets/sprites/trap-spikes.png`                          | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de espinhos e spike-pop, contorno duro.        |
 | `assets/sprites/trap-false-block.png`                     | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de bloco falso com indício roxo sutil.         |
 | `assets/sprites/trap-falling-platform.png`                | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de plataforma instável com alerta inferior.    |
@@ -103,20 +103,20 @@ jogo.
 | `assets/tilesets/lab-platform.png`                        | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de plataforma metalica com borda ciano de ledge. |
 | `assets/tilesets/lab-hazard-spikes.png`                   | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de perigo de espinhos vermelhos com base escura. |
 | `assets/tilesets/lab-background-panel.png`                | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de painel escuro repetivel, mais escuro que gameplay. |
-| `assets/audio/sfx/player-jump.wav`                        | Gerado no projeto por script   | Original do projeto | Placeholder curto de pulo do Pino.                               |
-| `assets/audio/sfx/player-land.wav`                        | Gerado no projeto por script   | Original do projeto | Placeholder curto de aterrissagem do Pino.                       |
-| `assets/audio/sfx/player-death-01.wav`                    | Gerado no projeto por script   | Original do projeto | Variação placeholder de morte do Pino.                           |
-| `assets/audio/sfx/player-death-02.wav`                    | Gerado no projeto por script   | Original do projeto | Variação placeholder de morte do Pino.                           |
-| `assets/audio/sfx/player-death-03.wav`                    | Gerado no projeto por script   | Original do projeto | Variação placeholder de morte do Pino.                           |
-| `assets/audio/sfx/player-respawn.wav`                     | Gerado no projeto por script   | Original do projeto | Placeholder curto de respawn do Pino.                            |
-| `assets/audio/sfx/player-primary.wav`                     | Gerado no projeto por script   | Original do projeto | Placeholder curto de ação primária.                              |
-| `assets/audio/sfx/player-secondary.wav`                   | Gerado no projeto por script   | Original do projeto | Placeholder curto de ação secundária.                            |
-| `assets/audio/sfx/level-checkpoint.wav`                   | Gerado no projeto por script   | Original do projeto | Placeholder curto de checkpoint.                                 |
-| `assets/audio/sfx/level-complete.wav`                     | Gerado no projeto por script   | Original do projeto | Placeholder curto de fim de fase.                                |
-| `assets/audio/sfx/level-item.wav`                         | Gerado no projeto por script   | Original do projeto | Placeholder curto de coleta de item.                             |
-| `assets/audio/sfx/level-trap.wav`                         | Gerado no projeto por script   | Original do projeto | Placeholder curto de armadilha ativada.                          |
-| `assets/audio/sfx/level-falling-platform.wav`             | Gerado no projeto por script   | Original do projeto | Placeholder curto de plataforma caindo.                          |
-| `assets/audio/sfx/level-projectile.wav`                   | Gerado no projeto por script   | Original do projeto | Placeholder curto de projétil disparando.                        |
+| `assets/audio/sfx/player-jump.wav`                        | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — pulo organico curto.                               |
+| `assets/audio/sfx/player-land.wav`                        | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de aterrissagem do Pino.                       |
+| `assets/audio/sfx/player-death-01.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                           |
+| `assets/audio/sfx/player-death-02.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                           |
+| `assets/audio/sfx/player-death-03.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                           |
+| `assets/audio/sfx/player-respawn.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de respawn do Pino.                            |
+| `assets/audio/sfx/player-primary.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de ação primária.                              |
+| `assets/audio/sfx/player-secondary.wav`                   | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de ação secundária.                            |
+| `assets/audio/sfx/level-checkpoint.wav`                   | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de checkpoint.                                 |
+| `assets/audio/sfx/level-complete.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de fim de fase.                                |
+| `assets/audio/sfx/level-item.wav`                         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de coleta de item.                             |
+| `assets/audio/sfx/level-trap.wav`                         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de armadilha ativada.                          |
+| `assets/audio/sfx/level-falling-platform.wav`             | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de plataforma caindo.                          |
+| `assets/audio/sfx/level-projectile.wav`                   | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de projétil disparando.                        |
 | `assets/audio/sfx/energy-charge-loop.wav`                 | Gerado no projeto por script   | Original do projeto | Loop baixo da Carga Ciano enquanto segura energia.               |
 | `assets/audio/sfx/energy-charge-full.wav`                 | Gerado no projeto por script   | Original do projeto | Ping curto de Energia Ciano cheia.                               |
 | `assets/audio/sfx/energy-shot.wav`                        | Gerado no projeto por script   | Original do projeto | Disparo seco e curto da Centelha Ciano.                          |
@@ -130,11 +130,11 @@ jogo.
 | `assets/audio/sfx/boss-attack.wav`                        | Gerado no projeto por script   | Original do projeto | Ataque seco de boss com impacto grave curto.                     |
 | `assets/audio/sfx/boss-hit.wav`                           | Gerado no projeto por script   | Original do projeto | Hit metálico curto quando boss perde vida.                       |
 | `assets/audio/sfx/boss-defeat.wav`                        | Gerado no projeto por script   | Original do projeto | Queda musical curta para derrota de boss.                        |
-| `assets/audio/music/menu-loop.wav`                        | Gerado no projeto por script   | Original do projeto | Loop original simples do tema `Entrada Pulante`.                 |
+| `assets/audio/music/menu-loop.wav`                        | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — loop do tema `Entrada Pulante`.                 |
 | `assets/audio/music/mvp-loop.wav`                         | Gerado no projeto por script   | Original do projeto | Loop do bloco 1 (fases 01-03), tema `Pulos de Azar`.             |
 | `assets/audio/music/block-2-dash-loop.wav`                | Gerado no projeto por script   | Original do projeto | Loop do bloco 2 (fases 04-06), tema `Dash Sob Suspeita`.       |
 | `assets/audio/music/block-3-energy-loop.wav`              | Gerado no projeto por script   | Original do projeto | Loop do bloco 3 (fases 07-10), tema `Nucleo Ciano`.            |
-| `assets/audio/music/mvp-level-complete-sting.wav`         | Gerado no projeto por script   | Original do projeto | Vinheta musical curta de fim de fase.                            |
+| `assets/audio/music/mvp-level-complete-sting.wav`         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — vinheta de fim de fase.                            |
 
 ## Referencias De Boss
 

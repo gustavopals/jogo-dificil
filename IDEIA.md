@@ -745,6 +745,19 @@ Implementação inicial da música do MVP:
 - A tela inicial e o HUD têm um botão `♪`/`OFF` para mutar apenas a música; o
   mute global em `M` continua silenciando música e efeitos juntos.
 
+Fase 20 — áudio profissional (2026-05-29):
+
+- Brief e QA em `docs/phase-20-audio-plan.md` e
+  `docs/phase-20-audio-qa-checklist.md`.
+- Pipeline: `npm run assets:audio` (`scripts/generate-sfx.mjs`,
+  `scripts/generate-music.mjs`), WAV 44.1 kHz mono, pico ~−3 dBFS.
+- Síntese procedural melhorada para todos os SFX e loops (mesmos paths e
+  `audioId`); level 11 reutiliza `block-3-energy-loop`.
+- Ducking de música (~55% por 800 ms) em sting de fase e `boss-entry`;
+  anti-spam de SFX (morte, hit, pulo).
+- Sliders música/efeitos no menu e pausa; persistência
+  `jogo-dificil-audio-settings` em `localStorage`.
+
 Implementação inicial da tela inicial:
 
 - A tela de abertura exibe `Pals Adventure 1` (antes `Jogo Difícil`) e mantém

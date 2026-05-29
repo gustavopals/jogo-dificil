@@ -87,7 +87,12 @@ npm run format
 npm run assets:pino-sheets
 npm run assets:boss-sheets
 npm run assets:environment
+npm run assets:audio
 ```
+
+`assets:audio` regenera todos os SFX e loops de musica (44.1 kHz). Use apos
+clonar o repo ou alterar `scripts/generate-sfx.mjs` / `scripts/generate-music.mjs`.
+Atalho legado so para musica: `npm run assets:block-music`.
 
 Registro de origem e licenca: [`assets/ASSETS.md`](assets/ASSETS.md).
 

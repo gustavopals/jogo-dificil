@@ -3,6 +3,16 @@ import type {
   AudioDefinition,
   AudioSettings,
 } from "../../shared";
+import {
+  DEFAULT_MUSIC_DUCK_CONFIG,
+  applyMusicDuckMultiplier,
+  resolveMusicDuckMultiplier,
+  type MusicDuckConfig,
+} from "./audio-ducking";
+import {
+  recordSfxPlayback,
+  shouldAllowSfxPlayback,
+} from "./audio-sfx-cooldown";
 
 export type AudioPlaybackConfig = {
   readonly volume: number;
@@ -59,14 +69,20 @@ export class AudioManager {
   private readonly audioDefinitions = new Map<string, AudioDefinition>();
   private readonly activeSounds = new Map<string, AudioPlaybackHandle>();
   private readonly pendingPlayRequests: QueuedPlayRequest[] = [];
+  private readonly sfxLastPlayedAt = new Map<string, number>();
   private settings: AudioSettings;
   private isAutoplayBlocked = false;
+  private musicDuckUntilMs: number | null = null;
+  private musicDuckVolumeMultiplier = 1;
+  private readonly nowMs: () => number;
 
   public constructor(
     private readonly engine?: AudioPlaybackEngine,
     settings: AudioSettings = DEFAULT_AUDIO_SETTINGS,
+    nowMs: () => number = () => Date.now(),
   ) {
     this.settings = normalizeSettings(settings);
+    this.nowMs = nowMs;
   }
 
   public registerAudio(audioDefinitions: readonly AudioDefinition[]): void {
@@ -193,6 +209,35 @@ export class AudioManager {
     });
   }
 
+  public requestMusicDuck(
+    config: MusicDuckConfig = DEFAULT_MUSIC_DUCK_CONFIG,
+  ): void {
+    this.musicDuckVolumeMultiplier = config.volumeMultiplier;
+    this.musicDuckUntilMs = this.nowMs() + config.durationMs;
+    this.refreshActiveVolumes();
+  }
+
+  public syncMusicDuck(nowMs = this.nowMs()): void {
+    if (this.musicDuckUntilMs === null) {
+      return;
+    }
+
+    if (nowMs < this.musicDuckUntilMs) {
+      return;
+    }
+
+    this.musicDuckUntilMs = null;
+    this.refreshActiveVolumes();
+  }
+
+  public getMusicDuckMultiplier(nowMs = this.nowMs()): number {
+    return resolveMusicDuckMultiplier(
+      nowMs,
+      this.musicDuckUntilMs,
+      this.musicDuckVolumeMultiplier,
+    );
+  }
+
   public getEffectiveVolume(category: AudioCategory, baseVolume = 1): number {
     if (this.settings.isMuted) {
       return 0;
@@ -203,8 +248,17 @@ export class AudioManager {
         ? this.settings.musicVolume
         : this.settings.sfxVolume;
 
+    const effectiveBase = clampVolume(baseVolume) * categoryVolume;
+
+    if (category !== "music") {
+      return effectiveBase * this.settings.masterVolume;
+    }
+
     return (
-      clampVolume(baseVolume) * this.settings.masterVolume * categoryVolume
+      applyMusicDuckMultiplier(
+        effectiveBase,
+        this.getMusicDuckMultiplier(),
+      ) * this.settings.masterVolume
     );
   }
 
@@ -222,6 +276,17 @@ export class AudioManager {
     audio: AudioDefinition,
     options: AudioPlayOptions,
   ): AudioPlayResult {
+    if (
+      audio.category === "sfx" &&
+      !shouldAllowSfxPlayback(
+        audio.id,
+        this.nowMs(),
+        this.sfxLastPlayedAt,
+      )
+    ) {
+      return "already-playing";
+    }
+
     const activeSound = this.activeSounds.get(audio.id);
 
     if (audio.category === "music" && audio.loop && activeSound) {
@@ -251,6 +316,10 @@ export class AudioManager {
     }
 
     this.activeSounds.set(audio.id, handle);
+
+    if (audio.category === "sfx") {
+      recordSfxPlayback(audio.id, this.nowMs(), this.sfxLastPlayedAt);
+    }
 
     return "played";
   }

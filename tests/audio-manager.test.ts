@@ -6,7 +6,13 @@ import {
   type AudioPlaybackEngine,
   type AudioPlaybackHandle,
 } from "../src/game/systems/audio-manager";
-import { ENERGY_AUDIO_DEFINITIONS, ENERGY_AUDIO_IDS } from "../src/data/audio";
+import { MUSIC_DUCK_VOLUME_MULTIPLIER } from "../src/game/systems/audio-ducking";
+import {
+  ENERGY_AUDIO_DEFINITIONS,
+  ENERGY_AUDIO_IDS,
+  PLAYER_AUDIO_DEFINITIONS,
+  PLAYER_AUDIO_IDS,
+} from "../src/data/audio";
 import type { AudioDefinition, AudioCategory } from "../src/shared";
 
 const MUSIC: AudioDefinition = {
@@ -251,6 +257,48 @@ describe("audio manager", () => {
 
     expect(managerWithoutEngine.play(SFX.id)).toBe("engine-unavailable");
     expect(managerWithEngine.play("missing")).toBe("missing-audio");
+  });
+
+  it("ducks active music volume temporarily", () => {
+    const engine = new FakeAudioEngine();
+    let nowMs = 1_000;
+    const manager = new AudioManager(engine, undefined, () => nowMs);
+
+    manager.registerAudio([MUSIC]);
+    manager.play(MUSIC.id);
+
+    manager.requestMusicDuck({
+      volumeMultiplier: MUSIC_DUCK_VOLUME_MULTIPLIER,
+      durationMs: 800,
+    });
+
+    expect(manager.getEffectiveVolume("music", MUSIC.volume)).toBeCloseTo(
+      0.4 * MUSIC_DUCK_VOLUME_MULTIPLIER,
+    );
+
+    nowMs = 1_900;
+
+    expect(manager.getMusicDuckMultiplier()).toBe(1);
+    expect(engine.handles[0]!.volumeHistory.at(-1)).toBeCloseTo(
+      0.4 * MUSIC_DUCK_VOLUME_MULTIPLIER,
+    );
+
+    manager.syncMusicDuck(nowMs);
+
+    expect(engine.handles[0]!.volumeHistory.at(-1)).toBeCloseTo(0.4);
+  });
+
+  it("applies sfx cooldown without throwing", () => {
+    const engine = new FakeAudioEngine();
+    const manager = new AudioManager(engine, undefined, () => 5_000);
+    const jumpSfx = PLAYER_AUDIO_DEFINITIONS.find(
+      (audio) => audio.id === PLAYER_AUDIO_IDS.JUMP,
+    )!;
+
+    manager.registerAudio([jumpSfx]);
+
+    expect(manager.play(PLAYER_AUDIO_IDS.JUMP)).toBe("played");
+    expect(manager.play(PLAYER_AUDIO_IDS.JUMP)).toBe("already-playing");
   });
 
   it("stops audio by id and by category", () => {

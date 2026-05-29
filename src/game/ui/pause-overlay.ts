@@ -13,7 +13,7 @@ export const PAUSE_OVERLAY_LAYOUT = {
   centerX: GAME_RESOLUTION.width / 2,
   centerY: GAME_RESOLUTION.height / 2,
   cardWidth: scaleLegacyY(186),
-  cardHeight: scaleLegacyY(72),
+  cardHeight: scaleLegacyY(88),
   titleY: GAME_RESOLUTION.height / 2 - scaleLegacyY(14),
   commandY: GAME_RESOLUTION.height / 2 + scaleLegacyY(6),
   muteY: GAME_RESOLUTION.height / 2 + scaleLegacyY(20),
