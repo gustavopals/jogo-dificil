@@ -3190,26 +3190,12 @@ export class LevelScene extends Phaser.Scene {
         Math.max(bounds.height, GAME_RESOLUTION.height),
       )
       .setRoundPixels(true)
-      .startFollow(
-        this.player.getSprite(),
-        true,
-        this.cameraProfile.followLerpX,
-        this.cameraProfile.followLerpY,
-      )
+      .startFollow(this.player.getSprite(), true, 1, 1)
       .setFollowOffset(0, 0);
   }
 
-  private updateCameraLookAhead(velocity: Vector2Like): void {
-    if (!this.cameraProfile) {
-      return;
-    }
-
-    // Aplica lookahead direto — sem lerp extra. O lerp interno do startFollow
-    // é a única suavização ativa, evitando dois lerps em cascata que criavam
-    // movimento inconsistente (ora lento, ora rápido).
-    const lookahead = resolveCameraLookAhead(velocity, this.cameraProfile);
-    this.cameraLookAhead = lookahead;
-    this.cameras.main.setFollowOffset(lookahead.x, lookahead.y);
+  private updateCameraLookAhead(_velocity: Vector2Like): void {
+    // Câmera fixa no herói, sem lookahead por enquanto.
   }
 
   private updateExitMarker(): void {
