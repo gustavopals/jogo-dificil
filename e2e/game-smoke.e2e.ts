@@ -19,6 +19,12 @@ type DebugVisualState = {
 type DebugPlayer = {
   getPhysicsState?: () => DebugPhysicsState;
   getVisualState?: () => DebugVisualState;
+  getWorldHitbox?: () => {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  };
 };
 
 type DebugScene = {
@@ -50,6 +56,35 @@ type DevQaPlayerSnapshot = {
   readonly animationState: string;
   readonly energy: number;
   readonly energyActivity: string;
+  readonly hitboxLocal: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  };
+  readonly hitboxWorld: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  };
+};
+
+type DevQaScaleSnapshot = {
+  readonly resolution: {
+    readonly width: number;
+    readonly height: number;
+  };
+  readonly tileSizePx: number;
+  readonly worldPhysicsScale: number;
+  readonly playerVisual: {
+    readonly width: number;
+    readonly height: number;
+  };
+  readonly playerHitbox: {
+    readonly width: number;
+    readonly height: number;
+  };
 };
 
 type DevQaInteractiveObjectSnapshot = {
@@ -111,6 +146,13 @@ type DevQaSnapshot = {
 type DevQaApi = {
   readonly bosses?: readonly DevQaBossEntry[];
   readonly readSnapshot?: () => DevQaSnapshot;
+  readonly readScaleInfo?: () => DevQaScaleSnapshot;
+  readonly readPlayerHitbox?: () => {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  } | null;
   readonly startLevel?: (levelId: string) => DevQaCommandResult;
   readonly startBoss?: (bossId: string) => DevQaCommandResult;
   readonly goToCheckpoint?: (checkpointId?: string) => DevQaCommandResult;
@@ -147,6 +189,12 @@ type SmokeSnapshot = {
     readonly isGrounded: boolean;
     readonly x: number;
     readonly y: number;
+    readonly hitboxWorld?: {
+      readonly x: number;
+      readonly y: number;
+      readonly width: number;
+      readonly height: number;
+    };
   };
 };
 
@@ -175,8 +223,22 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
     .poll(() => readSmokeSnapshot(page))
     .toMatchObject({
       canvas: {
-        width: 480,
-        height: 270,
+        width: 960,
+        height: 540,
+      },
+    });
+  await expect
+    .poll(() => readScaleInfoWithQa(page))
+    .toMatchObject({
+      resolution: {
+        width: 960,
+        height: 540,
+      },
+      tileSizePx: 32,
+      worldPhysicsScale: 2,
+      playerHitbox: {
+        width: 36,
+        height: 80,
       },
     });
   await waitForQaTools(page);
@@ -194,8 +256,16 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
   expect(startSnapshot.player).toMatchObject({
     isAlive: true,
     isGrounded: true,
-    x: 64,
-    y: 222,
+    x: 128,
+    y: 444,
+  });
+  expect(startSnapshot.player?.hitboxWorld).toMatchObject({
+    width: 36,
+    height: 80,
+  });
+  expect(await readPlayerHitboxWithQa(page)).toMatchObject({
+    width: 36,
+    height: 80,
   });
 
   await page.keyboard.down("Space");
@@ -204,7 +274,7 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
 
   await expect
     .poll(async () => (await readSmokeSnapshot(page)).player?.y ?? 0)
-    .toBeLessThan((startSnapshot.player?.y ?? 0) - 15);
+    .toBeLessThan((startSnapshot.player?.y ?? 0) - 30);
   await expect
     .poll(async () => (await readSmokeSnapshot(page)).player?.isGrounded, {
       timeout: 1_500,
@@ -217,7 +287,7 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
 
   await expect
     .poll(async () => (await readSmokeSnapshot(page)).player?.x ?? 0)
-    .toBeGreaterThan((startSnapshot.player?.x ?? 0) + 20);
+    .toBeGreaterThan((startSnapshot.player?.x ?? 0) + 40);
 
   const beforeDashSnapshot = await readSmokeSnapshot(page);
 
@@ -227,7 +297,7 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
 
   await expect
     .poll(async () => (await readSmokeSnapshot(page)).player?.x ?? 0)
-    .toBeGreaterThan((beforeDashSnapshot.player?.x ?? 0) + 25);
+    .toBeGreaterThan((beforeDashSnapshot.player?.x ?? 0) + 50);
 
   expect(pageErrors).toEqual([]);
   expect(consoleErrors).toEqual([]);
@@ -599,6 +669,7 @@ async function readSmokeSnapshot(page: Page): Promise<SmokeSnapshot> {
     const levelScene = game?.scene?.getScene?.("level");
     const physicsState = levelScene?.player?.getPhysicsState?.();
     const visualState = levelScene?.player?.getVisualState?.();
+    const worldHitbox = levelScene?.player?.getWorldHitbox?.();
     const canvasRect = game?.canvas?.getBoundingClientRect();
 
     return {
@@ -620,6 +691,7 @@ async function readSmokeSnapshot(page: Page): Promise<SmokeSnapshot> {
               isGrounded: physicsState.isGrounded,
               isAlive: visualState.isAlive,
               animationState: visualState.animationState,
+              hitboxWorld: worldHitbox,
             }
           : undefined,
     };
@@ -634,6 +706,8 @@ async function waitForQaTools(page: Page): Promise<void> {
 
         return Boolean(
           qa?.readSnapshot &&
+          qa.readScaleInfo &&
+          qa.readPlayerHitbox &&
           qa.bosses &&
           qa.startLevel &&
           qa.startBoss &&
@@ -691,6 +765,29 @@ async function readEnergyStateWithQa(
 ): Promise<DevQaEnergyStateSnapshot | null | undefined> {
   return page.evaluate(() =>
     (window as DebugWindow).__JOGO_DIFICIL_QA__?.readEnergyState?.(),
+  );
+}
+
+async function readScaleInfoWithQa(
+  page: Page,
+): Promise<DevQaScaleSnapshot | undefined> {
+  return page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.readScaleInfo?.(),
+  );
+}
+
+async function readPlayerHitboxWithQa(page: Page): Promise<
+  | {
+      readonly x: number;
+      readonly y: number;
+      readonly width: number;
+      readonly height: number;
+    }
+  | null
+  | undefined
+> {
+  return page.evaluate(() =>
+    (window as DebugWindow).__JOGO_DIFICIL_QA__?.readPlayerHitbox?.(),
   );
 }
 

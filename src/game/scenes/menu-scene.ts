@@ -1,12 +1,20 @@
 import Phaser from "phaser";
 
 import {
-  PINO_TEXTURE_KEYS,
+  applyPinoSpriteFrame,
+  applyPinoVisualDisplaySize,
   PINO_ANIMATIONS,
+  PINO_FRAME_IDS,
+  resolveInitialPinoSpriteFrame,
 } from "../../data/characters/pino-animations";
 import { MUSIC_AUDIO_IDS } from "../../data/audio";
 import { getRequiredLevelDefinition } from "../../data/levels";
 import { GAME_BACKGROUND_COLOR, TILE_SIZE_PX } from "../constants";
+import {
+  scaleLegacyFontPx,
+  scaleLegacyX,
+  scaleLegacyY,
+} from "../scale";
 import { emitGameEvent, GAME_EVENTS } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
 import { resolveLevelInitialEnergy } from "../systems/level-progress";
@@ -65,7 +73,8 @@ export class MenuScene extends Phaser.Scene {
     skyline.fillStyle(0x20232d, 1);
 
     for (let x = 0; x < width; x += TILE_SIZE_PX * 2) {
-      const heightOffset = x % (TILE_SIZE_PX * 4) === 0 ? 18 : 8;
+      const heightOffset =
+        x % (TILE_SIZE_PX * 4) === 0 ? scaleLegacyY(18) : scaleLegacyY(8);
 
       skyline.fillRect(
         x,
@@ -75,14 +84,31 @@ export class MenuScene extends Phaser.Scene {
       );
     }
 
-    this.add.rectangle(width / 2, groundY + 16, width, 32, 0x242630);
+    this.add.rectangle(
+      width / 2,
+      groundY + scaleLegacyY(16),
+      width,
+      scaleLegacyY(32),
+      0x242630,
+    );
     this.add.rectangle(width / 2, groundY, width, 2, 0x80d7c2).setAlpha(0.45);
 
     const hazards = this.add.graphics();
     hazards.fillStyle(0xe35d6a, 1);
 
-    for (let x = width - 158; x < width - 90; x += 12) {
-      hazards.fillTriangle(x, groundY, x + 6, groundY - 14, x + 12, groundY);
+    for (
+      let x = width - scaleLegacyX(158);
+      x < width - scaleLegacyX(90);
+      x += scaleLegacyX(12)
+    ) {
+      hazards.fillTriangle(
+        x,
+        groundY,
+        x + scaleLegacyX(6),
+        groundY - scaleLegacyY(14),
+        x + scaleLegacyX(12),
+        groundY,
+      );
     }
   }
 
@@ -94,7 +120,7 @@ export class MenuScene extends Phaser.Scene {
     for (let i = 0; i < particleCount; i++) {
       const size = 1 + Math.random() * 2;
       const x = Math.random() * width;
-      const y = Math.random() * (groundY - 20);
+      const y = Math.random() * (groundY - scaleLegacyY(20));
       const color = Math.random() > 0.5 ? 0x80d7c2 : 0xf5f7fb;
       const alpha = 0.08 + Math.random() * 0.18;
 
@@ -106,8 +132,8 @@ export class MenuScene extends Phaser.Scene {
 
       this.tweens.add({
         targets: particle,
-        y: y - 15 - Math.random() * 25,
-        x: x + (Math.random() - 0.5) * 30,
+        y: y - scaleLegacyY(15) - Math.random() * scaleLegacyY(25),
+        x: x + (Math.random() - 0.5) * scaleLegacyX(30),
         alpha: 0,
         duration: 3000 + Math.random() * 4000,
         delay: Math.random() * 3000,
@@ -117,7 +143,7 @@ export class MenuScene extends Phaser.Scene {
         onRepeat: () => {
           particle.setPosition(
             Math.random() * width,
-            groundY - Math.random() * 20,
+            groundY - Math.random() * scaleLegacyY(20),
           );
           particle.setAlpha(alpha);
         },
@@ -143,7 +169,7 @@ export class MenuScene extends Phaser.Scene {
       .text(width / 2, titleY, START_SCREEN_COPY.title, {
         color: "#f5f7fb",
         fontFamily: "monospace",
-        fontSize: "34px",
+        fontSize: scaleLegacyFontPx(34),
       })
       .setOrigin(0.5)
       .setShadow(0, 3, "#05060a", 2);
@@ -152,7 +178,7 @@ export class MenuScene extends Phaser.Scene {
       .text(width / 2, subtitleY, START_SCREEN_COPY.subtitle, {
         color: "#a0a4b8",
         fontFamily: "monospace",
-        fontSize: "11px",
+        fontSize: scaleLegacyFontPx(11),
       })
       .setOrigin(0.5);
 
@@ -160,7 +186,7 @@ export class MenuScene extends Phaser.Scene {
       .text(width / 2, humorPhraseY, `"${pickRandomHumorPhrase()}"`, {
         color: "#e3b341",
         fontFamily: "monospace",
-        fontSize: "9px",
+        fontSize: scaleLegacyFontPx(9),
         fontStyle: "italic",
       })
       .setOrigin(0.5)
@@ -179,7 +205,7 @@ export class MenuScene extends Phaser.Scene {
       .text(width / 2, commandY, START_SCREEN_COPY.startCommand, {
         color: "#80d7c2",
         fontFamily: "monospace",
-        fontSize: "12px",
+        fontSize: scaleLegacyFontPx(12),
       })
       .setOrigin(0.5);
 
@@ -201,7 +227,7 @@ export class MenuScene extends Phaser.Scene {
         .text(width / 2, statsY, statsLines.join("   |   "), {
           color: "#e35d6a",
           fontFamily: "monospace",
-          fontSize: "8px",
+          fontSize: scaleLegacyFontPx(8),
         })
         .setOrigin(0.5)
         .setAlpha(0.6);
@@ -211,7 +237,7 @@ export class MenuScene extends Phaser.Scene {
       .text(width / 2, vibeTagY, START_SCREEN_COPY.vibeTag, {
         color: "#80d7c2",
         fontFamily: "monospace",
-        fontSize: "9px",
+        fontSize: scaleLegacyFontPx(9),
       })
       .setOrigin(0.5)
       .setAlpha(0.4);
@@ -226,18 +252,39 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.add
-      .rectangle(exitX, groundY - 25, 28, 50, 0x80d7c2)
+      .rectangle(
+        exitX,
+        groundY - scaleLegacyY(25),
+        scaleLegacyX(28),
+        scaleLegacyY(50),
+        0x80d7c2,
+      )
       .setAlpha(0.18)
-      .setStrokeStyle(2, 0x80d7c2, 0.85);
-    this.add.rectangle(exitX, groundY - 4, 12, 4, 0xf5f7fb).setAlpha(0.75);
+      .setStrokeStyle(scaleLegacyX(2), 0x80d7c2, 0.85);
+    this.add
+      .rectangle(
+        exitX,
+        groundY - scaleLegacyY(4),
+        scaleLegacyX(12),
+        scaleLegacyY(4),
+        0xf5f7fb,
+      )
+      .setAlpha(0.75);
 
     this.registerMenuAnimations();
 
+    const initialFrame = resolveInitialPinoSpriteFrame();
     const player = this.add
-      .sprite(playerX, groundY, PINO_TEXTURE_KEYS.IDLE)
-      .setOrigin(0.5, 1)
-      .setScale(2)
-      .setAlpha(0.95);
+      .sprite(
+        playerX,
+        groundY,
+        initialFrame.textureKey,
+        initialFrame.frame,
+      )
+      .setOrigin(0.5, 1);
+
+    applyPinoVisualDisplaySize(player);
+    player.setAlpha(0.95);
 
     this.playDanceLoop(player, playerX, groundY);
   }
@@ -269,7 +316,9 @@ export class MenuScene extends Phaser.Scene {
         {
           color: START_SCREEN_MUSIC_BUTTON_STYLE.textColor,
           fontFamily: "monospace",
-          fontSize: START_SCREEN_MUSIC_BUTTON_STYLE.fontSize,
+          fontSize: scaleLegacyFontPx(
+            Number.parseInt(START_SCREEN_MUSIC_BUTTON_STYLE.fontSize, 10),
+          ),
         },
       )
       .setOrigin(0.5)
@@ -320,13 +369,14 @@ export class MenuScene extends Phaser.Scene {
     originX: number,
     groundY: number,
   ): void {
-    const hopOffset = 18;
-    const bigJumpHeight = 38;
-    const smallHopHeight = 8;
+    const baseScale = 1;
+    const hopOffset = scaleLegacyX(18);
+    const bigJumpHeight = scaleLegacyY(38);
+    const smallHopHeight = scaleLegacyY(8);
 
     const resetPose = () => {
-      player.setTexture(PINO_TEXTURE_KEYS.IDLE);
-      player.setScale(2, 2);
+      applyPinoSpriteFrame(player, PINO_FRAME_IDS.IDLE);
+      player.setScale(baseScale, baseScale);
       player.setFlipX(false);
     };
 
@@ -336,12 +386,12 @@ export class MenuScene extends Phaser.Scene {
         this.tweens.add({
           targets: player,
           y: groundY - smallHopHeight,
-          scaleX: 2.15,
-          scaleY: 1.85,
+          scaleX: baseScale * 1.075,
+          scaleY: baseScale * 0.925,
           duration: 180,
           yoyo: true,
           ease: "Quad.easeOut",
-          onStart: () => player.setTexture(PINO_TEXTURE_KEYS.JUMP),
+          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
           onComplete: () => resetPose(),
         }),
       // 2. pause
@@ -356,10 +406,10 @@ export class MenuScene extends Phaser.Scene {
           yoyo: true,
           ease: "Sine.easeOut",
           onStart: () => {
-            player.setTexture(PINO_TEXTURE_KEYS.RUN_01);
+            applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_01);
             player.setFlipX(true);
           },
-          onYoyo: () => player.setTexture(PINO_TEXTURE_KEYS.RUN_02),
+          onYoyo: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_02),
           onComplete: () => {
             player.setX(originX);
             resetPose();
@@ -375,10 +425,10 @@ export class MenuScene extends Phaser.Scene {
           yoyo: true,
           ease: "Sine.easeOut",
           onStart: () => {
-            player.setTexture(PINO_TEXTURE_KEYS.RUN_01);
+            applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_01);
             player.setFlipX(false);
           },
-          onYoyo: () => player.setTexture(PINO_TEXTURE_KEYS.RUN_02),
+          onYoyo: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.RUN_02),
           onComplete: () => {
             player.setX(originX);
             resetPose();
@@ -390,23 +440,23 @@ export class MenuScene extends Phaser.Scene {
       () =>
         this.tweens.add({
           targets: player,
-          scaleY: 1.6,
-          scaleX: 2.3,
+          scaleY: baseScale * 0.8,
+          scaleX: baseScale * 1.15,
           duration: 150,
           ease: "Quad.easeIn",
-          onStart: () => player.setTexture(PINO_TEXTURE_KEYS.IDLE),
+          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.IDLE),
         }),
       // 7. big jump + spin
       () =>
         this.tweens.add({
           targets: player,
           y: groundY - bigJumpHeight,
-          scaleY: 2.1,
-          scaleX: 1.9,
+          scaleY: baseScale * 1.05,
+          scaleX: baseScale * 0.95,
           angle: 360,
           duration: 420,
           ease: "Sine.easeOut",
-          onStart: () => player.setTexture(PINO_TEXTURE_KEYS.JUMP),
+          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
         }),
       // 8. fall down
       () =>
@@ -415,19 +465,19 @@ export class MenuScene extends Phaser.Scene {
           y: groundY,
           duration: 280,
           ease: "Quad.easeIn",
-          onStart: () => player.setTexture(PINO_TEXTURE_KEYS.FALL),
+          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.FALL),
         }),
       // 9. land squash
       () =>
         this.tweens.add({
           targets: player,
-          scaleY: 1.5,
-          scaleX: 2.5,
+          scaleY: baseScale * 0.75,
+          scaleX: baseScale * 1.25,
           duration: 80,
           yoyo: true,
           ease: "Quad.easeOut",
           onStart: () => {
-            player.setTexture(PINO_TEXTURE_KEYS.IDLE);
+            applyPinoSpriteFrame(player, PINO_FRAME_IDS.IDLE);
             player.setAngle(0);
           },
           onComplete: () => resetPose(),
@@ -436,21 +486,21 @@ export class MenuScene extends Phaser.Scene {
       () =>
         this.tweens.add({
           targets: player,
-          y: groundY - 6,
+          y: groundY - scaleLegacyY(6),
           duration: 130,
           yoyo: true,
           ease: "Quad.easeOut",
-          onStart: () => player.setTexture(PINO_TEXTURE_KEYS.JUMP),
+          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
           onComplete: () => resetPose(),
         }),
       () =>
         this.tweens.add({
           targets: player,
-          y: groundY - 6,
+          y: groundY - scaleLegacyY(6),
           duration: 130,
           yoyo: true,
           ease: "Quad.easeOut",
-          onStart: () => player.setTexture(PINO_TEXTURE_KEYS.JUMP),
+          onStart: () => applyPinoSpriteFrame(player, PINO_FRAME_IDS.JUMP),
           onComplete: () => resetPose(),
         }),
       // 11. rest before loop

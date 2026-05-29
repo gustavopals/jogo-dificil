@@ -100,7 +100,7 @@ describe("block 3 content", () => {
       },
       {
         id: "level-10",
-        nextLevelId: undefined,
+        nextLevelId: "level-11",
       },
     ]);
   });

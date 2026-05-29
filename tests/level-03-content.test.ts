@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { BOSS_HD_VISUAL_PROFILES } from "../src/data/characters/boss-spritesheet-registry";
 import { LEVEL_03, validateLevel } from "../src/data/levels";
+import { getResolutionScale } from "../src/game/scale";
 import { applyBossRuntimeDamage } from "../src/game/physics";
 import { getInteractiveObjectSolidAreas } from "../src/game/systems/level-interactive-objects";
 import {
@@ -194,7 +196,21 @@ describe("level 03 content", () => {
       entryDoorId: "level-03-hirolito-entry-door",
       defeatUnlocks: ["level-03-hirolito-exit-door"],
     });
-    expect(boss.assetId).toBe("boss-hirolito-narguilito");
+    expect(boss.assetId).toBe("boss-hirolito-sheet-512");
+    expect(BOSS_HD_VISUAL_PROFILES.HIROLITO_NARGUILITO).toMatchObject({
+      displaySize: { width: 56, height: 72 },
+      bottomOffsetY: 0,
+    });
+    const scale = getResolutionScale().uniform;
+    const scaledHitbox = {
+      width: boss.hitbox.width * scale,
+      height: boss.hitbox.height * scale,
+    };
+    const { displaySize } = BOSS_HD_VISUAL_PROFILES.HIROLITO_NARGUILITO;
+    expect(scaledHitbox.width).toBeLessThanOrEqual(displaySize.width + 16);
+    expect(scaledHitbox.height).toBeLessThanOrEqual(displaySize.height + 16);
+    expect(boss.hitbox.y + boss.hitbox.height).toBe(FLOOR_Y);
+    expect(boss.spawn.y).toBe(FLOOR_Y - 24);
     expect(boss.movement).toMatchObject({
       kind: "patrol",
       speedPxPerSecond: 28,

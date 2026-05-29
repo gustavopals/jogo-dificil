@@ -219,11 +219,14 @@ export interface LevelAssetsDefinition {
   readonly audio: readonly LevelAssetId[];
 }
 
+export type LevelContentKind = "campaign" | "challenge";
+
 export interface LevelDefinition {
   readonly id: LevelId;
   readonly name: string;
   readonly order: number;
   readonly theme: string;
+  readonly contentKind?: LevelContentKind;
   readonly initialEnergy?: number;
   readonly bounds: RectLike;
   readonly spawn: Vector2Like;

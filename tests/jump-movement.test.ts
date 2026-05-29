@@ -3,9 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   calculateJumpMovement,
   createInitialJumpMovementState,
+  DEFAULT_JUMP_MOVEMENT_CONFIG,
 } from "../src/game/physics";
 
-const GROUND_Y = 222;
+const GROUND_Y = 444;
+const {
+  jumpVelocity: JUMP_VELOCITY,
+  gravity: GRAVITY,
+  jumpCutMultiplier: JUMP_CUT_MULTIPLIER,
+} = DEFAULT_JUMP_MOVEMENT_CONFIG;
 
 describe("jump movement", () => {
   it("starts a jump with the configured initial velocity", () => {
@@ -22,14 +28,15 @@ describe("jump movement", () => {
     });
 
     expect(result.didJump).toBe(true);
-    expect(result.velocityY).toBe(-430);
+    expect(result.velocityY).toBe(JUMP_VELOCITY);
     expect(result.isGrounded).toBe(false);
   });
 
   it("applies gravity while the player is airborne", () => {
+    const startPositionY = 180;
     const result = calculateJumpMovement({
-      currentPositionY: 180,
-      currentVelocityY: -430,
+      currentPositionY: startPositionY,
+      currentVelocityY: JUMP_VELOCITY,
       groundY: GROUND_Y,
       isGrounded: false,
       isJumpDown: true,
@@ -38,15 +45,17 @@ describe("jump movement", () => {
       deltaMs: 100,
       state: createInitialJumpMovementState(),
     });
+    const expectedVelocityY = JUMP_VELOCITY + GRAVITY * 0.1;
 
-    expect(result.velocityY).toBe(-310);
-    expect(result.positionY).toBe(149);
+    expect(result.velocityY).toBe(expectedVelocityY);
+    expect(result.positionY).toBe(startPositionY + expectedVelocityY * 0.1);
   });
 
   it("cuts upward velocity when jump is released early", () => {
+    const startVelocityY = -300;
     const result = calculateJumpMovement({
       currentPositionY: 180,
-      currentVelocityY: -300,
+      currentVelocityY: startVelocityY,
       groundY: GROUND_Y,
       isGrounded: false,
       isJumpDown: false,
@@ -56,7 +65,7 @@ describe("jump movement", () => {
       state: createInitialJumpMovementState(),
     });
 
-    expect(result.velocityY).toBe(-135);
+    expect(result.velocityY).toBe(startVelocityY * JUMP_CUT_MULTIPLIER);
   });
 
   it("allows a jump shortly after leaving the ground", () => {
@@ -85,7 +94,7 @@ describe("jump movement", () => {
     });
 
     expect(coyoteResult.didJump).toBe(true);
-    expect(coyoteResult.velocityY).toBe(-370);
+    expect(coyoteResult.velocityY).toBe(JUMP_VELOCITY + GRAVITY * 0.05);
   });
 
   it("does not allow a coyote jump after the grace window expires", () => {
@@ -112,7 +121,7 @@ describe("jump movement", () => {
     });
 
     expect(expiredResult.didJump).toBe(false);
-    expect(expiredResult.velocityY).toBe(144);
+    expect(expiredResult.velocityY).toBe(GRAVITY * 0.12);
   });
 
   it("uses isolated coyote and jump buffer timers from the supplied state", () => {
@@ -191,7 +200,7 @@ describe("jump movement", () => {
     });
 
     expect(landingResult.didJump).toBe(true);
-    expect(landingResult.velocityY).toBe(-430);
+    expect(landingResult.velocityY).toBe(JUMP_VELOCITY);
   });
 
   it("expires buffered jump input before a late landing", () => {

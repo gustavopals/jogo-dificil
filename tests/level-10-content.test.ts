@@ -3,12 +3,18 @@ import { describe, expect, it } from "vitest";
 import {
   LEVEL_09,
   LEVEL_10,
+  LEVEL_11,
   LEVEL_DEFINITIONS,
   type LevelDefinition,
   type TerrainDefinition,
   validateLevel,
 } from "../src/data/levels";
 import { GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
+import {
+  BOSS_HD_VISUAL_PROFILES,
+  BOSS_SPRITESHEET_KEYS,
+} from "../src/data/characters/boss-spritesheet-registry";
+import { getHdCampaignLevel } from "./helpers/hd-campaign";
 import {
   applyBossRuntimeDamage,
   transitionBossRuntimeState,
@@ -41,8 +47,8 @@ describe("level 10 final arena content", () => {
       isValid: true,
       issues: [],
     });
-    expect(levelIds.slice(-2)).toEqual(["level-09", "level-10"]);
-    expect(LEVEL_DEFINITIONS.at(-1)?.id).toBe(LEVEL_10.id);
+    expect(levelIds.slice(-2)).toEqual(["level-10", "level-11"]);
+    expect(LEVEL_DEFINITIONS.at(-1)?.id).toBe(LEVEL_11.id);
     expect(LEVEL_09.exit.nextLevelId).toBe(LEVEL_10.id);
     expect(LEVEL_10).toMatchObject({
       id: "level-10",
@@ -52,7 +58,7 @@ describe("level 10 final arena content", () => {
       difficulty: 10,
       initialEnergy: 100,
     });
-    expect("nextLevelId" in LEVEL_10.exit).toBe(false);
+    expect(LEVEL_10.exit.nextLevelId).toBe("level-11");
     expect(isTouchingExit(LEVEL_10.exit.area, LEVEL_10)).toBe(true);
   });
 
@@ -150,7 +156,7 @@ describe("level 10 final arena content", () => {
       entryCheckpointId: "level-10-before-giga-fabio",
       entryDoorId: "level-10-giga-fabio-entry-door",
       defeatUnlocks: ["level-10-giga-fabio-exit-door"],
-      assetId: GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO,
+      assetId: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
       movement: {
         kind: "patrol",
         speedPxPerSecond: 38,
@@ -351,10 +357,31 @@ describe("level 10 final arena content", () => {
     });
   });
 
+  it("anchors migrated Giga Fabio hitbox feet to the arena floor at 72x88", () => {
+    const migrated = getHdCampaignLevel("level-10");
+    const boss = migrated.bosses!.find(
+      (candidate) => candidate.id === "boss-giga-fabio",
+    )!;
+    const arenaFloor = migrated.terrain.find(
+      (terrain) => terrain.id === "level-10-giga-fabio-arena-floor",
+    )!;
+
+    expect(BOSS_HD_VISUAL_PROFILES.GIGA_FABIO).toEqual({
+      textureKey: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
+      displaySize: { width: 72, height: 88 },
+      bottomOffsetY: 0,
+    });
+    expect(boss.hitbox.y + boss.hitbox.height).toBe(arenaFloor.area.y);
+    expect(boss.weakPoint.y).toBeGreaterThan(boss.hitbox.y);
+    expect(boss.weakPoint.y + boss.weakPoint.height).toBeLessThanOrEqual(
+      boss.hitbox.y + boss.hitbox.height,
+    );
+  });
+
   it("preloads the final boss placeholder assets for the future fight", () => {
     expect(LEVEL_10.assets.sprites).toEqual(
       expect.arrayContaining([
-        GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO,
+        BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
         GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_BOULDER,
         GAMEPLAY_SPRITE_KEYS.BOSS_IMPACT_BURST,
         GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_BURST_BEAM,

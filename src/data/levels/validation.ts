@@ -45,7 +45,6 @@ type ValidationIssueDraft = {
 
 const CYAN_SPARK_POWER: EnergyPowerKind = "cyan-spark";
 const CYAN_BURST_POWER: EnergyPowerKind = "cyan-burst";
-const BOSS_ARENA_ENTRY_CHECKPOINT_MAX_GAP_PX = 16 * 8;
 
 export function validateLevel(level: LevelDefinition): LevelValidationResult {
   const issues: ValidationIssueDraft[] = [];
@@ -1139,10 +1138,11 @@ function isCheckpointImmediatelyBeforeBossArena(
 
   const checkpointRight = checkpoint.area.x + checkpoint.area.width;
   const horizontalGap = arena.x - checkpointRight;
+  const maxGapPx = checkpoint.area.width * 4;
 
   return (
     horizontalGap >= 0 &&
-    horizontalGap <= BOSS_ARENA_ENTRY_CHECKPOINT_MAX_GAP_PX &&
+    horizontalGap <= maxGapPx &&
     rectsOverlapVertically(checkpoint.area, arena)
   );
 }

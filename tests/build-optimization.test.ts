@@ -4,6 +4,7 @@ import viteConfig from "../vite.config";
 
 type BuildOptimizationConfig = {
   readonly build?: {
+    readonly assetsInlineLimit?: number;
     readonly chunkSizeWarningLimit?: number;
     readonly rolldownOptions?: {
       readonly output?: {
@@ -22,10 +23,11 @@ type BuildOptimizationConfig = {
 };
 
 describe("build optimization config", () => {
-  it("splits Phaser into an explicit vendor chunk with documented warning limit", () => {
+  it("externalizes large HD assets while keeping Phaser in a vendor chunk", () => {
     const config = viteConfig as BuildOptimizationConfig;
     const codeSplitting = config.build?.rolldownOptions?.output?.codeSplitting;
 
+    expect(config.build?.assetsInlineLimit).toBe(4096);
     expect(config.build?.chunkSizeWarningLimit).toBe(1400);
     expect(codeSplitting).toMatchObject({
       groups: expect.arrayContaining([

@@ -1,4 +1,15 @@
 import type { CharacterAnimationDefinition, Vector2Like } from "../../shared";
+import { PLAYER_SIZE } from "../../game/constants";
+import {
+  PINO_ANIMATION_FRAME_REGISTRY,
+  PINO_FRAME_IDS,
+  PINO_SPRITESHEET_ASSETS,
+  PINO_SPRITESHEET_FRAME_REGISTRY,
+  type PinoFrameId,
+} from "./pino-spritesheet-registry";
+
+export { PINO_FRAME_IDS } from "./pino-spritesheet-registry";
+export type { PinoFrameId } from "./pino-spritesheet-registry";
 
 export const PINO_TEXTURE_KEYS = {
   IDLE: "player-pino-idle",
@@ -26,19 +37,30 @@ export const PINO_TEXTURE_KEYS = {
 export type PinoTextureKey =
   (typeof PINO_TEXTURE_KEYS)[keyof typeof PINO_TEXTURE_KEYS];
 
+export const PINO_FRAME_SOURCE_MODES = {
+  LEGACY_IMAGES: "legacy-images",
+  SPRITESHEETS: "spritesheets",
+} as const;
+
+export type PinoFrameSourceMode =
+  (typeof PINO_FRAME_SOURCE_MODES)[keyof typeof PINO_FRAME_SOURCE_MODES];
+
+export const ACTIVE_PINO_FRAME_SOURCE_MODE: PinoFrameSourceMode =
+  PINO_FRAME_SOURCE_MODES.SPRITESHEETS;
+
 export const PINO_SPRITE_SIZE_PX = {
-  width: 14,
-  height: 26,
+  width: PLAYER_SIZE.visualWidth,
+  height: PLAYER_SIZE.visualHeight,
 } as const;
 
 export const PINO_HITBOX_SIZE_PX = {
-  width: 10,
-  height: 22,
+  width: PLAYER_SIZE.hitboxWidth,
+  height: PLAYER_SIZE.hitboxHeight,
 } as const;
 
 export type PinoSpriteAssetDefinition = {
   readonly key: PinoTextureKey;
-  readonly path: `assets/sprites/${string}.png`;
+  readonly path: `assets/legacy/pino/${string}.png`;
   readonly sizePx: typeof PINO_SPRITE_SIZE_PX;
   readonly description: string;
   readonly origin: "Gerado no projeto por script";
@@ -48,7 +70,7 @@ export type PinoSpriteAssetDefinition = {
 export const PINO_SPRITE_ASSETS = [
   {
     key: PINO_TEXTURE_KEYS.IDLE,
-    path: "assets/sprites/player-pino-idle.png",
+    path: "assets/legacy/pino/player-pino-idle.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Pose idle de Pino, agora como lutador shonen original com cabelo espetado e aura baixa.",
@@ -57,7 +79,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.RUN_01,
-    path: "assets/sprites/player-pino-run-01.png",
+    path: "assets/legacy/pino/player-pino-run-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 1 de corrida de Pino, corpo inclinado e braço armado para impulso.",
@@ -66,7 +88,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.RUN_02,
-    path: "assets/sprites/player-pino-run-02.png",
+    path: "assets/legacy/pino/player-pino-run-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 2 de corrida de Pino, troca de apoio com cabelo e faixa em atraso.",
@@ -75,7 +97,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.RUN_03,
-    path: "assets/sprites/player-pino-run-03.png",
+    path: "assets/legacy/pino/player-pino-run-03.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 3 de corrida de Pino, passada baixa com energia ciano no calcanhar.",
@@ -84,7 +106,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.JUMP,
-    path: "assets/sprites/player-pino-jump.png",
+    path: "assets/legacy/pino/player-pino-jump.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Pose de pulo de Pino, joelho alto, cabelo vertical e energia saindo dos pes.",
@@ -93,7 +115,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.JUMP_PEAK,
-    path: "assets/sprites/player-pino-jump-peak.png",
+    path: "assets/legacy/pino/player-pino-jump-peak.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame de ápice do pulo de Pino, pose compacta com aura ciano ao redor.",
@@ -102,7 +124,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.FALL,
-    path: "assets/sprites/player-pino-fall.png",
+    path: "assets/legacy/pino/player-pino-fall.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Pose de queda de Pino, braços abertos e cabelo puxado para cima pela descida.",
@@ -111,7 +133,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.DASH,
-    path: "assets/sprites/player-pino-dash.png",
+    path: "assets/legacy/pino/player-pino-dash.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Pose de dash de Pino, corpo horizontal com rastro de aura e faixa atrasada.",
@@ -120,7 +142,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CHARGE_01,
-    path: "assets/sprites/player-pino-charge-01.png",
+    path: "assets/legacy/pino/player-pino-charge-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 1 da Carga Ciano de Pino, pose firme com aura baixa e uma mao energizada.",
@@ -129,7 +151,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CHARGE_02,
-    path: "assets/sprites/player-pino-charge-02.png",
+    path: "assets/legacy/pino/player-pino-charge-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 2 da Carga Ciano de Pino, postura comprimida com faixas de energia ciano nos pes.",
@@ -138,7 +160,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CYAN_SPARK_01,
-    path: "assets/sprites/player-pino-cyan-spark-01.png",
+    path: "assets/legacy/pino/player-pino-cyan-spark-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 1 de Pino disparando Centelha Ciano, braco estendido e faisca curta na mao.",
@@ -147,7 +169,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CYAN_SPARK_02,
-    path: "assets/sprites/player-pino-cyan-spark-02.png",
+    path: "assets/legacy/pino/player-pino-cyan-spark-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 2 de Pino disparando Centelha Ciano, recuo compacto e pulso ciano no punho.",
@@ -156,7 +178,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_01,
-    path: "assets/sprites/player-pino-cyan-burst-prepare-01.png",
+    path: "assets/legacy/pino/player-pino-cyan-burst-prepare-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 1 de Pino preparando Rajada Ciano, energia segmentada crescendo no punho.",
@@ -165,7 +187,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_02,
-    path: "assets/sprites/player-pino-cyan-burst-prepare-02.png",
+    path: "assets/legacy/pino/player-pino-cyan-burst-prepare-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 2 de Pino preparando Rajada Ciano, postura comprimida e nucleo ciano maior.",
@@ -174,7 +196,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_01,
-    path: "assets/sprites/player-pino-cyan-burst-fire-01.png",
+    path: "assets/legacy/pino/player-pino-cyan-burst-fire-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 1 de Pino soltando Rajada Ciano, braco estendido e inicio curto do feixe.",
@@ -183,7 +205,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_02,
-    path: "assets/sprites/player-pino-cyan-burst-fire-02.png",
+    path: "assets/legacy/pino/player-pino-cyan-burst-fire-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 2 de Pino soltando Rajada Ciano, recuo do corpo e feixe segmentado no punho.",
@@ -192,7 +214,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.DEATH_01,
-    path: "assets/sprites/player-pino-death-01.png",
+    path: "assets/legacy/pino/player-pino-death-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 1 de morte de Pino, impacto vermelho quebrando a aura do lutador.",
@@ -201,7 +223,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.DEATH_02,
-    path: "assets/sprites/player-pino-death-02.png",
+    path: "assets/legacy/pino/player-pino-death-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 2 de morte de Pino, silhueta baixa com cabelo e faixa desfeitos.",
@@ -210,7 +232,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.RESPAWN_01,
-    path: "assets/sprites/player-pino-respawn-01.png",
+    path: "assets/legacy/pino/player-pino-respawn-01.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 1 de respawn de Pino, silhueta shonen reconstruida por varredura ciano.",
@@ -219,7 +241,7 @@ export const PINO_SPRITE_ASSETS = [
   },
   {
     key: PINO_TEXTURE_KEYS.RESPAWN_02,
-    path: "assets/sprites/player-pino-respawn-02.png",
+    path: "assets/legacy/pino/player-pino-respawn-02.png",
     sizePx: PINO_SPRITE_SIZE_PX,
     description:
       "Frame 2 de respawn de Pino, pose firme com aura e cabelo ja reconstruidos.",
@@ -298,9 +320,117 @@ type CreatePinoAnimationConfig = {
   readonly state: PinoAnimationState;
   readonly frameRate: number;
   readonly repeat: number;
-  readonly frames: readonly PinoTextureKey[];
+  readonly frameIds: readonly PinoFrameId[];
   readonly isPlaceholder: boolean;
 };
+
+const PINO_LEGACY_FRAME_TEXTURE_BY_ID = {
+  [PINO_FRAME_IDS.IDLE]: PINO_TEXTURE_KEYS.IDLE,
+  [PINO_FRAME_IDS.RUN_01]: PINO_TEXTURE_KEYS.RUN_01,
+  [PINO_FRAME_IDS.RUN_02]: PINO_TEXTURE_KEYS.RUN_02,
+  [PINO_FRAME_IDS.RUN_03]: PINO_TEXTURE_KEYS.RUN_03,
+  [PINO_FRAME_IDS.JUMP]: PINO_TEXTURE_KEYS.JUMP,
+  [PINO_FRAME_IDS.JUMP_PEAK]: PINO_TEXTURE_KEYS.JUMP_PEAK,
+  [PINO_FRAME_IDS.FALL]: PINO_TEXTURE_KEYS.FALL,
+  [PINO_FRAME_IDS.DASH]: PINO_TEXTURE_KEYS.DASH,
+  [PINO_FRAME_IDS.CHARGE_01]: PINO_TEXTURE_KEYS.CHARGE_01,
+  [PINO_FRAME_IDS.CHARGE_02]: PINO_TEXTURE_KEYS.CHARGE_02,
+  [PINO_FRAME_IDS.CYAN_SPARK_01]: PINO_TEXTURE_KEYS.CYAN_SPARK_01,
+  [PINO_FRAME_IDS.CYAN_SPARK_02]: PINO_TEXTURE_KEYS.CYAN_SPARK_02,
+  [PINO_FRAME_IDS.CYAN_BURST_PREPARE_01]: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_01,
+  [PINO_FRAME_IDS.CYAN_BURST_PREPARE_02]: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_02,
+  [PINO_FRAME_IDS.CYAN_BURST_FIRE_01]: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_01,
+  [PINO_FRAME_IDS.CYAN_BURST_FIRE_02]: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_02,
+  [PINO_FRAME_IDS.DEATH_01]: PINO_TEXTURE_KEYS.DEATH_01,
+  [PINO_FRAME_IDS.DEATH_02]: PINO_TEXTURE_KEYS.DEATH_02,
+  [PINO_FRAME_IDS.RESPAWN_01]: PINO_TEXTURE_KEYS.RESPAWN_01,
+  [PINO_FRAME_IDS.RESPAWN_02]: PINO_TEXTURE_KEYS.RESPAWN_02,
+} as const satisfies Record<PinoFrameId, PinoTextureKey>;
+
+function canUsePinoSpritesheetFrames(): boolean {
+  return (
+    ACTIVE_PINO_FRAME_SOURCE_MODE === PINO_FRAME_SOURCE_MODES.SPRITESHEETS &&
+    PINO_SPRITESHEET_ASSETS.every((asset) => asset.enabled)
+  );
+}
+
+function resolvePinoAnimationFrames(frameIds: readonly PinoFrameId[]) {
+  if (canUsePinoSpritesheetFrames()) {
+    return frameIds.map((frameId) => {
+      const spriteFrame = PINO_SPRITESHEET_FRAME_REGISTRY[frameId];
+
+      return {
+        textureKey: spriteFrame.textureKey,
+        frame: spriteFrame.frame,
+      };
+    });
+  }
+
+  return frameIds.map((frameId) => ({
+    textureKey: PINO_LEGACY_FRAME_TEXTURE_BY_ID[frameId],
+  }));
+}
+
+export type PinoSpriteFrameRef = {
+  readonly textureKey: string;
+  readonly frame?: string | number;
+};
+
+export function resolvePinoSpriteFrame(
+  frameId: PinoFrameId,
+): PinoSpriteFrameRef {
+  if (canUsePinoSpritesheetFrames()) {
+    const frame = PINO_SPRITESHEET_FRAME_REGISTRY[frameId];
+
+    return {
+      textureKey: frame.textureKey,
+      frame: frame.frame,
+    };
+  }
+
+  return {
+    textureKey: PINO_LEGACY_FRAME_TEXTURE_BY_ID[frameId],
+  };
+}
+
+export function getPinoVisualDisplaySize(): typeof PINO_SPRITE_SIZE_PX {
+  return PINO_SPRITE_SIZE_PX;
+}
+
+export function applyPinoVisualDisplaySize(sprite: {
+  setDisplaySize(width: number, height: number): unknown;
+}): void {
+  const size = getPinoVisualDisplaySize();
+  sprite.setDisplaySize(size.width, size.height);
+}
+
+export function applyPinoSpriteFrame(
+  sprite: {
+    setTexture(key: string, frame?: string | number): unknown;
+    setDisplaySize(width: number, height: number): unknown;
+  },
+  frameId: PinoFrameId,
+): void {
+  const frameRef = resolvePinoSpriteFrame(frameId);
+
+  if (frameRef.frame === undefined) {
+    sprite.setTexture(frameRef.textureKey);
+  } else {
+    sprite.setTexture(frameRef.textureKey, frameRef.frame);
+  }
+
+  applyPinoVisualDisplaySize(sprite);
+}
+
+export function resolveInitialPinoSpriteFrame(): PinoSpriteFrameRef {
+  const [initialFrameId] = PINO_ANIMATION_FRAME_REGISTRY.idle;
+
+  if (!initialFrameId) {
+    return resolvePinoSpriteFrame(PINO_FRAME_IDS.IDLE);
+  }
+
+  return resolvePinoSpriteFrame(initialFrameId);
+}
 
 function createPinoAnimation(
   config: CreatePinoAnimationConfig,
@@ -311,9 +441,7 @@ function createPinoAnimation(
     playback: config.repeat === -1 ? "loop" : "once",
     frameRate: config.frameRate,
     repeat: config.repeat,
-    frames: config.frames.map((textureKey) => ({
-      textureKey,
-    })),
+    frames: resolvePinoAnimationFrames(config.frameIds),
     isPlaceholder: config.isPlaceholder,
     hitboxPx: PINO_HITBOX_SIZE_PX,
   };
@@ -324,7 +452,7 @@ const pinoIdleAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.IDLE,
   frameRate: 1,
   repeat: -1,
-  frames: [PINO_TEXTURE_KEYS.IDLE],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY.idle,
   isPlaceholder: false,
 });
 const pinoRunAnimation = createPinoAnimation({
@@ -332,11 +460,7 @@ const pinoRunAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.RUN,
   frameRate: 12,
   repeat: -1,
-  frames: [
-    PINO_TEXTURE_KEYS.RUN_01,
-    PINO_TEXTURE_KEYS.RUN_02,
-    PINO_TEXTURE_KEYS.RUN_03,
-  ],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY.run,
   isPlaceholder: false,
 });
 const pinoJumpAnimation = createPinoAnimation({
@@ -344,7 +468,7 @@ const pinoJumpAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.JUMP,
   frameRate: 10,
   repeat: -1,
-  frames: [PINO_TEXTURE_KEYS.JUMP, PINO_TEXTURE_KEYS.JUMP_PEAK],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY.jump,
   isPlaceholder: false,
 });
 const pinoFallAnimation = createPinoAnimation({
@@ -352,7 +476,7 @@ const pinoFallAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.FALL,
   frameRate: 8,
   repeat: -1,
-  frames: [PINO_TEXTURE_KEYS.JUMP_PEAK, PINO_TEXTURE_KEYS.FALL],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY.fall,
   isPlaceholder: false,
 });
 const pinoDeathAnimation = createPinoAnimation({
@@ -360,7 +484,7 @@ const pinoDeathAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.DEATH,
   frameRate: 10,
   repeat: 0,
-  frames: [PINO_TEXTURE_KEYS.DEATH_01, PINO_TEXTURE_KEYS.DEATH_02],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY.death,
   isPlaceholder: false,
 });
 const pinoRespawnAnimation = createPinoAnimation({
@@ -368,11 +492,7 @@ const pinoRespawnAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.RESPAWN,
   frameRate: 12,
   repeat: 0,
-  frames: [
-    PINO_TEXTURE_KEYS.RESPAWN_01,
-    PINO_TEXTURE_KEYS.RESPAWN_02,
-    PINO_TEXTURE_KEYS.IDLE,
-  ],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY.respawn,
   isPlaceholder: false,
 });
 const pinoPrimaryActionAnimation = createPinoAnimation({
@@ -380,7 +500,7 @@ const pinoPrimaryActionAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.PRIMARY_ACTION,
   frameRate: 18,
   repeat: 0,
-  frames: [PINO_TEXTURE_KEYS.DASH],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY["primary-action"],
   isPlaceholder: false,
 });
 const pinoSecondaryActionAnimation = createPinoAnimation({
@@ -388,7 +508,7 @@ const pinoSecondaryActionAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.SECONDARY_ACTION,
   frameRate: 8,
   repeat: 0,
-  frames: [PINO_TEXTURE_KEYS.IDLE],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY["secondary-action"],
   isPlaceholder: true,
 });
 const pinoCyanChargeAnimation = createPinoAnimation({
@@ -396,7 +516,7 @@ const pinoCyanChargeAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.CYAN_CHARGE,
   frameRate: 8,
   repeat: -1,
-  frames: [PINO_TEXTURE_KEYS.CHARGE_01, PINO_TEXTURE_KEYS.CHARGE_02],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY["cyan-charge"],
   isPlaceholder: false,
 });
 const pinoCyanSparkAnimation = createPinoAnimation({
@@ -404,7 +524,7 @@ const pinoCyanSparkAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.CYAN_SPARK,
   frameRate: 18,
   repeat: 0,
-  frames: [PINO_TEXTURE_KEYS.CYAN_SPARK_01, PINO_TEXTURE_KEYS.CYAN_SPARK_02],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY["cyan-spark"],
   isPlaceholder: false,
 });
 const pinoCyanBurstPrepareAnimation = createPinoAnimation({
@@ -412,10 +532,7 @@ const pinoCyanBurstPrepareAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.CYAN_BURST_PREPARE,
   frameRate: 8,
   repeat: -1,
-  frames: [
-    PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_01,
-    PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_02,
-  ],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY["cyan-burst-prepare"],
   isPlaceholder: false,
 });
 const pinoCyanBurstFireAnimation = createPinoAnimation({
@@ -423,10 +540,7 @@ const pinoCyanBurstFireAnimation = createPinoAnimation({
   state: PINO_ANIMATION_STATES.CYAN_BURST_FIRE,
   frameRate: 14,
   repeat: -1,
-  frames: [
-    PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_01,
-    PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_02,
-  ],
+  frameIds: PINO_ANIMATION_FRAME_REGISTRY["cyan-burst-fire"],
   isPlaceholder: false,
 });
 

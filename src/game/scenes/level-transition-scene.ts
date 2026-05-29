@@ -1,11 +1,12 @@
 import Phaser from "phaser";
 
-import { MUSIC_AUDIO_IDS } from "../../data/audio";
+import { resolveGameplayMusicAudioId } from "../../data/audio";
 import { getRequiredLevelDefinition } from "../../data/levels";
 import type { LevelId } from "../../shared";
 import { GAME_BACKGROUND_COLOR, GAME_RESOLUTION } from "../constants";
 import { emitGameEvent, GAME_EVENTS } from "../systems/game-events";
 import { gameStateStore } from "../systems/game-state";
+import { scaleLegacyFontPx, scaleLegacyY } from "../scale";
 import { resolveLevelInitialEnergy } from "../systems/level-progress";
 import type { LevelCompletionResult } from "../systems/level-results";
 import {
@@ -76,9 +77,16 @@ export class LevelTransitionScene extends Phaser.Scene {
     const centerX = GAME_RESOLUTION.width / 2;
     const centerY = GAME_RESOLUTION.height / 2;
     const hasResult = result.length > 0;
-    const deathsY = hasResult ? centerY + 34 : centerY + 18;
-    const separatorY = hasResult ? centerY + 52 : centerY + 44;
-    const promptY = hasResult ? centerY + 64 : centerY + 56;
+    const textWrapWidth = GAME_RESOLUTION.width - scaleLegacyY(96);
+    const deathsY = hasResult
+      ? centerY + scaleLegacyY(34)
+      : centerY + scaleLegacyY(18);
+    const separatorY = hasResult
+      ? centerY + scaleLegacyY(52)
+      : centerY + scaleLegacyY(44);
+    const promptY = hasResult
+      ? centerY + scaleLegacyY(64)
+      : centerY + scaleLegacyY(56);
 
     this.add.rectangle(
       centerX,
@@ -88,6 +96,16 @@ export class LevelTransitionScene extends Phaser.Scene {
       0x111217,
       1,
     );
+    this.add
+      .rectangle(
+        centerX,
+        centerY,
+        GAME_RESOLUTION.width - scaleLegacyY(120),
+        GAME_RESOLUTION.height - scaleLegacyY(108),
+        0x0f1118,
+        0.78,
+      )
+      .setStrokeStyle(1, 0x80d7c2, 0.32);
     this.add.rectangle(
       centerX,
       separatorY,
@@ -98,26 +116,38 @@ export class LevelTransitionScene extends Phaser.Scene {
     );
 
     const titleText = this.add
-      .text(centerX, centerY - 36, title, {
+      .text(centerX, centerY - scaleLegacyY(36), title, {
         color: "#f5f7fb",
         fontFamily: "monospace",
-        fontSize: "20px",
+        fontSize: scaleLegacyFontPx(20),
+        align: "center",
+        wordWrap: {
+          width: textWrapWidth,
+        },
       })
       .setOrigin(0.5)
       .setAlpha(0);
     const detailText = this.add
-      .text(centerX, centerY - 4, detail, {
+      .text(centerX, centerY - scaleLegacyY(4), detail, {
         color: "#80d7c2",
         fontFamily: "monospace",
-        fontSize: "10px",
+        fontSize: scaleLegacyFontPx(10),
+        align: "center",
+        wordWrap: {
+          width: textWrapWidth,
+        },
       })
       .setOrigin(0.5)
       .setAlpha(0);
     const resultText = this.add
-      .text(centerX, centerY + 14, result, {
+      .text(centerX, centerY + scaleLegacyY(14), result, {
         color: "#f4d35e",
         fontFamily: "monospace",
-        fontSize: "10px",
+        fontSize: scaleLegacyFontPx(10),
+        align: "center",
+        wordWrap: {
+          width: textWrapWidth,
+        },
       })
       .setOrigin(0.5)
       .setAlpha(0);
@@ -125,7 +155,11 @@ export class LevelTransitionScene extends Phaser.Scene {
       .text(centerX, deathsY, deaths, {
         color: "#f5f7fb",
         fontFamily: "monospace",
-        fontSize: "10px",
+        fontSize: scaleLegacyFontPx(10),
+        align: "center",
+        wordWrap: {
+          width: textWrapWidth,
+        },
       })
       .setOrigin(0.5)
       .setAlpha(0);
@@ -135,7 +169,7 @@ export class LevelTransitionScene extends Phaser.Scene {
         .text(centerX, promptY, prompt, {
           color: "#80d7c2",
           fontFamily: "monospace",
-          fontSize: "10px",
+          fontSize: scaleLegacyFontPx(10),
         })
         .setOrigin(0.5);
     }
@@ -167,7 +201,7 @@ export class LevelTransitionScene extends Phaser.Scene {
       resolveLevelInitialEnergy(nextLevel),
     );
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
-      audioId: MUSIC_AUDIO_IDS.MVP_LOOP,
+      audioId: resolveGameplayMusicAudioId(nextLevel),
       category: "music",
     });
     this.scene.start(SCENE_KEYS.LEVEL);

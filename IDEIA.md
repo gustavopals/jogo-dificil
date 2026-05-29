@@ -1172,19 +1172,12 @@ Fase 16 - Kit de energia original:
   até ativar, pode acionar `activatesObjectId`, usa `activationRemainingMs` para
   passagens temporárias declaradas por `activationDurationMs`, fecha o objeto e
   rearma a vida ao expirar.
-- Sprites da `Carga Ciano` criados para Pino:
-  `player-pino-charge-01.png` e `player-pino-charge-02.png`, ambos 14x26px,
-  registrados como assets originais e mantendo a hitbox real 10x22px.
-- Sprites do disparo da `Centelha Ciano` criados para Pino:
-  `player-pino-cyan-spark-01.png` e `player-pino-cyan-spark-02.png`, ambos
-  14x26px, com braço estendido, pulso ciano curto e sem extrapolar a hitbox
-  real do personagem.
-- Sprites da `Rajada Ciano` criados para Pino: dois frames de preparação
-  (`player-pino-cyan-burst-prepare-01.png` e
-  `player-pino-cyan-burst-prepare-02.png`) e dois frames de soltura
-  (`player-pino-cyan-burst-fire-01.png` e
-  `player-pino-cyan-burst-fire-02.png`), todos 14x26px, com energia segmentada
-  no punho e recuo compacto.
+- Sprites de energia do Pino migrados para spritesheet HD:
+  `assets/spritesheets/player-pino-energy-512.png` (512x512, células 128x128)
+  com os frames `charge`, `cyan-spark`, `cyan-burst-prepare` e
+  `cyan-burst-fire`.
+- Os PNGs 14x26 antigos seguem no repositório como base histórica e fallback
+  de pipeline, mas o runtime oficial da Fase 18 já usa spritesheets ativos.
 - Kit visual externo dos poderes criado: `energy-cyan-spark-projectile.png`
   representa o projétil pequeno 8x8px da `Centelha Ciano`;
   `energy-cyan-burst-beam.png` é o segmento tileável 16x16px do feixe;
@@ -1194,9 +1187,8 @@ Fase 16 - Kit de energia original:
   pouco espaço visual para não esconder hazards.
 - Animações de `Energia Ciano` registradas nos dados do Pino:
   `cyan-charge`, `cyan-spark`, `cyan-burst-prepare` e `cyan-burst-fire` entram
-  em `PINO_ANIMATIONS`, apontam para os sprites 14x26px já criados e declaram
-  `hitboxPx` 10x22px para manter a colisão real estável enquanto a cena troca
-  o visual conforme carga, tiro e rajada.
+  em `PINO_ANIMATIONS`, apontam para frames de spritesheet e mantêm `hitboxPx`
+  desacoplado do contorno visual para preservar colisão justa.
 - Legibilidade dos perigos pequenos protegida: `visual-readability` define
   depths para hazards diretos, `spike-pop` e projéteis de trap ficarem acima dos
   efeitos de energia do Pino, enquanto partículas/impactos/feixe largos são
@@ -1553,7 +1545,7 @@ Fase 17 - Trinca de chefões:
 
 ### Ponto 9 - Resolução Base e Tamanho de Tile
 
-Status: Decidido.
+Status: Decidido (baseline HD oficial — Fase 18 concluída).
 
 Decisões a registrar:
 
@@ -1564,22 +1556,80 @@ Decisões a registrar:
 
 Decisão:
 
-- Resolução base: 480x270 pixels.
-- Tamanho do tile: 16x16 pixels.
-- Tamanho aproximado do personagem: ~24px de altura, ~12px de largura.
-- Grid resultante: 30 tiles de largura por ~17 tiles de altura.
-- A resolução base escala 1:1 para resoluções comuns:
-  - 2x → 960x540.
-  - 3x → 1440x810.
-  - 4x → 1920x1080 (Full HD).
-- Os valores de física definidos no Ponto 3 continuam válidos: pulo de pico ~77px equivale a ~5 tiles.
+- Baseline antigo (histórico, somente migração): 480x270 pixels com tile 16x16.
+- **Baseline oficial atual:** 960x540 pixels com tile 32x32.
+- O grid visível continua equivalente em composição: ~30 tiles de largura por
+  ~17 tiles de altura, porém em escala visual 2x.
+- O personagem principal deve sair da faixa mini de 14x26 e migrar para porte
+  visual de alta leitura (faixa alvo entre 48x96 e 64x128 no runtime).
+- A hitbox deve continuar menor que o sprite para preservar justiça de gameplay.
+- Bosses devem operar em porte visual grande. Baseline atual da Task 18.5:
+  - Hirolito: 96x112 (runtime visual).
+  - Dr. Imports: 96x128 (runtime visual).
+  - Giga Fabio: 120x128 (runtime visual).
+  Todos com weak points e tells claramente legíveis.
+- A resolução base segue escalando por múltiplos inteiros para telas comuns:
+  - 1x -> 960x540.
+  - 2x -> 1920x1080 (Full HD).
+  - 3x -> 2880x1620.
+- A física será recalibrada durante a migração para manter sensação de precisão,
+  restart rápido e dificuldade aprendível.
 
 Regras:
 
-- Todo sprite e tileset deve respeitar a base de 16px.
-- Personagem e elementos importantes devem ser legíveis em escala 1x.
-- Mapas devem ser desenhados pensando no grid de 16px.
-- Mudanças nessa resolução base depois de assets criados forçam retrabalho — evitar.
+- Todo novo tile e colisão de mapa deve respeitar a base de 32px.
+- Personagem, bosses, traps e itens devem ser legíveis em 1x (960x540) sem
+  depender de zoom artificial.
+- Sprites de personagem e boss devem seguir pipeline por spritesheet, com
+  células padrão de 128x128 para animações principais.
+- Bosses usam sheets dedicadas 512x512 (grade 4x4), com mapeamento mínimo de
+  frames por estado: `inactive/intro/patrol`, `windup`, `attack`, `recover` e
+  `defeated`.
+- Arte em spritesheet grande não substitui escala de gameplay: o tamanho exibido
+  em runtime deve ser definido por design de fase e leitura de combate.
+- Hitboxes continuam orientadas por jogabilidade justa, não pelo contorno total
+  da arte.
+- A migração HD foi concluída na Fase 18; o runtime, preload, testes e docs
+  oficiais usam este baseline. Plano histórico: `docs/phase-18-hd-migration-plan.md`.
+  Padrão consolidado: `docs/hd-visual-standard.md`.
+- Performance e preload (Task 18.11): `RUNTIME_IMAGE_ASSETS` evita duplicar PNG
+  legado e sheet HD; Vite externaliza PNGs grandes (`assetsInlineLimit: 4096`).
+  PNG legados permanecem no repo para fallback de pipeline até remoção na Fase 19.
+- Estratégia declarativa atual para fases (Task 18.6): arquivos de fase
+  continuam como fonte legada em 480x270/16px, e a campanha em runtime é
+  convertida por utilitário de migração 2x controlado no registry de níveis.
+  Isso reduz retrabalho manual e mantém a progressão das 10 fases consistente
+  durante a transição HD.
+- Regras de câmera na Task 18.7: cada fase usa perfil de câmera declarativo
+  com deadzone/follow/look-ahead calibrados por dificuldade e presença de boss.
+- Regras de leitura na Task 18.7: checkpoint ativo precisa destacar mais que
+  checkpoint inativo, e saída bloqueada por boss deve sinalizar estado de lock
+  com alpha/tint de perigo.
+- Efeitos do jogador (aura, dash ghost, bursts) seguem escala HD derivada da
+  base 960x540 para manter legibilidade visual sem encobrir hazards.
+- Recalibração de física na Task 18.8: a sensação de movimento é definida em
+  unidades de tile, não em pixels. Como o mundo dobrou (tile 16 -> 32), as
+  quantidades espaciais de física (velocidade horizontal, aceleração,
+  desacelerações, gravidade, velocidade de pulo e dash) escalam pelo mesmo fator
+  2x (`WORLD_PHYSICS_SCALE`), preservando altura de pulo, alcance de dash e
+  velocidade em tiles. Janelas temporais (`coyote 90ms`, `jump buffer 100ms`,
+  duração/cooldown de dash, respawn 450ms, recuperação 120ms) e a proporção de
+  corte de pulo permanecem fixas por serem independentes de escala visual.
+  Velocidade e alcance dos projéteis do jogador (Centelha/Rajada Ciano) também
+  escalam 2x; tamanho de hitbox e offset de origem desses efeitos ficam para o
+  passo de arte/efeitos (Task 18.9). Projéteis e ataques de bosses já escalam
+  via migração de dados de fase.
+- Arte de ambiente e efeitos na Task 18.9: tilesets e sprites de cenário/trap/
+  item/marcador/energia foram redesenhados em pixel art nativa de 32px (sem
+  upscale) por `scripts/generate-environment-sprites.mjs`, seguindo a paleta
+  semântica (vermelho = perigo, ciano = energia/seguro, amarelo = foco, coral =
+  saída, roxo = trap). Projéteis pequenos passaram a 16px nativos. Decisão de
+  legibilidade: a Centelha mantém a geometria de colisão validada em 18.8 e só
+  o sprite cresce; a Rajada Ciano teve a faixa (altura/offsets) escalada 2x para
+  não virar um fio fino em HD. A ordem de desenho de todos os elementos virou
+  uma escada única (`DEPTH_LAYERS`): perigos e projéteis ficam acima do jogador,
+  e efeitos de energia ficam abaixo dos hazards e com teto de alpha, de modo que
+  nenhum efeito esconda um hazard pequeno (lado <= 1 tile = 32px em HD).
 
 ### Ponto 10 - Funções da Ação Principal e Secundária
 
@@ -1632,7 +1682,7 @@ Decisão:
 - `pixelArt: true` para manter nitidez.
 - `roundPixels: true` para evitar sub-pixel rendering.
 - FPS alvo: 60.
-- Aspect ratio fixo: 16:9 (480x270).
+- Aspect ratio fixo: 16:9 (960x540).
 - Letterbox quando o aspect ratio da janela não bater.
 - Escala inteira priorizada quando possível.
 - Mobile e touch ficam fora do MVP.
@@ -1656,6 +1706,8 @@ O desenvolvimento deve seguir o roadmap por fases, tasks e subtasks. Cada IA que
 - Marcar tasks e subtasks concluídas em `ROADMAP.md`.
 - Registrar bloqueios no próprio roadmap quando existirem.
 - Atualizar `IDEIA.md` sempre que uma decisão de design mudar.
+- Para conteúdo e arte novos, usar o baseline HD oficial (`docs/hd-visual-standard.md`)
+  e seguir a Fase 19 de `ROADMAP.md` para polimento e expansão.
 
 Regra prática:
 
@@ -1834,23 +1886,48 @@ Decisões de conceito fechadas na Task 3.1:
 
 ### Tamanho e Leitura
 
-Decisões de escala fechadas na Task 3.2:
+Decisões atualizadas na migração HD (Task 18.4), revisadas em 2026-05-29:
 
-- Resolução base do jogo: 480x270.
-- Tamanho dos tiles: 16x16px.
-- Área visual atual do sprite: 14x26px.
-- Hitbox real: 10x22px, centralizada dentro da área visual.
-- Margem entre sprite e hitbox: 2px nas laterais, 3px no topo e 1px na base.
-  Cabelo, aura e deformações visuais podem ocupar essa margem, mas não devem
-  mudar a colisão principal.
-- Pivô do personagem: centro inferior do sprite, equivalente a x=7px e y=26px
-  dentro da área visual. Checkpoints e respawn devem usar esse ponto como
-  posição de referência.
-- Relação com tile: sprite visual de 0,875 tile de largura por 1,625 tile de
-  altura; hitbox de 0,625 tile de largura por 1,375 tile de altura.
-- Leitura prática: Pino cabe visualmente em dois tiles de altura com folga e
-  ocupa menos de um tile de largura, favorecendo plataformas estreitas e colisão
-  previsível.
+- Resolução base do jogo: 960x540.
+- Tamanho dos tiles: 32x32px.
+- Proporção inspirada em Stardew Valley (16x32 em tile 16 → 32x48 em tile 32):
+  personagem ocupa ~1 tile de largura por ~1,5 tile de altura, deixando mais
+  mundo visível na tela.
+- Área visual oficial de runtime do Pino: 32x48px.
+- Hitbox real oficial: 20x36px, menor que o visual para preservar justiça.
+- Margens entre visual e hitbox: 6px laterais, 8px topo, 4px base.
+- Pivô oficial do personagem: centro inferior (`x=0.5`, `y=1`).
+- Arte base: `assets/hero/hero-examples.png` (lutador pixel art); frames
+  extraídos por `scripts/extract-pino-frames-from-hero-examples.mjs`.
+- Leitura prática: silhueta legível em 1x com mapa proporcionalmente maior.
+
+- Scripts: `npm run assets:boss-sheets` (extrai sheets + projeteis de
+  `assets/boss/examples/`).
+
+### Chefões (referência art, 2026-05-29)
+
+- Hirolito: `boss-1-examples.png` → sheet 512, display 56x72, animação por estado
+  com ciclo de frames (idle, carga, cristal, hurt, death).
+- Dr. Imports: `boss-2-examples.png` → display 56x80, advogado techno-roxo.
+- Giga Fabio: `boss-3-examples.png` → display 72x88, bodybuilder cômico final.
+- Projeteis extraídos das mesmas referências (cristal/fumaça, frasco, pedra).
+- Registry: `boss-spritesheet-registry.ts` + `resolveBossAnimationFrameIndex()`.
+
+Decisão histórica (Task 18.4, substituída):
+
+- Visual anterior 56x104px / hitbox 36x80px (~1,75 x 3,25 tiles).
+
+### Mapas e ambiente (Stardew-inspired, 2026-05-29)
+
+- Proporção de tela: ~30x17 tiles visíveis (960x540, tile 32); personagem ~1x1,5
+  tile deixa o mundo dominante como em Stardew Valley (farmer 16x32 em tile 16).
+- Tilesets regenerados (`npm run assets:environment`): grama/pedra quente, madeira,
+  céu suave, espinhos legíveis.
+- Temas por fase: `src/data/levels/level-visual-themes.ts` (tint de fundo/terreno).
+- Decorações não colidíveis: `src/data/levels/level-decorations.ts` (arbustos,
+  flores, lanternas, nuvens, cogumelos) renderizadas em `level-visuals.ts`.
+- Layout das fases permanece em coordenadas legadas (tile 16) com migração 2x;
+  gaps revisados pelos subagentes — fases 01–02 usam vãos de 2–3 tiles legados.
 
 Regra prática:
 
@@ -2617,6 +2694,11 @@ Direção pendente:
 - Roadmap operacional definido em `ROADMAP.md` para desenvolvimento com IA por fases, tasks e subtasks.
 - Stack técnica definida: TypeScript, Vite, Phaser 3, Vitest, Playwright, ESLint, Prettier e npm.
 - Resolução base do jogo: 480x270 com tiles de 16px, escalando 1:1 para 960x540, 1440x810 e 1920x1080.
+- Migração HD definida como próxima grande etapa: novo baseline alvo 960x540 com
+  tile 32x32, mantendo gameplay em pixel art e leitura de traps em alta
+  velocidade.
+- Pipeline visual novo definido para personagens e bosses: spritesheets com
+  células de 128x128 como padrão para animações principais.
 - Ação principal: Dash (impulso horizontal curto, no chão e no ar). Ação secundária: Interagir (alavancas, botões, portas, itens).
 - Canvas usa modo `FIT` do Phaser, com pixel art ativado, letterbox em aspect ratio diferente e 60 FPS alvo. Sem mobile/touch no MVP.
 - Direção visual inicial definida como pixel art de baixa resolução em
@@ -2634,6 +2716,9 @@ Direção pendente:
 - Escala atual de Pino definida: sprite visual 14x26px, hitbox real 10x22px,
   margens visuais de 2px nas laterais, 3px no topo e 1px na base, pivô no
   centro inferior e relação de 0,875x1,625 tile para o sprite.
+- Nova escala alvo do Pino para a migração HD: faixa visual entre 48x96 e
+  64x128 no runtime, preservando hitbox menor que o visual para manter justiça
+  do platformer difícil.
 - Arte visual atual de Pino criada em `assets/sprites/player-pino-idle.png`,
   removendo a leitura de cápsula amarela e adotando silhueta shonen original.
 - Arte atual de movimento do Pino criada em sprites 14x26px para idle, corrida
@@ -2694,6 +2779,17 @@ Direção pendente:
   `Hirolito Narguilito` em `level-03`, `Dr. Imports` em `level-06` e
   `Giga Fabio` como boss final em `level-10`, todos usando arenas curtas,
   tells claros, vida baixa, reset completo e dano integrado à Energia Ciano.
+- Fase 18 concluída: migração HD completa (960x540, tile 32, spritesheets,
+  física recalibrada, ambiente HD, QA automatizado/manual, performance e build).
+  Baseline oficial documentado em `docs/hd-visual-standard.md`. Próximo foco:
+  Fase 19 — polimento pós-HD e expansão de conteúdo (`ROADMAP.md`).
+- Task 19.3 (decisão): próxima entrega = **segmento desafio bonus** `level-11`
+  (`Circuito Relampago`), não campanha 11+ completa nem menu separado de modo
+  desafio nesta task. Desbloqueio: vencer `level-10` → transição "Desafio
+  liberado" → `level-11`. Metadados em `contentKind: "challenge"` e helpers em
+  `src/data/levels/challenge-content.ts`. QA: `tests/level-11-content.test.ts`,
+  `tests/challenge-content.test.ts`, roteiro em `docs/task-19.2-polish-checklist.md`
+  (matriz estendida manualmente para level-11).
 - Task 17.1 iniciada: a distribuição dos bosses foi fechada nesses três pontos
   da campanha, sem mudar ainda `nextLevelId` ou dados de fase. A integração de
   progressão fica para a Task 17.9, depois que as arenas de boss existirem.

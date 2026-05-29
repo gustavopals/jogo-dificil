@@ -2,6 +2,7 @@ import type {
   BossAttackId,
   BossDefinition,
   BossId,
+  BossStateKind,
   CheckpointDefinition,
   CheckpointId,
   EnergyPowerKind,
@@ -9,6 +10,12 @@ import type {
   RectLike,
 } from "../../shared";
 import { GAMEPLAY_SPRITE_KEYS } from "../../data/art";
+import {
+  BOSS_HD_VISUAL_PROFILES,
+  BOSS_SPRITESHEET_KEYS,
+  resolveBossAnimationFrameIndex,
+  type BossAnimationState,
+} from "../../data/characters/boss-spritesheet-registry";
 import {
   applyBossRuntimeDamage,
   canSpawnBossProjectile,
@@ -451,6 +458,11 @@ export function getBossTextureKey(boss: BossDefinition): LevelAssetId {
     return boss.assetId;
   }
 
+  const hdProfile = getBossHdVisualProfile(boss);
+  if (hdProfile) {
+    return hdProfile.textureKey;
+  }
+
   if (boss.id.includes("dr-imports")) {
     return GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS;
   }
@@ -459,7 +471,33 @@ export function getBossTextureKey(boss: BossDefinition): LevelAssetId {
     return GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO;
   }
 
-  return GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO;
+  return BOSS_SPRITESHEET_KEYS.HIROLITO_512;
+}
+
+export function getBossVisualDisplaySize(
+  boss: BossDefinition,
+): Readonly<Pick<RectLike, "width" | "height">> {
+  const hdProfile = getBossHdVisualProfile(boss);
+
+  return hdProfile?.displaySize ?? boss.hitbox;
+}
+
+export function getBossVisualBottomOffsetY(boss: BossDefinition): number {
+  const hdProfile = getBossHdVisualProfile(boss);
+
+  return hdProfile?.bottomOffsetY ?? 0;
+}
+
+export function getBossFrameByState(
+  boss: Pick<BossDefinition, "id">,
+  state: BossStateKind,
+  stateElapsedMs = 0,
+): number {
+  return resolveBossAnimationFrameIndex(
+    boss.id,
+    state as BossAnimationState,
+    stateElapsedMs,
+  );
 }
 
 export function getBossProjectileTextureKey(
@@ -844,6 +882,32 @@ function isBossWeakPointOpen(
     vulnerabilityWindow?.state === state.state &&
     vulnerabilityWindow.weakPointActive
   );
+}
+
+function getBossHdVisualProfile(
+  boss: Pick<BossDefinition, "id">,
+): (typeof BOSS_HD_VISUAL_PROFILES)[keyof typeof BOSS_HD_VISUAL_PROFILES] | undefined {
+  if (boss.id.includes("dr-imports")) {
+    return BOSS_HD_VISUAL_PROFILES.DR_IMPORTS;
+  }
+
+  if (boss.id.includes("giga-fabio")) {
+    return BOSS_HD_VISUAL_PROFILES.GIGA_FABIO;
+  }
+
+  if (boss.id.includes("hirolito")) {
+    return BOSS_HD_VISUAL_PROFILES.HIROLITO_NARGUILITO;
+  }
+
+  if (boss.id.includes("boss-schema-test")) {
+    return {
+      textureKey: BOSS_SPRITESHEET_KEYS.HIROLITO_512,
+      displaySize: BOSS_HD_VISUAL_PROFILES.HIROLITO_NARGUILITO.displaySize,
+      bottomOffsetY: 0,
+    };
+  }
+
+  return undefined;
 }
 
 function rectsOverlap(a: RectLike, b: RectLike): boolean {

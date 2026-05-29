@@ -25,7 +25,7 @@ export type EnergyTargetFeedback = {
 
 const ENERGY_TARGET_COLORS = {
   "energy-switch": VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary,
-  "energy-cracked-block": 0x5d6f86,
+  "energy-cracked-block": VISUAL_READABILITY_SEMANTIC_COLORS.energy.crackedBlock,
   "energy-relay": VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
   "energy-absorber": VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger,
   "energy-core": VISUAL_READABILITY_SEMANTIC_COLORS.energy.charged,

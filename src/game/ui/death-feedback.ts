@@ -1,12 +1,13 @@
 import type { DeathCause, PlayerDiedEvent } from "../systems/game-events";
 import { GAME_RESOLUTION } from "../constants";
+import { scaleLegacyY } from "../scale";
 import { HUD_LAYOUT, HUD_TEXT_STYLE } from "./hud";
 
 export const DEATH_FEEDBACK_DURATION_MS = 850;
 
 export const DEATH_FEEDBACK_LAYOUT = {
   x: GAME_RESOLUTION.width / 2,
-  y: HUD_LAYOUT.y + HUD_LAYOUT.height + 5,
+  y: HUD_LAYOUT.y + HUD_LAYOUT.height + scaleLegacyY(7),
 } as const;
 
 export const DEATH_FEEDBACK_TEXT_STYLE = {

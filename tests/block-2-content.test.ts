@@ -13,6 +13,12 @@ import {
   type TrapDefinition,
   validateLevels,
 } from "../src/data/levels";
+import {
+  BOSS_HD_VISUAL_PROFILES,
+  BOSS_SPRITESHEET_KEYS,
+} from "../src/data/characters/boss-spritesheet-registry";
+import { getBossVisualDisplaySize } from "../src/game/systems/level-bosses";
+import { getHdCampaignLevel } from "./helpers/hd-campaign";
 import { applyBossRuntimeDamage } from "../src/game/physics";
 import { getInteractiveObjectSolidAreas } from "../src/game/systems/level-interactive-objects";
 import {
@@ -236,7 +242,29 @@ describe("block 2 content", () => {
       entryDoorId: "level-06-dr-imports-entry-door",
       defeatUnlocks: ["level-06-dr-imports-exit-door"],
     });
-    expect(boss.assetId).toBe("boss-dr-imports");
+    expect(boss.assetId).toBe("boss-dr-imports-sheet-512");
+    expect(getBossVisualDisplaySize(boss)).toEqual(
+      BOSS_HD_VISUAL_PROFILES.DR_IMPORTS.displaySize,
+    );
+    expect(getBossVisualDisplaySize(boss)).toEqual({
+      width: 56,
+      height: 80,
+    });
+    const hdBoss = getHdCampaignLevel("level-06").bosses!.find(
+      (candidate) => candidate.id === "boss-dr-imports",
+    )!;
+    expect(hdBoss.hitbox).toEqual({
+      x: boss.hitbox.x * 2,
+      y: boss.hitbox.y * 2,
+      width: 56,
+      height: 96,
+    });
+    expect(hdBoss.weakPoint).toEqual({
+      x: boss.weakPoint.x * 2,
+      y: boss.weakPoint.y * 2,
+      width: 36,
+      height: 48,
+    });
     expect(boss.movement).toMatchObject({
       kind: "anchor-swap",
       speedPxPerSecond: 36,
@@ -308,7 +336,7 @@ describe("block 2 content", () => {
     expect(weakPoint.area).toEqual(boss.weakPoint);
     expect(LEVEL_06.assets.sprites).toEqual(
       expect.arrayContaining([
-        "boss-dr-imports",
+        BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512,
         "boss-projectile-import-bottle",
       ]),
     );

@@ -10,7 +10,7 @@ import { PLAYER_SIZE, TILE_SIZE_PX } from "../src/game/constants";
 describe("initial visual direction", () => {
   it("locks the MVP art style to low-res pixel art", () => {
     expect(INITIAL_VISUAL_DIRECTION.style).toBe("low-res-pixel-art");
-    expect(INITIAL_VISUAL_DIRECTION.thesis).toContain("hostile test lab");
+    expect(INITIAL_VISUAL_DIRECTION.thesis).toContain("Cozy Stardew-inspired");
     expect(INITIAL_VISUAL_DIRECTION.assetRules).toContain(
       "Read every sprite at 1x before adding detail.",
     );

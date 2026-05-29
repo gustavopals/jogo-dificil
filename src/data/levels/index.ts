@@ -8,12 +8,23 @@ export { LEVEL_07 } from "./level-07";
 export { LEVEL_08 } from "./level-08";
 export { LEVEL_09 } from "./level-09";
 export { LEVEL_10 } from "./level-10";
+export { LEVEL_11 } from "./level-11";
+export {
+  CAMPAIGN_LEVEL_COUNT,
+  CHALLENGE_LEVEL_IDS,
+  getCampaignLevelDefinitions,
+  getChallengeLevelDefinitions,
+  getFirstChallengeLevelId,
+  isChallengeLevel,
+  type ChallengeLevelId,
+} from "./challenge-content";
 export {
   getLevelDefinition,
   getRequiredLevelDefinition,
   LEVEL_DEFINITIONS,
 } from "./registry";
 export { defineLevel } from "./schema";
+export { migrateLegacyLevelDefinition } from "./migration";
 export type {
   BossAttackDefinition,
   BossAttackId,

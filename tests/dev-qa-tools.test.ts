@@ -7,6 +7,7 @@ import {
   DEV_QA_GLOBAL_KEY,
   getDevQaBossEntries,
   getDevQaLevelIds,
+  getDevQaScaleSnapshot,
   installDevQaTools,
   isKnownDevQaLevelId,
   type DevQaEnergyStateSnapshot,
@@ -33,6 +34,7 @@ describe("dev QA tools", () => {
       "level-08",
       "level-09",
       "level-10",
+      "level-11",
     ]);
   });
 
@@ -73,6 +75,12 @@ describe("dev QA tools", () => {
         key: "level",
       },
       getDevQaLevelSnapshot: vi.fn(() => null),
+      readDevQaPlayerHitbox: vi.fn(() => ({
+        x: 110,
+        y: 364,
+        width: 20,
+        height: 36,
+      })),
     };
     const game = createFakeGame(levelScene);
     const targetWindow = {} as Window & Record<string, unknown>;
@@ -92,8 +100,8 @@ describe("dev QA tools", () => {
       activeCheckpoint: {
         id: "level-06-before-dr-imports",
         levelId: "level-06",
-        x: 992,
-        y: 222,
+        x: 1984,
+        y: 444,
         initialEnergy: 80,
       },
     });
@@ -152,6 +160,45 @@ describe("dev QA tools", () => {
     expect(levelScene.fillDevQaEnergy).toHaveBeenCalledTimes(1);
     expect(api.clearEnergyCooldowns()).toMatchObject({ ok: true });
     expect(levelScene.clearDevQaEnergyCooldowns).toHaveBeenCalledTimes(1);
+  });
+
+  it("exposes HD scale info and player hitbox hooks for QA", () => {
+    const levelScene = {
+      scene: {
+        key: "level",
+      },
+      getDevQaLevelSnapshot: vi.fn(() => null),
+      readDevQaPlayerHitbox: vi.fn(() => ({
+        x: 110,
+        y: 364,
+        width: 20,
+        height: 36,
+      })),
+    };
+    const game = createFakeGame(levelScene);
+    const targetWindow = {} as Window & Record<string, unknown>;
+    const api = installDevQaTools(game, targetWindow);
+
+    expect(getDevQaScaleSnapshot()).toMatchObject({
+      resolution: {
+        width: 960,
+        height: 540,
+      },
+      tileSizePx: 32,
+      worldPhysicsScale: 2,
+      playerHitbox: {
+        width: 20,
+        height: 36,
+      },
+    });
+    expect(api.readScaleInfo()).toEqual(getDevQaScaleSnapshot());
+    expect(api.readPlayerHitbox()).toEqual({
+      x: 110,
+      y: 364,
+      width: 20,
+      height: 36,
+    });
+    expect(levelScene.readDevQaPlayerHitbox).toHaveBeenCalledTimes(1);
   });
 });
 

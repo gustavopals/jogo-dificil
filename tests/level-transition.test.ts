@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LEVEL_01, LEVEL_02, LEVEL_10 } from "../src/data/levels";
+import { LEVEL_01, LEVEL_02, LEVEL_10, LEVEL_11 } from "../src/data/levels";
 import {
   createLevelTransitionLabels,
   formatTransitionDeaths,
@@ -22,12 +22,24 @@ describe("level transition UI", () => {
     });
   });
 
-  it("formats the final campaign screen after the last phase", () => {
-    expect(createLevelTransitionLabels(LEVEL_10, undefined, 9)).toMatchObject({
-      title: "Campanha concluida",
-      detail: "As 10 fases atuais foram vencidas",
-      result: "",
+  it("formats the challenge unlock transition after the campaign finale", () => {
+    expect(createLevelTransitionLabels(LEVEL_10, LEVEL_11, 9)).toMatchObject({
+      title: "Desafio liberado",
+      detail:
+        "Fase 10: O Ultimo Nucleo -> Desafio: Circuito Relampago",
       deaths: "Mortes 9",
+      prompt: "",
+      isFinal: false,
+    });
+  });
+
+  it("formats the final screen after the challenge segment", () => {
+    expect(createLevelTransitionLabels(LEVEL_11, undefined, 4)).toMatchObject({
+      title: "Desafio concluido",
+      detail:
+        "O segmento pos-campanha foi vencido. Campanha e desafio completos.",
+      result: "",
+      deaths: "Mortes 4",
       prompt: "ENTER reinicia",
       isFinal: true,
     });
@@ -39,6 +51,7 @@ describe("level transition UI", () => {
     expect(formatTransitionLevel(LEVEL_02)).toBe(
       "Fase 2: O Caminho Nao Confia Em Voce",
     );
+    expect(formatTransitionLevel(LEVEL_11)).toBe("Desafio: Circuito Relampago");
     expect(formatTransitionDeaths(Number.NaN)).toBe("Mortes 0");
     expect(normalizeTransitionDeathCount(2.8)).toBe(2);
     expect(normalizeTransitionDeathCount(-3)).toBe(0);

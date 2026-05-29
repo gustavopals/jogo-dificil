@@ -115,6 +115,8 @@ Evitar:
 
 Todos os assets devem ser originais, gerados para o projeto ou usados com licença compatível.
 
+**Baseline visual oficial (pós-Fase 18):** resolução `960x540`, tile `32x32`, spritesheets com células `128x128` para Pino e bosses. Ver `docs/hd-visual-standard.md`.
+
 Naming:
 
 - Usar nomes em kebab-case.
@@ -123,6 +125,9 @@ Naming:
 
 Sprites e animações:
 
+- Personagem e bosses usam spritesheets (`512x512`, células `128x128`) em runtime; PNG por frame é fallback legado, não preload duplicado.
+- Ambiente, traps e itens usam pixel art nativa em `32x32` (projéteis pequenos em `16x16`).
+- Respeitar `src/game/asset-load-policy.ts`: nunca preloadar PNG legado e sheet HD do mesmo personagem/boss.
 - Documentar dimensões base do personagem.
 - Manter pivôs e hitboxes consistentes.
 - Separar hitbox de sprite visual quando necessário.
@@ -137,6 +142,9 @@ Sprites e animações:
 ## Mapas e Fases
 
 Fases devem ser tratadas como conteúdo, não como código improvisado.
+
+- Arquivos `src/data/levels/level-*.ts` usam coordenadas legadas (`480x270`, tile `16`); o registry aplica migração `2x` para o runtime HD.
+- Novo conteúdo pode ser escrito em legado (com migração automática) ou diretamente em escala HD quando a fase for criada do zero — manter consistência com `validateLevels`.
 
 Preferir:
 
@@ -318,6 +326,18 @@ Antes de concluir:
 
 ## Estado Atual
 
-O repositório ainda está em fase inicial de planejamento. Não há scaffold,
-`package.json`, comandos de build/teste ou código de jogo neste momento.
+O jogo está em **baseline HD oficial** (Fase 18 concluída):
+
+- Stack: TypeScript, Vite, Phaser 3, Vitest, Playwright, ESLint, Prettier.
+- Resolução `960x540`, tile `32`, campanha de 10 fases com bosses, energia ciano e dash.
+- Spritesheets ativos para Pino e bosses; ambiente/traps em arte `32x32` gerada por scripts.
+- Comandos: `npm run dev`, `npm run build`, `npm run test`, `npm run test:e2e`, `npm run lint`.
+- Padrão visual consolidado: `docs/hd-visual-standard.md`.
+- Próximo foco recomendado: Fase 19 (polimento pós-HD e expansão de conteúdo) em `ROADMAP.md`.
+
+Pendências conhecidas (não bloqueiam o baseline HD):
+
+- PNGs legados de Pino/boss ainda no repositório para fallback; remoção do bundle em fase futura.
+- Smoke e2e pode exigir libs do Chromium no ambiente (ex.: WSL sem `libnspr4`).
+- Playtest humano longo em 960x540 para validar ritmo e cansaco visual.
 

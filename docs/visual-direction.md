@@ -8,10 +8,11 @@ perigo saturados e poucos detalhes por sprite.
 
 ## Escala
 
-- Resolucao base: 480x270.
-- Tile base: 16x16px.
-- Pino: aproximadamente 14x26px.
-- Hitbox do Pino: 10x22px.
+- Resolucao base historica: 480x270, tile 16x16px (origem do projeto).
+- Escala HD atual (Fase 18): 960x540, tile `32x32px` (`TILE_SIZE_PX`), fator
+  espacial 2x. Pino ~56x104px, hitbox 36x80px.
+- A fisica acompanha a escala em unidades de tile (Task 18.8); a arte de
+  ambiente e efeitos foi redesenhada em pixel art nativa de 32px (Task 18.9).
 - Regra pratica: assets importantes precisam funcionar antes de qualquer escala
   de janela.
 
@@ -38,17 +39,38 @@ perigo saturados e poucos detalhes por sprite.
 - Preferir contorno duro de 1px, areas chapadas e poucos tons.
 - Evitar texturas que confundam plataforma, hazard, item ou saida.
 
-## Tileset Placeholder
+## Tileset HD
 
-O primeiro tileset coerente fica em `assets/tilesets/` e usa tiles 16x16px:
+O tileset coerente fica em `assets/tilesets/` e usa tiles `32x32px` (HD):
 
-- `lab-solid-block.png`: massa solida para paredes e blocos grossos.
-- `lab-platform.png`: piso/plataforma fina para leitura imediata de salto.
-- `lab-hazard-spikes.png`: perigo visual vermelho para espinhos e pits.
-- `lab-background-panel.png`: painel escuro repetivel para fundo simples.
+- `lab-solid-block.png`: massa solida com bisel e rebites, tileavel em grade.
+- `lab-platform.png`: plataforma metalica com borda ciano de leitura de ledge.
+- `lab-hazard-spikes.png`: perigo de espinhos vermelhos sobre base escura.
+- `lab-background-panel.png`: painel escuro repetivel, mais escuro que gameplay.
 
-Todos foram gerados no projeto com `magick`, usam licenca original do projeto e
-estao registrados em `assets/ASSETS.md`.
+Todos sao gerados por `scripts/generate-environment-sprites.mjs`
+(`npm run assets:environment`), usam licenca original do projeto e estao
+registrados em `assets/ASSETS.md`. A geracao desenha pixel art nativa pela
+paleta semantica, sem upscale.
+
+## Camadas De Profundidade (Depth) E Leitura HD
+
+`DEPTH_LAYERS` em `src/game/systems/visual-readability.ts` e a fonte unica da
+ordem de desenho de todos os elementos. Da mais ao fundo para mais a frente:
+fundo, terreno, corpo de trap, alvos de energia, aura do jogador, itens e
+marcadores, rastro do jogador, corpo de boss/burst, jogador, efeitos de
+energia, vida de boss, hazards diretos e, por fim, projeteis.
+
+Regras de leitura que essa ordem garante:
+
+- Hazards e projeteis ficam ACIMA do jogador: ameacas nunca somem atras do
+  personagem.
+- Efeitos de energia ficam ABAIXO dos hazards e, combinados ao teto de alpha
+  (`clampWideEffectAlpha`), nao escondem perigos pequenos. Em HD, "hazard
+  pequeno" e qualquer ameaca com lado <= 1 tile (`smallHazardMaxSizePx = 32`).
+- O fundo permanece mais escuro que objetos de gameplay para preservar
+  contraste; cores semanticas mantem distancia minima entre papeis primarios
+  (`minPrimaryColorDistance`).
 
 ## Sprite Do Pino
 
@@ -79,7 +101,7 @@ Os objetos de gameplay do MVP agora usam sprites dedicados:
 - Bloco falso: `trap-false-block.png`, metal escuro com pista roxa discreta.
 - Plataforma que cai: `trap-falling-platform.png`, metal com borda ciano.
 - Piso quebravel: `trap-breakable-floor.png`, metal com rachaduras vermelhas.
-- Projetil: `trap-projectile.png`, losango roxo 8x8px.
+- Projetil: `trap-projectile.png`, losango roxo 16x16px (HD).
 - Itens: chip obrigatorio amarelo, chave coral e token opcional ciano/amarelo.
 - Checkpoint: versoes inativa e ativa para feedback imediato.
 - Saida de fase: coluna coral repetivel dentro da area de saida.

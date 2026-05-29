@@ -1,8 +1,10 @@
 import type { FacingDirection, Vector2Like } from "../../shared";
 import {
+  DEPTH_LAYERS,
   VISUAL_READABILITY_SEMANTIC_COLORS,
   clampWideEffectAlpha,
 } from "./visual-readability";
+import { scaleLegacyX, scaleLegacyY } from "../scale";
 
 export type PlayerEnergyMode =
   | "idle"
@@ -35,11 +37,11 @@ export type PlayerBurstParticle = {
 };
 
 export const PLAYER_EFFECT_DEPTHS = {
-  aura: 3,
-  trail: 5,
-  burst: 6,
-  sprite: 7,
-  energyShot: 8,
+  aura: DEPTH_LAYERS.playerAura,
+  trail: DEPTH_LAYERS.playerTrail,
+  burst: DEPTH_LAYERS.playerBurst,
+  sprite: DEPTH_LAYERS.player,
+  energyShot: DEPTH_LAYERS.energyEffect,
 } as const;
 
 export const PLAYER_DASH_TRAIL_INTERVAL_MS = 38;
@@ -50,15 +52,17 @@ const ENERGY_COLOR = VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary;
 const ENERGY_HOT_COLOR = VISUAL_READABILITY_SEMANTIC_COLORS.energy.charged;
 const IMPACT_COLOR = VISUAL_READABILITY_SEMANTIC_COLORS.energy.failure;
 const WHITE_COLOR = 0xf5f7fb;
+const sx = (value: number) => scaleLegacyX(value);
+const sy = (value: number) => scaleLegacyY(value);
 
 const AURA_BY_MODE = {
-  idle: { width: 17, height: 26, yOffset: -13, alpha: 0.09 },
-  run: { width: 20, height: 23, yOffset: -12, alpha: 0.14 },
-  jump: { width: 18, height: 33, yOffset: -17, alpha: 0.22 },
-  fall: { width: 21, height: 28, yOffset: -14, alpha: 0.16 },
-  dash: { width: 31, height: 18, yOffset: -13, alpha: 0.3 },
-  death: { width: 25, height: 19, yOffset: -10, alpha: 0.2 },
-  respawn: { width: 22, height: 34, yOffset: -16, alpha: 0.28 },
+  idle: { width: sx(17), height: sy(26), yOffset: -sy(13), alpha: 0.09 },
+  run: { width: sx(20), height: sy(23), yOffset: -sy(12), alpha: 0.14 },
+  jump: { width: sx(18), height: sy(33), yOffset: -sy(17), alpha: 0.22 },
+  fall: { width: sx(21), height: sy(28), yOffset: -sy(14), alpha: 0.16 },
+  dash: { width: sx(31), height: sy(18), yOffset: -sy(13), alpha: 0.3 },
+  death: { width: sx(25), height: sy(19), yOffset: -sy(10), alpha: 0.2 },
+  respawn: { width: sx(22), height: sy(34), yOffset: -sy(16), alpha: 0.28 },
 } as const satisfies Record<
   PlayerEnergyMode,
   {
@@ -125,9 +129,42 @@ export function createJumpBurstParticles(
   position: Vector2Like,
 ): readonly PlayerBurstParticle[] {
   return [
-    createBurstParticle(position, -7, 0, -12, 4, 6, 2, ENERGY_COLOR, 0.54, 180),
-    createBurstParticle(position, 0, 1, 0, 8, 5, 2, WHITE_COLOR, 0.5, 150),
-    createBurstParticle(position, 7, 0, 12, 4, 6, 2, ENERGY_COLOR, 0.54, 180),
+    createBurstParticle(
+      position,
+      -sx(7),
+      0,
+      -sx(12),
+      sy(4),
+      sx(6),
+      sy(2),
+      ENERGY_COLOR,
+      0.54,
+      180,
+    ),
+    createBurstParticle(
+      position,
+      0,
+      sy(1),
+      0,
+      sy(8),
+      sx(5),
+      sy(2),
+      WHITE_COLOR,
+      0.5,
+      150,
+    ),
+    createBurstParticle(
+      position,
+      sx(7),
+      0,
+      sx(12),
+      sy(4),
+      sx(6),
+      sy(2),
+      ENERGY_COLOR,
+      0.54,
+      180,
+    ),
   ];
 }
 
@@ -137,25 +174,36 @@ export function createLandingBurstParticles(
   return [
     createBurstParticle(
       position,
-      -8,
+      -sx(8),
       0,
-      -14,
-      3,
-      7,
-      2,
+      -sx(14),
+      sy(3),
+      sx(7),
+      sy(2),
       ENERGY_HOT_COLOR,
       0.42,
       160,
     ),
-    createBurstParticle(position, 0, 1, 0, 5, 6, 2, WHITE_COLOR, 0.32, 130),
     createBurstParticle(
       position,
-      8,
       0,
-      14,
-      3,
-      7,
-      2,
+      sy(1),
+      0,
+      sy(5),
+      sx(6),
+      sy(2),
+      WHITE_COLOR,
+      0.32,
+      130,
+    ),
+    createBurstParticle(
+      position,
+      sx(8),
+      0,
+      sx(14),
+      sy(3),
+      sx(7),
+      sy(2),
       ENERGY_HOT_COLOR,
       0.42,
       160,
@@ -171,12 +219,12 @@ export function createRunSparkParticle(
 
   return createBurstParticle(
     position,
-    direction * 8,
-    -2,
-    direction * 14,
-    -5,
-    4,
-    2,
+    direction * sx(8),
+    -sy(2),
+    direction * sx(14),
+    -sy(5),
+    sx(4),
+    sy(2),
     ENERGY_COLOR,
     0.38,
     170,
@@ -192,36 +240,36 @@ export function createInsufficientEnergyParticles(
   return [
     createBurstParticle(
       position,
-      direction * 11,
-      -15,
-      direction * 5,
-      -4,
-      4,
-      2,
+      direction * sx(11),
+      -sy(15),
+      direction * sx(5),
+      -sy(4),
+      sx(4),
+      sy(2),
       IMPACT_COLOR,
       0.68,
       130,
     ),
     createBurstParticle(
       position,
-      direction * 8,
-      -12,
-      -direction * 5,
-      1,
-      2,
-      2,
+      direction * sx(8),
+      -sy(12),
+      -direction * sx(5),
+      sy(1),
+      sx(2),
+      sy(2),
       WHITE_COLOR,
       0.46,
       110,
     ),
     createBurstParticle(
       position,
-      direction * 13,
-      -9,
-      direction * 3,
-      5,
-      5,
-      2,
+      direction * sx(13),
+      -sy(9),
+      direction * sx(3),
+      sy(5),
+      sx(5),
+      sy(2),
       ENERGY_HOT_COLOR,
       0.36,
       145,
@@ -238,36 +286,36 @@ export function createCyanBurstPreparationParticles(
   return [
     createBurstParticle(
       position,
-      direction * 10,
-      -15,
-      direction * 8,
-      -7,
-      5,
-      2,
+      direction * sx(10),
+      -sy(15),
+      direction * sx(8),
+      -sy(7),
+      sx(5),
+      sy(2),
       ENERGY_COLOR,
       0.64,
       190,
     ),
     createBurstParticle(
       position,
-      direction * 5,
-      -18,
-      direction * 2,
-      -10,
-      3,
-      3,
+      direction * sx(5),
+      -sy(18),
+      direction * sx(2),
+      -sy(10),
+      sx(3),
+      sy(3),
       WHITE_COLOR,
       0.52,
       170,
     ),
     createBurstParticle(
       position,
-      direction * 14,
-      -11,
-      direction * 9,
-      1,
-      6,
-      2,
+      direction * sx(14),
+      -sy(11),
+      direction * sx(9),
+      sy(1),
+      sx(6),
+      sy(2),
       ENERGY_HOT_COLOR,
       0.3,
       210,
@@ -279,8 +327,8 @@ export function getDashGhostOffset(facing: FacingDirection): Vector2Like {
   const direction = facing === "left" ? 1 : -1;
 
   return {
-    x: direction * 8,
-    y: -1,
+    x: direction * sx(8),
+    y: -sy(1),
   };
 }
 

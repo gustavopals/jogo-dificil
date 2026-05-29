@@ -1,4 +1,5 @@
 import { GAME_RESOLUTION } from "../constants";
+import { scaleLegacyY } from "../scale";
 
 export const PAUSE_OVERLAY_COPY = {
   title: "Pausado",
@@ -11,9 +12,11 @@ export const PAUSE_OVERLAY_LAYOUT = {
   height: GAME_RESOLUTION.height,
   centerX: GAME_RESOLUTION.width / 2,
   centerY: GAME_RESOLUTION.height / 2,
-  titleY: GAME_RESOLUTION.height / 2 - 18,
-  commandY: GAME_RESOLUTION.height / 2 + 10,
-  muteY: GAME_RESOLUTION.height / 2 + 28,
+  cardWidth: scaleLegacyY(186),
+  cardHeight: scaleLegacyY(72),
+  titleY: GAME_RESOLUTION.height / 2 - scaleLegacyY(14),
+  commandY: GAME_RESOLUTION.height / 2 + scaleLegacyY(6),
+  muteY: GAME_RESOLUTION.height / 2 + scaleLegacyY(20),
 } as const;
 
 export const PAUSE_OVERLAY_STYLE = {

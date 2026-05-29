@@ -3,6 +3,7 @@ import {
   PLACEHOLDER_LEVEL_TILESET_ASSET_KEYS,
   PLACEHOLDER_TILESET_ASSET_KEYS,
 } from "../art";
+import { BOSS_SPRITESHEET_KEYS } from "../characters/boss-spritesheet-registry";
 import { defineLevel } from "./schema";
 
 const TILE_SIZE_PX = 16;
@@ -18,7 +19,7 @@ const GIGA_FABIO_SPAWN_Y = FLOOR_Y - 31;
 const GIGA_FABIO_HEALTH = 4;
 const GIGA_FABIO_RECOVER_MS = 950;
 const SOLID_TILESET_ID = PLACEHOLDER_TILESET_ASSET_KEYS.SOLID_BLOCK;
-const GIGA_FABIO_SPRITE_ID = GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO;
+const GIGA_FABIO_SPRITE_ID = BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512;
 const GIGA_FABIO_BOULDER_PROJECTILE_SPRITE_ID =
   GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_BOULDER;
 const GIGA_FABIO_IMPACT_SPRITE_ID = GAMEPLAY_SPRITE_KEYS.BOSS_IMPACT_BURST;
@@ -47,6 +48,7 @@ export const LEVEL_10 = defineLevel({
       width: TILE_SIZE_PX,
       height: TILE_SIZE_PX * 3,
     },
+    nextLevelId: "level-11",
   },
   checkpoints: [
     {

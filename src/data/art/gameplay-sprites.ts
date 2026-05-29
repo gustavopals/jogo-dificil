@@ -46,27 +46,15 @@ const TILE_SPRITE_SIZE = {
   width: TILE_SIZE,
   height: TILE_SIZE,
 } as const;
+// Fase 18: projeteis pequenos migraram de 8px para 16px nativos para leitura
+// crisp em HD (tile 32), mantendo a grade de pixel art em multiplos de 8.
 const PROJECTILE_SPRITE_SIZE = {
-  width: 8,
-  height: 8,
+  width: 16,
+  height: 16,
 } as const;
 const ENERGY_EFFECT_SPRITE_SIZE = {
   width: TILE_SIZE,
   height: TILE_SIZE,
-} as const;
-const BOSS_SPRITE_SIZES = {
-  HIROLITO_NARGUILITO: {
-    width: 48,
-    height: 56,
-  },
-  DR_IMPORTS: {
-    width: 48,
-    height: 64,
-  },
-  GIGA_FABIO: {
-    width: 64,
-    height: 80,
-  },
 } as const;
 const BOSS_PROJECTILE_SPRITE_SIZES = {
   SMOKE_PUFF: {
@@ -214,33 +202,6 @@ export const GAMEPLAY_SPRITE_ASSETS = [
     path: "assets/sprites/marker-exit.png",
     sizePx: TILE_SPRITE_SIZE,
     description: "Saida de fase coral com painel vertical claro.",
-    origin: "Gerado no projeto com magick",
-    license: "Original do projeto",
-  },
-  {
-    key: GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO,
-    path: "assets/sprites/bosses/hirolito-narguilito.png",
-    sizePx: BOSS_SPRITE_SIZES.HIROLITO_NARGUILITO,
-    description:
-      "Placeholder do Hirolito Narguilito com corpo de narguile e cristal ciano.",
-    origin: "Gerado no projeto com magick",
-    license: "Original do projeto",
-  },
-  {
-    key: GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS,
-    path: "assets/sprites/bosses/dr-imports.png",
-    sizePx: BOSS_SPRITE_SIZES.DR_IMPORTS,
-    description:
-      "Placeholder do Dr. Imports com casaco escuro, maleta e fumaca roxa.",
-    origin: "Gerado no projeto com magick",
-    license: "Original do projeto",
-  },
-  {
-    key: GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO,
-    path: "assets/sprites/bosses/giga-fabio.png",
-    sizePx: BOSS_SPRITE_SIZES.GIGA_FABIO,
-    description:
-      "Placeholder do Giga Fabio com silhueta grande, punhos dourados e nucleo ciano.",
     origin: "Gerado no projeto com magick",
     license: "Original do projeto",
   },

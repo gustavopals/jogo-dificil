@@ -80,6 +80,18 @@ Ler snapshot de QA:
 window.__JOGO_DIFICIL_QA__.readSnapshot();
 ```
 
+Ler contrato de escala HD (resolucao, tile, fisica e hitbox do Pino):
+
+```js
+window.__JOGO_DIFICIL_QA__.readScaleInfo();
+```
+
+Ler hitbox world do jogador na fase atual:
+
+```js
+window.__JOGO_DIFICIL_QA__.readPlayerHitbox();
+```
+
 ## Snapshot
 
 O snapshot inclui:
@@ -90,8 +102,16 @@ O snapshot inclui:
 - mortes acumuladas;
 - ultima morte conhecida, com causa e fonte quando existir;
 - estado do jogador;
+- hitbox local/world do jogador quando a fase esta ativa;
 - estado de traps, projeteis, itens, objetos interativos e alvos de energia da
   fase.
+
+Hooks adicionais da migracao HD (Task 18.10):
+
+- `readScaleInfo()` retorna resolucao 960x540, tile 32, `worldPhysicsScale`,
+  tamanho visual/hitbox do Pino e margens de colisao.
+- `readPlayerHitbox()` retorna a hitbox world atual do Arcade body quando a
+  `LevelScene` esta ativa.
 
 ## Uso Recomendado
 
@@ -105,3 +125,5 @@ O snapshot inclui:
   `clearEnergyCooldowns()` antes do trecho alvo.
 - Para smoke tests, preferir os helpers de QA a cliques longos quando o objetivo
   for apenas posicionar o jogo em um estado conhecido.
+- Para validar migracao HD, usar `readScaleInfo()` e `readPlayerHitbox()` junto
+  com o checklist em `docs/hd-migration-qa-checklist.md`.

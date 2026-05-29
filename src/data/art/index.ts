@@ -19,3 +19,16 @@ export {
   type GameplaySpriteAssetDefinition,
   type GameplaySpriteKey,
 } from "./gameplay-sprites";
+export {
+  LEGACY_BOSS_BODY_SPRITE_ASSETS,
+  type LegacyCharacterSpriteAssetDefinition,
+} from "./legacy-character-sprites";
+export {
+  SPRITESHEET_ALLOWED_SHEET_SIZES_PX,
+  SPRITESHEET_CELL_SIZE_PX,
+  SPRITESHEET_GRID_BY_SIZE,
+  isValidSpritesheetFrameSize,
+  type SpritesheetAssetDefinition,
+  type SpritesheetPurpose,
+  type SpritesheetSheetSizePx,
+} from "./spritesheet-conventions";

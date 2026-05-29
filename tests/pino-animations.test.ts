@@ -1,17 +1,69 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  ACTIVE_PINO_FRAME_SOURCE_MODE,
   PINO_ANIMATION_STATES,
   PINO_ANIMATIONS,
+  PINO_FRAME_SOURCE_MODES,
   PINO_HITBOX_SIZE_PX,
   PINO_POWER_ANIMATION_MODES,
   PINO_SPRITE_ASSETS,
   PINO_SPRITE_SIZE_PX,
   PINO_TEXTURE_KEYS,
+  resolveInitialPinoSpriteFrame,
+  resolvePinoSpriteFrame,
+  getPinoVisualDisplaySize,
   selectPinoAnimationState,
 } from "../src/data/characters/pino-animations";
-import { PLAYER_SIZE } from "../src/game/constants";
+import {
+  PINO_ANIMATION_FRAME_REGISTRY,
+  PINO_FRAME_IDS,
+  PINO_SPRITESHEET_FRAME_REGISTRY,
+} from "../src/data/characters/pino-spritesheet-registry";
+import { PLAYER_SIZE, TILE_SIZE_PX } from "../src/game/constants";
 import { IMAGE_ASSETS } from "../src/game/assets";
+
+function getExpectedAnimationFrames(
+  frameIds: readonly (typeof PINO_FRAME_IDS)[keyof typeof PINO_FRAME_IDS][],
+) {
+  if (ACTIVE_PINO_FRAME_SOURCE_MODE === PINO_FRAME_SOURCE_MODES.SPRITESHEETS) {
+    return frameIds.map((frameId) => {
+      const frame = PINO_SPRITESHEET_FRAME_REGISTRY[frameId];
+
+      return {
+        textureKey: frame.textureKey,
+        frame: frame.frame,
+      };
+    });
+  }
+
+  const legacyMap = {
+    [PINO_FRAME_IDS.IDLE]: PINO_TEXTURE_KEYS.IDLE,
+    [PINO_FRAME_IDS.RUN_01]: PINO_TEXTURE_KEYS.RUN_01,
+    [PINO_FRAME_IDS.RUN_02]: PINO_TEXTURE_KEYS.RUN_02,
+    [PINO_FRAME_IDS.RUN_03]: PINO_TEXTURE_KEYS.RUN_03,
+    [PINO_FRAME_IDS.JUMP]: PINO_TEXTURE_KEYS.JUMP,
+    [PINO_FRAME_IDS.JUMP_PEAK]: PINO_TEXTURE_KEYS.JUMP_PEAK,
+    [PINO_FRAME_IDS.FALL]: PINO_TEXTURE_KEYS.FALL,
+    [PINO_FRAME_IDS.DASH]: PINO_TEXTURE_KEYS.DASH,
+    [PINO_FRAME_IDS.CHARGE_01]: PINO_TEXTURE_KEYS.CHARGE_01,
+    [PINO_FRAME_IDS.CHARGE_02]: PINO_TEXTURE_KEYS.CHARGE_02,
+    [PINO_FRAME_IDS.CYAN_SPARK_01]: PINO_TEXTURE_KEYS.CYAN_SPARK_01,
+    [PINO_FRAME_IDS.CYAN_SPARK_02]: PINO_TEXTURE_KEYS.CYAN_SPARK_02,
+    [PINO_FRAME_IDS.CYAN_BURST_PREPARE_01]: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_01,
+    [PINO_FRAME_IDS.CYAN_BURST_PREPARE_02]: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_02,
+    [PINO_FRAME_IDS.CYAN_BURST_FIRE_01]: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_01,
+    [PINO_FRAME_IDS.CYAN_BURST_FIRE_02]: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_02,
+    [PINO_FRAME_IDS.DEATH_01]: PINO_TEXTURE_KEYS.DEATH_01,
+    [PINO_FRAME_IDS.DEATH_02]: PINO_TEXTURE_KEYS.DEATH_02,
+    [PINO_FRAME_IDS.RESPAWN_01]: PINO_TEXTURE_KEYS.RESPAWN_01,
+    [PINO_FRAME_IDS.RESPAWN_02]: PINO_TEXTURE_KEYS.RESPAWN_02,
+  } as const;
+
+  return frameIds.map((frameId) => ({
+    textureKey: legacyMap[frameId],
+  }));
+}
 
 describe("pino animations", () => {
   it("defines every animation expected for the player", () => {
@@ -36,57 +88,24 @@ describe("pino animations", () => {
       PINO_ANIMATIONS.map((animation) => [animation.state, animation]),
     );
 
-    expect(animationsByState[PINO_ANIMATION_STATES.IDLE]?.frames).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.IDLE,
-      },
-    ]);
-    expect(animationsByState[PINO_ANIMATION_STATES.RUN]?.frames).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.RUN_01,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.RUN_02,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.RUN_03,
-      },
-    ]);
-    expect(animationsByState[PINO_ANIMATION_STATES.JUMP]?.frames).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.JUMP,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.JUMP_PEAK,
-      },
-    ]);
-    expect(animationsByState[PINO_ANIMATION_STATES.FALL]?.frames).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.JUMP_PEAK,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.FALL,
-      },
-    ]);
-    expect(animationsByState[PINO_ANIMATION_STATES.DEATH]?.frames).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.DEATH_01,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.DEATH_02,
-      },
-    ]);
-    expect(animationsByState[PINO_ANIMATION_STATES.RESPAWN]?.frames).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.RESPAWN_01,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.RESPAWN_02,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.IDLE,
-      },
-    ]);
+    expect(animationsByState[PINO_ANIMATION_STATES.IDLE]?.frames).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY.idle),
+    );
+    expect(animationsByState[PINO_ANIMATION_STATES.RUN]?.frames).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY.run),
+    );
+    expect(animationsByState[PINO_ANIMATION_STATES.JUMP]?.frames).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY.jump),
+    );
+    expect(animationsByState[PINO_ANIMATION_STATES.FALL]?.frames).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY.fall),
+    );
+    expect(animationsByState[PINO_ANIMATION_STATES.DEATH]?.frames).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY.death),
+    );
+    expect(animationsByState[PINO_ANIMATION_STATES.RESPAWN]?.frames).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY.respawn),
+    );
 
     [
       PINO_ANIMATION_STATES.IDLE,
@@ -105,14 +124,40 @@ describe("pino animations", () => {
     });
     expect(
       animationsByState[PINO_ANIMATION_STATES.PRIMARY_ACTION]?.frames,
-    ).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.DASH,
-      },
-    ]);
+    ).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY["primary-action"]),
+    );
     expect(
       animationsByState[PINO_ANIMATION_STATES.SECONDARY_ACTION]?.isPlaceholder,
     ).toBe(true);
+  });
+
+  it("resolves menu and player sprite frames from the active Pino source mode", () => {
+    const idleFrame = resolvePinoSpriteFrame(PINO_FRAME_IDS.IDLE);
+    const initialFrame = resolveInitialPinoSpriteFrame();
+
+    expect(initialFrame).toEqual(idleFrame);
+
+    if (ACTIVE_PINO_FRAME_SOURCE_MODE === PINO_FRAME_SOURCE_MODES.SPRITESHEETS) {
+      expect(idleFrame.textureKey).toBe(
+        PINO_SPRITESHEET_FRAME_REGISTRY[PINO_FRAME_IDS.IDLE].textureKey,
+      );
+      expect(idleFrame.frame).toBe(
+        PINO_SPRITESHEET_FRAME_REGISTRY[PINO_FRAME_IDS.IDLE].frame,
+      );
+      expect(idleFrame.textureKey).not.toBe(PINO_TEXTURE_KEYS.IDLE);
+    } else {
+      expect(idleFrame).toEqual({
+        textureKey: PINO_TEXTURE_KEYS.IDLE,
+      });
+    }
+  });
+
+  it("maps spritesheet frames to the official HD runtime display size", () => {
+    expect(getPinoVisualDisplaySize()).toEqual({
+      width: PLAYER_SIZE.visualWidth,
+      height: PLAYER_SIZE.visualHeight,
+    });
   });
 
   it("registers Energia Ciano animation data with dedicated Pino frames", () => {
@@ -122,44 +167,22 @@ describe("pino animations", () => {
 
     expect(
       animationsByState[PINO_ANIMATION_STATES.CYAN_CHARGE]?.frames,
-    ).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.CHARGE_01,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.CHARGE_02,
-      },
-    ]);
+    ).toEqual(getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY["cyan-charge"]));
     expect(animationsByState[PINO_ANIMATION_STATES.CYAN_SPARK]?.frames).toEqual(
-      [
-        {
-          textureKey: PINO_TEXTURE_KEYS.CYAN_SPARK_01,
-        },
-        {
-          textureKey: PINO_TEXTURE_KEYS.CYAN_SPARK_02,
-        },
-      ],
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY["cyan-spark"]),
     );
     expect(
       animationsByState[PINO_ANIMATION_STATES.CYAN_BURST_PREPARE]?.frames,
-    ).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_01,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.CYAN_BURST_PREPARE_02,
-      },
-    ]);
+    ).toEqual(
+      getExpectedAnimationFrames(
+        PINO_ANIMATION_FRAME_REGISTRY["cyan-burst-prepare"],
+      ),
+    );
     expect(
       animationsByState[PINO_ANIMATION_STATES.CYAN_BURST_FIRE]?.frames,
-    ).toEqual([
-      {
-        textureKey: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_01,
-      },
-      {
-        textureKey: PINO_TEXTURE_KEYS.CYAN_BURST_FIRE_02,
-      },
-    ]);
+    ).toEqual(
+      getExpectedAnimationFrames(PINO_ANIMATION_FRAME_REGISTRY["cyan-burst-fire"]),
+    );
   });
 
   it("registers every Pino sprite at the gameplay sprite size", () => {
@@ -172,7 +195,7 @@ describe("pino animations", () => {
     );
 
     PINO_SPRITE_ASSETS.forEach((asset) => {
-      expect(asset.path).toMatch(/^assets\/sprites\/player-pino-.+\.png$/);
+      expect(asset.path).toMatch(/^assets\/legacy\/pino\/player-pino-.+\.png$/);
       expect(asset.sizePx).toEqual(PINO_SPRITE_SIZE_PX);
       expect(asset.origin).toBe("Gerado no projeto por script");
       expect(asset.license).toBe("Original do projeto");
@@ -180,7 +203,7 @@ describe("pino animations", () => {
     });
   });
 
-  it("keeps all Pino animations on the 10x22 collision hitbox", () => {
+  it("keeps all Pino animations on the configured runtime collision hitbox", () => {
     expect(PINO_HITBOX_SIZE_PX).toEqual({
       width: PLAYER_SIZE.hitboxWidth,
       height: PLAYER_SIZE.hitboxHeight,
@@ -188,10 +211,21 @@ describe("pino animations", () => {
 
     PINO_ANIMATIONS.forEach((animation) => {
       expect(animation.hitboxPx).toEqual({
-        width: 10,
-        height: 22,
+        width: PLAYER_SIZE.hitboxWidth,
+        height: PLAYER_SIZE.hitboxHeight,
       });
     });
+  });
+
+  it("keeps Pino readable at HD 1x with Stardew-inspired tile ratio", () => {
+    expect(PLAYER_SIZE.visualWidth).toBeGreaterThanOrEqual(28);
+    expect(PLAYER_SIZE.visualWidth).toBeLessThanOrEqual(36);
+    expect(PLAYER_SIZE.visualHeight).toBeGreaterThanOrEqual(44);
+    expect(PLAYER_SIZE.visualHeight).toBeLessThanOrEqual(64);
+    expect(PLAYER_SIZE.hitboxWidth).toBeLessThan(PLAYER_SIZE.visualWidth);
+    expect(PLAYER_SIZE.hitboxHeight).toBeLessThan(PLAYER_SIZE.visualHeight);
+    expect(PLAYER_SIZE.visualWidth / TILE_SIZE_PX).toBeCloseTo(1, 5);
+    expect(PLAYER_SIZE.visualHeight / TILE_SIZE_PX).toBeCloseTo(1.5, 5);
   });
 
   it("defines dedicated Carga Ciano sprite frames for Pino", () => {
@@ -202,8 +236,8 @@ describe("pino animations", () => {
     );
 
     expect(chargeAssets.map((asset) => asset.path)).toEqual([
-      "assets/sprites/player-pino-charge-01.png",
-      "assets/sprites/player-pino-charge-02.png",
+      "assets/legacy/pino/player-pino-charge-01.png",
+      "assets/legacy/pino/player-pino-charge-02.png",
     ]);
     chargeAssets.forEach((asset) => {
       expect(asset.sizePx).toEqual(PINO_SPRITE_SIZE_PX);
@@ -219,8 +253,8 @@ describe("pino animations", () => {
     );
 
     expect(cyanSparkAssets.map((asset) => asset.path)).toEqual([
-      "assets/sprites/player-pino-cyan-spark-01.png",
-      "assets/sprites/player-pino-cyan-spark-02.png",
+      "assets/legacy/pino/player-pino-cyan-spark-01.png",
+      "assets/legacy/pino/player-pino-cyan-spark-02.png",
     ]);
     cyanSparkAssets.forEach((asset) => {
       expect(asset.sizePx).toEqual(PINO_SPRITE_SIZE_PX);
@@ -238,10 +272,10 @@ describe("pino animations", () => {
     );
 
     expect(cyanBurstAssets.map((asset) => asset.path)).toEqual([
-      "assets/sprites/player-pino-cyan-burst-prepare-01.png",
-      "assets/sprites/player-pino-cyan-burst-prepare-02.png",
-      "assets/sprites/player-pino-cyan-burst-fire-01.png",
-      "assets/sprites/player-pino-cyan-burst-fire-02.png",
+      "assets/legacy/pino/player-pino-cyan-burst-prepare-01.png",
+      "assets/legacy/pino/player-pino-cyan-burst-prepare-02.png",
+      "assets/legacy/pino/player-pino-cyan-burst-fire-01.png",
+      "assets/legacy/pino/player-pino-cyan-burst-fire-02.png",
     ]);
     cyanBurstAssets.forEach((asset) => {
       expect(asset.sizePx).toEqual(PINO_SPRITE_SIZE_PX);
@@ -249,11 +283,11 @@ describe("pino animations", () => {
     });
   });
 
-  it("preloads every Pino sprite asset key", () => {
+  it("does not preload legacy Pino PNGs in the production runtime registry", () => {
     const imageAssetKeys = IMAGE_ASSETS.map((asset) => asset.key);
 
     PINO_SPRITE_ASSETS.forEach((asset) => {
-      expect(imageAssetKeys).toContain(asset.key);
+      expect(imageAssetKeys).not.toContain(asset.key);
     });
   });
 

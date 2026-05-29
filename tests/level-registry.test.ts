@@ -72,6 +72,11 @@ describe("level registry", () => {
       {
         id: "level-10",
         order: 10,
+        nextLevelId: "level-11",
+      },
+      {
+        id: "level-11",
+        order: 11,
         nextLevelId: undefined,
       },
     ]);

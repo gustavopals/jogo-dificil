@@ -320,7 +320,7 @@ describe("level bosses", () => {
       healthRemaining: 0,
     } as const;
 
-    expect(getBossTextureKey(BOSS)).toBe("boss-hirolito-narguilito");
+    expect(getBossTextureKey(BOSS)).toBe("boss-hirolito-sheet-512");
     expect(
       getBossTextureKey({
         ...BOSS,

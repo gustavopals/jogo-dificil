@@ -47,6 +47,7 @@ export type {
   LevelAssetId,
   LevelAssetsDefinition,
   LevelAudioDefinition,
+  LevelContentKind,
   LevelDefinition,
   LevelId,
   TrapConfig,

@@ -1,4 +1,5 @@
 import type { FacingDirection, RectLike, Vector2Like } from "../../shared";
+import { WORLD_PHYSICS_SCALE } from "../constants";
 
 export type CyanSparkProjectileDirection = -1 | 1;
 
@@ -104,9 +105,16 @@ export type UpdateCyanSparkProjectilesResult = {
   readonly impacts: readonly CyanSparkProjectileImpact[];
 };
 
+// Fase 18: velocidade (px/s) e alcance (px) escalam com o mundo HD (2x) para
+// que a centelha/rajada percorram a mesma fracao da tela em tiles que no
+// baseline (Task 18.8). A colisao da Centelha (hitbox e offset de spawn)
+// permanece na geometria validada em 18.8; o que cresce em 18.9 e o sprite
+// visual da centelha (renderizado em 16px). Ja a Rajada Ciano teve a faixa
+// (altura e offsets de origem) escalada 2x para nao virar um fio fino demais
+// na resolucao HD, mantendo leitura do feixe.
 export const DEFAULT_CYAN_SPARK_PROJECTILE_CONFIG = {
-  speed: 420,
-  maxRange: 128,
+  speed: 420 * WORLD_PHYSICS_SCALE,
+  maxRange: 128 * WORLD_PHYSICS_SCALE,
   hitboxWidth: 8,
   hitboxHeight: 5,
   spawnOffsetX: 12,
@@ -114,10 +122,10 @@ export const DEFAULT_CYAN_SPARK_PROJECTILE_CONFIG = {
 } as const satisfies CyanSparkProjectileConfig;
 
 export const DEFAULT_CYAN_BURST_BEAM_CONFIG = {
-  range: 192,
-  height: 12,
-  originOffsetX: 10,
-  originOffsetY: -14,
+  range: 192 * WORLD_PHYSICS_SCALE,
+  height: 12 * WORLD_PHYSICS_SCALE,
+  originOffsetX: 10 * WORLD_PHYSICS_SCALE,
+  originOffsetY: -14 * WORLD_PHYSICS_SCALE,
 } as const satisfies CyanBurstBeamConfig;
 
 export const CYAN_SPARK_MAX_ACTIVE_PROJECTILES = 2;

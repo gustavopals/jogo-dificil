@@ -8,9 +8,13 @@ import type {
   CheckpointId,
   LevelDefinition,
   LevelId,
+  RectLike,
   Vector2Like,
 } from "../../shared";
 import { SCENE_KEYS } from "../scenes/scene-keys";
+import { getDevQaScaleSnapshot, type DevQaScaleSnapshot } from "./dev-qa-scale";
+export type { DevQaScaleSnapshot } from "./dev-qa-scale";
+export { getDevQaScaleSnapshot } from "./dev-qa-scale";
 import { GAME_EVENTS, onGameEvent, type PlayerDiedEvent } from "./game-events";
 import { gameStateStore, type GameStateSnapshot } from "./game-state";
 import {
@@ -42,6 +46,8 @@ export type DevQaPlayerSnapshot = {
   readonly animationState: string;
   readonly energy: number;
   readonly energyActivity: string;
+  readonly hitboxLocal: RectLike;
+  readonly hitboxWorld: RectLike;
 };
 
 export type DevQaEnergyStateSnapshot = {
@@ -109,6 +115,8 @@ export type DevQaApi = {
   readonly levels: readonly LevelId[];
   readonly bosses: readonly DevQaBossEntry[];
   readonly readSnapshot: () => DevQaSnapshot;
+  readonly readScaleInfo: () => DevQaScaleSnapshot;
+  readonly readPlayerHitbox: () => RectLike | null;
   readonly startLevel: (levelId: LevelId) => DevQaCommandResult;
   readonly startBoss: (bossId: BossId) => DevQaCommandResult;
   readonly goToCheckpoint: (checkpointId?: CheckpointId) => DevQaCommandResult;
@@ -131,6 +139,7 @@ type DevQaScene = Phaser.Scene & {
   readonly fillDevQaEnergy?: () => boolean;
   readonly clearDevQaEnergyCooldowns?: () => boolean;
   readonly readDevQaEnergyState?: () => DevQaEnergyStateSnapshot | null;
+  readonly readDevQaPlayerHitbox?: () => RectLike | null;
 };
 
 export function getDevQaLevelIds(): readonly LevelId[] {
@@ -164,6 +173,12 @@ export function installDevQaTools(
     levels: getDevQaLevelIds(),
     bosses: getDevQaBossEntries(),
     readSnapshot,
+    readScaleInfo: getDevQaScaleSnapshot,
+    readPlayerHitbox: () => {
+      const levelScene = getDevQaLevelScene(game);
+
+      return levelScene?.readDevQaPlayerHitbox?.() ?? null;
+    },
     startLevel: (levelId) => {
       if (!isKnownDevQaLevelId(levelId)) {
         return createCommandFailure(

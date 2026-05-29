@@ -1,5 +1,11 @@
+import {
+  assertNoDuplicateCharacterAssetPreload,
+  selectRuntimeImageAssets,
+} from "./asset-load-policy";
 import mvpLevelCompleteStingUrl from "../../assets/audio/music/mvp-level-complete-sting.wav";
 import mvpLoopUrl from "../../assets/audio/music/mvp-loop.wav";
+import block2DashLoopUrl from "../../assets/audio/music/block-2-dash-loop.wav";
+import block3EnergyLoopUrl from "../../assets/audio/music/block-3-energy-loop.wav";
 import menuLoopUrl from "../../assets/audio/music/menu-loop.wav";
 import bossAttackUrl from "../../assets/audio/sfx/boss-attack.wav";
 import bossDefeatUrl from "../../assets/audio/sfx/boss-defeat.wav";
@@ -28,29 +34,6 @@ import playerLandUrl from "../../assets/audio/sfx/player-land.wav";
 import playerPrimaryUrl from "../../assets/audio/sfx/player-primary.wav";
 import playerRespawnUrl from "../../assets/audio/sfx/player-respawn.wav";
 import playerSecondaryUrl from "../../assets/audio/sfx/player-secondary.wav";
-import playerPinoDeath01Url from "../../assets/sprites/player-pino-death-01.png";
-import playerPinoDeath02Url from "../../assets/sprites/player-pino-death-02.png";
-import playerPinoCharge01Url from "../../assets/sprites/player-pino-charge-01.png";
-import playerPinoCharge02Url from "../../assets/sprites/player-pino-charge-02.png";
-import playerPinoCyanBurstFire01Url from "../../assets/sprites/player-pino-cyan-burst-fire-01.png";
-import playerPinoCyanBurstFire02Url from "../../assets/sprites/player-pino-cyan-burst-fire-02.png";
-import playerPinoCyanBurstPrepare01Url from "../../assets/sprites/player-pino-cyan-burst-prepare-01.png";
-import playerPinoCyanBurstPrepare02Url from "../../assets/sprites/player-pino-cyan-burst-prepare-02.png";
-import playerPinoCyanSpark01Url from "../../assets/sprites/player-pino-cyan-spark-01.png";
-import playerPinoCyanSpark02Url from "../../assets/sprites/player-pino-cyan-spark-02.png";
-import playerPinoDashUrl from "../../assets/sprites/player-pino-dash.png";
-import playerPinoFallUrl from "../../assets/sprites/player-pino-fall.png";
-import playerPinoIdleUrl from "../../assets/sprites/player-pino-idle.png";
-import playerPinoJumpUrl from "../../assets/sprites/player-pino-jump.png";
-import playerPinoJumpPeakUrl from "../../assets/sprites/player-pino-jump-peak.png";
-import playerPinoRespawn01Url from "../../assets/sprites/player-pino-respawn-01.png";
-import playerPinoRespawn02Url from "../../assets/sprites/player-pino-respawn-02.png";
-import playerPinoRun01Url from "../../assets/sprites/player-pino-run-01.png";
-import playerPinoRun02Url from "../../assets/sprites/player-pino-run-02.png";
-import playerPinoRun03Url from "../../assets/sprites/player-pino-run-03.png";
-import bossDrImportsUrl from "../../assets/sprites/bosses/dr-imports.png";
-import bossGigaFabioUrl from "../../assets/sprites/bosses/giga-fabio.png";
-import bossHirolitoNarguilitoUrl from "../../assets/sprites/bosses/hirolito-narguilito.png";
 import bossImpactBurstUrl from "../../assets/sprites/bosses/boss-impact-burst.png";
 import bossProjectileBoulderUrl from "../../assets/sprites/bosses/boss-projectile-boulder.png";
 import bossProjectileImportBottleUrl from "../../assets/sprites/bosses/boss-projectile-import-bottle.png";
@@ -71,6 +54,11 @@ import trapFallingPlatformUrl from "../../assets/sprites/trap-falling-platform.p
 import trapFalseBlockUrl from "../../assets/sprites/trap-false-block.png";
 import trapProjectileUrl from "../../assets/sprites/trap-projectile.png";
 import trapSpikesUrl from "../../assets/sprites/trap-spikes.png";
+import bossDrImportsSheet512Url from "../../assets/spritesheets/boss-dr-imports-sheet-512.png";
+import bossGigaFabioSheet512Url from "../../assets/spritesheets/boss-giga-fabio-sheet-512.png";
+import bossHirolitoSheet512Url from "../../assets/spritesheets/boss-hirolito-sheet-512.png";
+import playerPinoCoreSheet512Url from "../../assets/spritesheets/player-pino-core-512.png";
+import playerPinoEnergySheet512Url from "../../assets/spritesheets/player-pino-energy-512.png";
 import labBackgroundPanelUrl from "../../assets/tilesets/lab-background-panel.png";
 import labHazardSpikesUrl from "../../assets/tilesets/lab-hazard-spikes.png";
 import labPlatformUrl from "../../assets/tilesets/lab-platform.png";
@@ -85,8 +73,21 @@ import {
 import {
   GAMEPLAY_SPRITE_KEYS,
   PLACEHOLDER_TILESET_ASSET_KEYS,
+  SPRITESHEET_CELL_SIZE_PX,
+  isValidSpritesheetFrameSize,
 } from "../data/art";
-import { PINO_TEXTURE_KEYS } from "../data/characters/pino-animations";
+import {
+  PINO_TEXTURE_KEYS,
+  type PinoTextureKey,
+} from "../data/characters/pino-animations";
+import {
+  BOSS_SPRITESHEET_ASSETS,
+  BOSS_SPRITESHEET_KEYS,
+} from "../data/characters/boss-spritesheet-registry";
+import {
+  PINO_SPRITESHEET_ASSETS,
+  PINO_SPRITESHEET_KEYS,
+} from "../data/characters/pino-spritesheet-registry";
 
 export const ASSET_KEYS = {
   PLAYER_PINO_IDLE: PINO_TEXTURE_KEYS.IDLE,
@@ -109,6 +110,11 @@ export const ASSET_KEYS = {
   PLAYER_PINO_DEATH_02: PINO_TEXTURE_KEYS.DEATH_02,
   PLAYER_PINO_RESPAWN_01: PINO_TEXTURE_KEYS.RESPAWN_01,
   PLAYER_PINO_RESPAWN_02: PINO_TEXTURE_KEYS.RESPAWN_02,
+  PLAYER_PINO_CORE_SHEET_512: PINO_SPRITESHEET_KEYS.CORE_512,
+  PLAYER_PINO_ENERGY_SHEET_512: PINO_SPRITESHEET_KEYS.ENERGY_512,
+  BOSS_HIROLITO_SHEET_512: BOSS_SPRITESHEET_KEYS.HIROLITO_512,
+  BOSS_DR_IMPORTS_SHEET_512: BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512,
+  BOSS_GIGA_FABIO_SHEET_512: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
   TRAP_SPIKES: GAMEPLAY_SPRITE_KEYS.TRAP_SPIKES,
   TRAP_FALSE_BLOCK: GAMEPLAY_SPRITE_KEYS.TRAP_FALSE_BLOCK,
   TRAP_FALLING_PLATFORM: GAMEPLAY_SPRITE_KEYS.TRAP_FALLING_PLATFORM,
@@ -140,87 +146,12 @@ export const ASSET_KEYS = {
   TILESET_LAB_BACKGROUND_PANEL: PLACEHOLDER_TILESET_ASSET_KEYS.BACKGROUND_PANEL,
 } as const;
 
-export const IMAGE_ASSETS = [
-  {
-    key: ASSET_KEYS.PLAYER_PINO_IDLE,
-    url: playerPinoIdleUrl,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_RUN_01,
-    url: playerPinoRun01Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_RUN_02,
-    url: playerPinoRun02Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_RUN_03,
-    url: playerPinoRun03Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_JUMP,
-    url: playerPinoJumpUrl,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_JUMP_PEAK,
-    url: playerPinoJumpPeakUrl,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_FALL,
-    url: playerPinoFallUrl,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_DASH,
-    url: playerPinoDashUrl,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CHARGE_01,
-    url: playerPinoCharge01Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CHARGE_02,
-    url: playerPinoCharge02Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CYAN_SPARK_01,
-    url: playerPinoCyanSpark01Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CYAN_SPARK_02,
-    url: playerPinoCyanSpark02Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CYAN_BURST_PREPARE_01,
-    url: playerPinoCyanBurstPrepare01Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CYAN_BURST_PREPARE_02,
-    url: playerPinoCyanBurstPrepare02Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CYAN_BURST_FIRE_01,
-    url: playerPinoCyanBurstFire01Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_CYAN_BURST_FIRE_02,
-    url: playerPinoCyanBurstFire02Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_DEATH_01,
-    url: playerPinoDeath01Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_DEATH_02,
-    url: playerPinoDeath02Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_RESPAWN_01,
-    url: playerPinoRespawn01Url,
-  },
-  {
-    key: ASSET_KEYS.PLAYER_PINO_RESPAWN_02,
-    url: playerPinoRespawn02Url,
-  },
+export type ImageAssetDefinition = {
+  readonly key: (typeof ASSET_KEYS)[keyof typeof ASSET_KEYS] | PinoTextureKey;
+  readonly url: string;
+};
+
+const RUNTIME_GAMEPLAY_IMAGE_ASSETS = [
   {
     key: ASSET_KEYS.TRAP_SPIKES,
     url: trapSpikesUrl,
@@ -286,18 +217,6 @@ export const IMAGE_ASSETS = [
     url: markerExitUrl,
   },
   {
-    key: ASSET_KEYS.BOSS_HIROLITO_NARGUILITO,
-    url: bossHirolitoNarguilitoUrl,
-  },
-  {
-    key: ASSET_KEYS.BOSS_DR_IMPORTS,
-    url: bossDrImportsUrl,
-  },
-  {
-    key: ASSET_KEYS.BOSS_GIGA_FABIO,
-    url: bossGigaFabioUrl,
-  },
-  {
     key: ASSET_KEYS.BOSS_PROJECTILE_SMOKE_PUFF,
     url: bossProjectileSmokePuffUrl,
   },
@@ -329,7 +248,57 @@ export const IMAGE_ASSETS = [
     key: ASSET_KEYS.TILESET_LAB_BACKGROUND_PANEL,
     url: labBackgroundPanelUrl,
   },
-] as const;
+] as const satisfies readonly ImageAssetDefinition[];
+
+export const IMAGE_ASSETS = [
+  ...RUNTIME_GAMEPLAY_IMAGE_ASSETS,
+] as const satisfies readonly ImageAssetDefinition[];
+
+export const RUNTIME_IMAGE_ASSETS = selectRuntimeImageAssets(
+  RUNTIME_GAMEPLAY_IMAGE_ASSETS,
+);
+
+assertNoDuplicateCharacterAssetPreload(RUNTIME_GAMEPLAY_IMAGE_ASSETS);
+
+export type SpritesheetAssetLoadDefinition = {
+  readonly key: (typeof ASSET_KEYS)[keyof typeof ASSET_KEYS];
+  readonly url: string;
+  readonly frameWidth: number;
+  readonly frameHeight: number;
+  readonly enabled: boolean;
+};
+
+export const SPRITESHEET_ASSETS: readonly SpritesheetAssetLoadDefinition[] =
+  [...PINO_SPRITESHEET_ASSETS, ...BOSS_SPRITESHEET_ASSETS].map((sheet) => ({
+    key: sheet.key,
+    url: resolveSpritesheetUrl(sheet.key),
+    frameWidth: sheet.frameWidth,
+    frameHeight: sheet.frameHeight,
+    enabled:
+      sheet.enabled &&
+      isValidSpritesheetFrameSize(sheet.frameWidth, sheet.frameHeight) &&
+      sheet.frameWidth === SPRITESHEET_CELL_SIZE_PX &&
+      sheet.frameHeight === SPRITESHEET_CELL_SIZE_PX,
+  }));
+
+function resolveSpritesheetUrl(
+  key: (typeof ASSET_KEYS)[keyof typeof ASSET_KEYS],
+): string {
+  switch (key) {
+    case PINO_SPRITESHEET_KEYS.CORE_512:
+      return playerPinoCoreSheet512Url;
+    case PINO_SPRITESHEET_KEYS.ENERGY_512:
+      return playerPinoEnergySheet512Url;
+    case BOSS_SPRITESHEET_KEYS.HIROLITO_512:
+      return bossHirolitoSheet512Url;
+    case BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512:
+      return bossDrImportsSheet512Url;
+    case BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512:
+      return bossGigaFabioSheet512Url;
+    default:
+      return playerPinoCoreSheet512Url;
+  }
+}
 
 export const AUDIO_ASSETS = [
   {
@@ -342,6 +311,14 @@ export const AUDIO_ASSETS = [
   },
   {
     key: MUSIC_AUDIO_DEFINITIONS[2].assetKey,
+    url: block2DashLoopUrl,
+  },
+  {
+    key: MUSIC_AUDIO_DEFINITIONS[3].assetKey,
+    url: block3EnergyLoopUrl,
+  },
+  {
+    key: MUSIC_AUDIO_DEFINITIONS[4].assetKey,
     url: mvpLevelCompleteStingUrl,
   },
   {

@@ -38,4 +38,15 @@ export default tseslint.config(
       sourceType: "module",
     },
   },
+  {
+    files: ["scripts/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      globals: globals.node,
+      sourceType: "module",
+    },
+    rules: {
+      "no-undef": "off",
+    },
+  },
 );

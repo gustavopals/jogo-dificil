@@ -1,9 +1,10 @@
 # jogo-dificil
 
 Jogo de plataforma 2D de navegador, dificil, rapido de reiniciar e baseado em
-surpresa, precisao, tentativa e erro. A versao atual tem 10 fases curtas,
-checkpoints, mortes rapidas, respawn automatico, reinicio manual, dash,
-armadilhas, itens, audio basico, resultados locais por fase e tela inicial.
+surpresa, precisao, tentativa e erro. A versao atual roda em **960x540** (pixel
+art HD), com 10 fases curtas, checkpoints, mortes rapidas, respawn automatico,
+reinicio manual, dash, energia ciano, tres bosses, armadilhas, itens, audio
+basico, resultados locais por fase e tela inicial.
 
 ## Stack
 
@@ -13,6 +14,13 @@ armadilhas, itens, audio basico, resultados locais por fase e tela inicial.
 - Vitest para testes unitarios de logica.
 - Playwright para smoke tests no navegador.
 - ESLint e Prettier para padrao de codigo.
+
+## Baseline Visual HD
+
+- Resolucao logica: **960x540**, tile **32x32**.
+- Pino e bosses: spritesheets `512x512` com celulas `128x128`.
+- Ambiente, traps e itens: pixel art nativa em `32x32` (projéteis pequenos em `16x16`).
+- Documento oficial: [`docs/hd-visual-standard.md`](docs/hd-visual-standard.md).
 
 ## Instalacao
 
@@ -73,6 +81,16 @@ Formate os arquivos:
 npm run format
 ```
 
+## Geracao De Assets HD
+
+```sh
+npm run assets:pino-sheets
+npm run assets:boss-sheets
+npm run assets:environment
+```
+
+Registro de origem e licenca: [`assets/ASSETS.md`](assets/ASSETS.md).
+
 ## Controles
 
 - `A` ou `Seta Esquerda`: andar para esquerda.
@@ -96,20 +114,22 @@ npm run format
 5. Use `R` para reiniciar manualmente do checkpoint sem contar morte.
 6. Ao concluir uma fase, a transicao mostra tempo, mortes da fase e recorde local.
 
+## QA Em Desenvolvimento
+
+Em modo dev, o jogo expoe `window.__JOGO_DIFICIL_QA__` para iniciar fases,
+bosses, checkpoints e ler escala/hitbox. Ver [`docs/dev-qa-tools.md`](docs/dev-qa-tools.md).
+
 ## Documentos Uteis
 
 - `CLAUDE.md`: regras de engenharia, gameplay e workflow do projeto.
 - `IDEIA.md`: visao, decisoes e registro de design.
 - `ROADMAP.md`: fases, tasks e progresso.
+- `docs/hd-visual-standard.md`: padrao visual HD oficial (escala, sheets, preload).
+- `docs/hd-migration-qa-checklist.md`: checklist manual pos-migracao HD.
+- `docs/hd-performance-stability-check.md`: performance e estabilidade HD.
+- `docs/phase-18-hd-migration-plan.md`: plano historico da migracao HD.
 - `assets/ASSETS.md`: origem/licenca dos assets.
-- `docs/mvp-gameplay-checklist.md`: checklist manual do MVP.
-- `docs/block-2-gameplay-checklist.md`: plano e checklist manual das fases 4 a 6.
-- `docs/block-3-gameplay-checklist.md`: plano e checklist manual das fases 7 a 9.
-- `docs/dev-qa-tools.md`: ferramentas dev para iniciar fases e acelerar playtest.
-- `docs/build-optimization.md`: decisao inicial de chunking do build.
-- `docs/performance-stability-check.md`: medicao inicial de estabilidade.
-- `docs/mvp-release-checklist.md`: checklist do primeiro build jogavel.
-- `docs/phase-15-improvement-plan.md`: analise pos-MVP e plano de melhorias.
-- `docs/phase-16-energy-shot-plan.md`: plano e fechamento do kit `Energia
-Ciano` e do Bloco 3.
-- `docs/phase-17-boss-plan.md`: plano dos tres chefes e da fase final.
+- `docs/dev-qa-tools.md`: ferramentas dev para playtest rapido.
+- `docs/build-optimization.md`: chunking e cache do build.
+- `docs/phase-17-boss-plan.md`: plano dos tres chefes.
+- `docs/phase-16-energy-shot-plan.md`: kit Energia Ciano e Bloco 3.

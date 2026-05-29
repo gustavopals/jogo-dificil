@@ -1,34 +1,40 @@
 import type { LevelDefinition } from "../../shared";
 import { GAME_RESOLUTION } from "../constants";
+import {
+  scaleLegacyFontPx,
+  scaleLegacyX,
+  scaleLegacyY,
+} from "../scale";
 import type {
   GameStateSnapshot,
   PlayerEnergyHudState,
 } from "../systems/game-state";
+import { VISUAL_READABILITY_SEMANTIC_COLORS } from "../systems/visual-readability";
 
 export const HUD_LAYOUT = {
-  x: 6,
-  y: 5,
-  width: GAME_RESOLUTION.width - 12,
-  height: 18,
-  paddingX: 7,
-  paddingY: 4,
-  maxCriticalHeight: 28,
+  x: scaleLegacyX(6),
+  y: scaleLegacyY(4),
+  width: GAME_RESOLUTION.width - scaleLegacyX(12),
+  height: scaleLegacyY(16),
+  paddingX: scaleLegacyX(7),
+  paddingY: scaleLegacyY(4),
+  maxCriticalHeight: scaleLegacyY(22),
   maxScreenAreaRatio: 0.07,
-  deathsX: 13,
-  energyMeterX: 78,
-  energyMeterY: 13,
-  energySegmentWidth: 8,
-  energySegmentHeight: 6,
-  energySegmentGap: 2,
+  deathsX: scaleLegacyX(12),
+  energyMeterX: scaleLegacyX(110),
+  energyMeterY: scaleLegacyY(11),
+  energySegmentWidth: scaleLegacyX(8),
+  energySegmentHeight: scaleLegacyY(6),
+  energySegmentGap: scaleLegacyX(2),
   energySegmentCount: 5,
   levelX: GAME_RESOLUTION.width / 2,
-  musicButtonX: GAME_RESOLUTION.width - 69,
-  musicButtonY: 8,
-  musicButtonWidth: 26,
-  musicButtonHeight: 12,
-  musicButtonTextX: GAME_RESOLUTION.width - 56,
-  musicButtonTextY: 14,
-  muteX: GAME_RESOLUTION.width - 13,
+  musicButtonX: GAME_RESOLUTION.width - scaleLegacyX(69),
+  musicButtonY: scaleLegacyY(8),
+  musicButtonWidth: scaleLegacyX(26),
+  musicButtonHeight: scaleLegacyY(12),
+  musicButtonTextX: GAME_RESOLUTION.width - scaleLegacyX(56),
+  musicButtonTextY: scaleLegacyY(14),
+  muteX: GAME_RESOLUTION.width - scaleLegacyX(13),
 } as const;
 
 export const HUD_PANEL_STYLE = {
@@ -41,7 +47,7 @@ export const HUD_PANEL_STYLE = {
 export const HUD_TEXT_STYLE = {
   color: "#f5f7fb",
   fontFamily: "monospace",
-  fontSize: "10px",
+  fontSize: scaleLegacyFontPx(10),
 } as const;
 
 export const HUD_ACCENT_TEXT_STYLE = {
@@ -63,13 +69,13 @@ export const HUD_MUSIC_BUTTON_STYLE = {
 export const HUD_ENERGY_METER_STYLE = {
   emptyFillColor: 0x10161a,
   emptyFillAlpha: 0.82,
-  emptyStrokeColor: 0x5d6f86,
+  emptyStrokeColor: VISUAL_READABILITY_SEMANTIC_COLORS.ui.mutedStroke,
   emptyStrokeAlpha: 0.58,
-  fillColor: 0x80d7c2,
+  fillColor: VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary,
   chargingFillColor: 0xa7f3d0,
   fullFillColor: 0xf5f7fb,
   fullFeedbackColor: 0xf5f7fb,
-  insufficientFeedbackColor: 0xe35d6a,
+  insufficientFeedbackColor: VISUAL_READABILITY_SEMANTIC_COLORS.energy.failure,
   fillAlpha: 0.92,
 } as const;
 
@@ -103,7 +109,9 @@ export function formatDeathCounter(deathCount: number): string {
 export function formatHudLevel(
   level: Pick<LevelDefinition, "name" | "order">,
 ): string {
-  return `Fase ${level.order}: ${level.name}`;
+  const base = `Fase ${level.order}: ${level.name}`;
+
+  return base.length <= 40 ? base : `${base.slice(0, 37)}...`;
 }
 
 export function formatMuteStatus(isMuted: boolean): string {

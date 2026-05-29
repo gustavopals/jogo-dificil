@@ -4,9 +4,9 @@ import itemRequiredChipUrl from "../assets/sprites/item-required-chip.png";
 import markerCheckpointActiveUrl from "../assets/sprites/marker-checkpoint-active.png";
 import markerCheckpointInactiveUrl from "../assets/sprites/marker-checkpoint-inactive.png";
 import markerExitUrl from "../assets/sprites/marker-exit.png";
-import bossDrImportsUrl from "../assets/sprites/bosses/dr-imports.png";
-import bossGigaFabioUrl from "../assets/sprites/bosses/giga-fabio.png";
-import bossHirolitoNarguilitoUrl from "../assets/sprites/bosses/hirolito-narguilito.png";
+import bossDrImportsUrl from "../assets/legacy/bosses/dr-imports.png";
+import bossGigaFabioUrl from "../assets/legacy/bosses/giga-fabio.png";
+import bossHirolitoNarguilitoUrl from "../assets/legacy/bosses/hirolito-narguilito.png";
 import bossImpactBurstUrl from "../assets/sprites/bosses/boss-impact-burst.png";
 import bossProjectileBoulderUrl from "../assets/sprites/bosses/boss-projectile-boulder.png";
 import bossProjectileImportBottleUrl from "../assets/sprites/bosses/boss-projectile-import-bottle.png";
@@ -23,10 +23,15 @@ import energyImpactUrl from "../assets/sprites/energy-impact.png";
 import energyTargetActiveUrl from "../assets/sprites/energy-target-active.png";
 import { describe, expect, it } from "vitest";
 
-import { GAMEPLAY_SPRITE_ASSETS, GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
+import {
+  GAMEPLAY_SPRITE_ASSETS,
+  GAMEPLAY_SPRITE_KEYS,
+  LEGACY_BOSS_BODY_SPRITE_ASSETS,
+} from "../src/data/art";
+import { TILE_SIZE_PX } from "../src/game/constants";
 import { IMAGE_ASSETS } from "../src/game/assets";
 
-const GAMEPLAY_SPRITE_URLS = {
+const RUNTIME_GAMEPLAY_SPRITE_URLS = {
   [GAMEPLAY_SPRITE_KEYS.TRAP_SPIKES]: trapSpikesUrl,
   [GAMEPLAY_SPRITE_KEYS.TRAP_FALSE_BLOCK]: trapFalseBlockUrl,
   [GAMEPLAY_SPRITE_KEYS.TRAP_FALLING_PLATFORM]: trapFallingPlatformUrl,
@@ -46,9 +51,6 @@ const GAMEPLAY_SPRITE_URLS = {
     markerCheckpointInactiveUrl,
   [GAMEPLAY_SPRITE_KEYS.MARKER_CHECKPOINT_ACTIVE]: markerCheckpointActiveUrl,
   [GAMEPLAY_SPRITE_KEYS.MARKER_EXIT]: markerExitUrl,
-  [GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO]: bossHirolitoNarguilitoUrl,
-  [GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS]: bossDrImportsUrl,
-  [GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO]: bossGigaFabioUrl,
   [GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_SMOKE_PUFF]: bossProjectileSmokePuffUrl,
   [GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_IMPORT_BOTTLE]:
     bossProjectileImportBottleUrl,
@@ -56,8 +58,14 @@ const GAMEPLAY_SPRITE_URLS = {
   [GAMEPLAY_SPRITE_KEYS.BOSS_IMPACT_BURST]: bossImpactBurstUrl,
 } as const;
 
+const LEGACY_BOSS_BODY_SPRITE_URLS = {
+  [GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO]: bossHirolitoNarguilitoUrl,
+  [GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS]: bossDrImportsUrl,
+  [GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO]: bossGigaFabioUrl,
+} as const;
+
 describe("gameplay sprites", () => {
-  it("defines sprite assets for traps, items, checkpoints, exit and bosses", () => {
+  it("defines runtime sprite assets for traps, items, checkpoints, exit and boss effects", () => {
     expect(GAMEPLAY_SPRITE_ASSETS.map((asset) => asset.key)).toEqual([
       GAMEPLAY_SPRITE_KEYS.TRAP_SPIKES,
       GAMEPLAY_SPRITE_KEYS.TRAP_FALSE_BLOCK,
@@ -75,9 +83,6 @@ describe("gameplay sprites", () => {
       GAMEPLAY_SPRITE_KEYS.MARKER_CHECKPOINT_INACTIVE,
       GAMEPLAY_SPRITE_KEYS.MARKER_CHECKPOINT_ACTIVE,
       GAMEPLAY_SPRITE_KEYS.MARKER_EXIT,
-      GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO,
-      GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS,
-      GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO,
       GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_SMOKE_PUFF,
       GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_IMPORT_BOTTLE,
       GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_BOULDER,
@@ -93,11 +98,11 @@ describe("gameplay sprites", () => {
       expect(asset.origin).toBe("Gerado no projeto com magick");
       expect(asset.license).toBe("Original do projeto");
       expect(asset.description.length).toBeGreaterThan(24);
-      expect(GAMEPLAY_SPRITE_URLS[asset.key].length).toBeGreaterThan(0);
+      expect(RUNTIME_GAMEPLAY_SPRITE_URLS[asset.key].length).toBeGreaterThan(0);
     });
   });
 
-  it("keeps sprites on the pixel-art grid and preloads every key", () => {
+  it("keeps sprites on the pixel-art grid and preloads every runtime key", () => {
     const imageAssetKeys = IMAGE_ASSETS.map((asset) => asset.key);
 
     GAMEPLAY_SPRITE_ASSETS.forEach((asset) => {
@@ -127,11 +132,11 @@ describe("gameplay sprites", () => {
       "assets/sprites/energy-cracked-block-broken.png",
     ]);
     expect(energySprites.map((asset) => asset.sizePx)).toEqual([
-      { width: 8, height: 8 },
       { width: 16, height: 16 },
-      { width: 16, height: 16 },
-      { width: 16, height: 16 },
-      { width: 16, height: 16 },
+      { width: TILE_SIZE_PX, height: TILE_SIZE_PX },
+      { width: TILE_SIZE_PX, height: TILE_SIZE_PX },
+      { width: TILE_SIZE_PX, height: TILE_SIZE_PX },
+      { width: TILE_SIZE_PX, height: TILE_SIZE_PX },
     ]);
     expect(energySprites.map((asset) => asset.description).join(" ")).toContain(
       "Centelha Ciano",
@@ -141,35 +146,20 @@ describe("gameplay sprites", () => {
     );
   });
 
-  it("defines the Phase 17 boss placeholder sprites", () => {
-    const bossSpriteKeys: ReadonlySet<string> = new Set([
-      GAMEPLAY_SPRITE_KEYS.BOSS_HIROLITO_NARGUILITO,
-      GAMEPLAY_SPRITE_KEYS.BOSS_DR_IMPORTS,
-      GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO,
+  it("archives legacy boss body placeholders under assets/legacy/", () => {
+    expect(LEGACY_BOSS_BODY_SPRITE_ASSETS.map((asset) => asset.path)).toEqual([
+      "assets/legacy/bosses/hirolito-narguilito.png",
+      "assets/legacy/bosses/dr-imports.png",
+      "assets/legacy/bosses/giga-fabio.png",
     ]);
-    const bossSprites = GAMEPLAY_SPRITE_ASSETS.filter((asset) =>
-      bossSpriteKeys.has(asset.key),
-    );
-
-    expect(bossSprites.map((asset) => asset.path)).toEqual([
-      "assets/sprites/bosses/hirolito-narguilito.png",
-      "assets/sprites/bosses/dr-imports.png",
-      "assets/sprites/bosses/giga-fabio.png",
+    expect(LEGACY_BOSS_BODY_SPRITE_ASSETS.map((asset) => asset.sizePx)).toEqual([
+      { width: 96, height: 112 },
+      { width: 96, height: 128 },
+      { width: 120, height: 128 },
     ]);
-    expect(bossSprites.map((asset) => asset.sizePx)).toEqual([
-      { width: 48, height: 56 },
-      { width: 48, height: 64 },
-      { width: 64, height: 80 },
-    ]);
-    expect(bossSprites.map((asset) => asset.description).join(" ")).toContain(
-      "Hirolito Narguilito",
-    );
-    expect(bossSprites.map((asset) => asset.description).join(" ")).toContain(
-      "Dr. Imports",
-    );
-    expect(bossSprites.map((asset) => asset.description).join(" ")).toContain(
-      "Giga Fabio",
-    );
+    LEGACY_BOSS_BODY_SPRITE_ASSETS.forEach((asset) => {
+      expect(LEGACY_BOSS_BODY_SPRITE_URLS[asset.key].length).toBeGreaterThan(0);
+    });
   });
 
   it("defines the Phase 17 boss projectile and impact sprites", () => {

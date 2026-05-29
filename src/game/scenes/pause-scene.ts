@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
 import { gameStateStore } from "../systems/game-state";
+import { scaleLegacyFontPx } from "../scale";
 import {
   formatPauseMuteStatus,
   PAUSE_OVERLAY_COPY,
@@ -29,6 +30,16 @@ export class PauseScene extends Phaser.Scene {
       PAUSE_OVERLAY_STYLE.fillColor,
       PAUSE_OVERLAY_STYLE.fillAlpha,
     );
+    this.add
+      .rectangle(
+        PAUSE_OVERLAY_LAYOUT.centerX,
+        PAUSE_OVERLAY_LAYOUT.centerY,
+        PAUSE_OVERLAY_LAYOUT.cardWidth,
+        PAUSE_OVERLAY_LAYOUT.cardHeight,
+        0x111217,
+        0.78,
+      )
+      .setStrokeStyle(1, 0x80d7c2, 0.42);
 
     this.add
       .text(
@@ -38,7 +49,7 @@ export class PauseScene extends Phaser.Scene {
         {
           color: PAUSE_OVERLAY_STYLE.titleColor,
           fontFamily: "monospace",
-          fontSize: "18px",
+          fontSize: scaleLegacyFontPx(18),
         },
       )
       .setOrigin(0.5);
@@ -51,7 +62,7 @@ export class PauseScene extends Phaser.Scene {
         {
           color: PAUSE_OVERLAY_STYLE.commandColor,
           fontFamily: "monospace",
-          fontSize: "10px",
+          fontSize: scaleLegacyFontPx(10),
         },
       )
       .setOrigin(0.5);
@@ -60,7 +71,7 @@ export class PauseScene extends Phaser.Scene {
       .text(PAUSE_OVERLAY_LAYOUT.centerX, PAUSE_OVERLAY_LAYOUT.muteY, "", {
         color: PAUSE_OVERLAY_STYLE.mutedColor,
         fontFamily: "monospace",
-        fontSize: "10px",
+        fontSize: scaleLegacyFontPx(10),
       })
       .setOrigin(0.5);
 

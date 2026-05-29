@@ -9,8 +9,10 @@ import { LEVEL_07 } from "./level-07";
 import { LEVEL_08 } from "./level-08";
 import { LEVEL_09 } from "./level-09";
 import { LEVEL_10 } from "./level-10";
+import { LEVEL_11 } from "./level-11";
+import { migrateLegacyLevelDefinition } from "./migration";
 
-export const LEVEL_DEFINITIONS = [
+const LEGACY_LEVEL_DEFINITIONS = [
   LEVEL_01,
   LEVEL_02,
   LEVEL_03,
@@ -21,7 +23,12 @@ export const LEVEL_DEFINITIONS = [
   LEVEL_08,
   LEVEL_09,
   LEVEL_10,
+  LEVEL_11,
 ] as const satisfies readonly LevelDefinition[];
+
+export const LEVEL_DEFINITIONS = LEGACY_LEVEL_DEFINITIONS.map((level) =>
+  migrateLegacyLevelDefinition(level),
+) as readonly LevelDefinition[];
 
 export function getLevelDefinition(
   levelId: LevelId,

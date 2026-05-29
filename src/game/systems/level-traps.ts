@@ -47,7 +47,7 @@ const TRAP_BODY_COLORS = {
   "falling-platform": VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
   "spike-pop": VISUAL_READABILITY_SEMANTIC_COLORS.trap.danger,
   projectile: VISUAL_READABILITY_SEMANTIC_COLORS.trap.primary,
-  "breakable-floor": 0xf4a261,
+  "breakable-floor": VISUAL_READABILITY_SEMANTIC_COLORS.trap.breakableFloor,
 } as const satisfies Record<TrapDefinition["kind"], number>;
 
 const TRAP_BODY_TEXTURE_KEYS = {

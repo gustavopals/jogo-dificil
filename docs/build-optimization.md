@@ -19,16 +19,25 @@ grande.
 
 ## Decisao
 
-Criar `vite.config.ts` com separacao explicita de vendor:
+Criar `vite.config.ts` com separacao explicita de vendor e politica HD de assets:
 
 - `phaser-vendor`: todos os modulos de `node_modules/phaser`.
 - `vendor`: demais dependencias de `node_modules`, caso existam.
+- `assetsInlineLimit`: 4096 bytes — externaliza sheets HD e PNGs grandes.
 - `chunkSizeWarningLimit`: 1400 kB, documentado como limite aceito para o
   vendor do Phaser.
 
 Isso nao reduz o tamanho total baixado no primeiro carregamento, mas melhora
 cache e revisao: mudancas frequentes no jogo passam a invalidar o chunk pequeno
-do app, nao o bundle inteiro com Phaser.
+do app, nao o bundle inteiro com Phaser. Sheets e sprites grandes passam a ser
+servidos como arquivos estaticos reutilizaveis.
+
+## Preload HD (Task 18.11)
+
+- `src/game/asset-load-policy.ts` define o que entra em `RUNTIME_IMAGE_ASSETS`.
+- Com spritesheets ativos, PNGs legados de Pino e bosses ficam fora do preload.
+- Sheets continuam em `SPRITESHEET_ASSETS` com celulas `128x128`.
+- Testes: `tests/asset-load-policy.test.ts`.
 
 ## Resultado
 

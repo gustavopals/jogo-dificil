@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-Ultima atualizacao: 2026-05-26
+Ultima atualizacao: 2026-05-29
 
 ## Objetivo
 
@@ -1451,6 +1451,214 @@ Pronto quando:
 
 - A trinca de bosses fica pronta para commit com regressões cobertas.
 
+## Fase 18 - Migracao HD Pixel E Spritesheets
+
+Status: **Concluida** (2026-05-29).
+
+Objetivo: migrar o jogo de 480x270 com tile 16 para uma base HD pixel de
+960x540 com tile 32, adotar spritesheets com celulas de 128x128 para
+personagens e bosses, preservar o feeling de jogo dificil e elevar a qualidade
+visual sem perder legibilidade de traps e hitboxes.
+
+Documentos:
+
+- Plano historico: `docs/phase-18-hd-migration-plan.md`.
+- Padrao oficial pos-migracao: `docs/hd-visual-standard.md`.
+
+### Task 18.1 - Congelar Baseline Tecnico E Definir Alvos Da Migracao
+
+- [x] Registrar baseline atual de resolucao, tile, tamanho de sprites e hitboxes.
+- [x] Definir metas visuais oficiais da migracao (Pino, bosses, projetis, UI).
+- [x] Definir alvos de performance para dev e build de producao.
+- [x] Definir criterio de rollback por fase caso regressao grave apareca.
+- [x] Registrar riscos de migracao em documento dedicado.
+
+Pronto quando:
+
+- Existe contrato de migracao com metas de qualidade, performance e seguranca.
+
+### Task 18.2 - Infraestrutura De Escala Global
+
+- [x] Criar constantes novas para resolucao 960x540 e tile 32.
+- [x] Centralizar fatores de escala em um modulo unico reutilizavel.
+- [x] Atualizar config Phaser para nova base mantendo `FIT` e pixel art.
+- [x] Revisar valores derivados (camera bounds, HUD anchors, margens, offsets).
+- [x] Cobrir conversoes de escala com testes unitarios puros.
+
+Pronto quando:
+
+- O jogo roda com a nova base de escala sem quebrar inicializacao.
+
+### Task 18.3 - Pipeline De Spritesheets
+
+- [x] Criar convencao oficial para sheets 512x512 e 1024x1024.
+- [x] Padronizar celulas de animacao em 128x128 para personagens jogaveis.
+- [x] Implementar carregamento de spritesheet com `frameWidth` e `frameHeight`.
+- [x] Criar registry declarativo de frames por animacao.
+- [x] Manter suporte temporario a assets antigos durante migracao incremental.
+- [x] Atualizar `assets/ASSETS.md` com regras de export e licenca.
+
+Pronto quando:
+
+- Personagens e bosses podem usar spritesheets sem depender de PNG por frame.
+
+### Task 18.4 - Migrar Pino Para Escala HD
+
+- [x] Definir tamanho visual alvo do Pino em runtime (faixa 48x96 ate 64x128).
+- [x] Definir hitbox nova menor que o visual para preservar justica.
+- [x] Migrar animacoes principais para sheet (`idle`, `run`, `jump`, `fall`).
+- [x] Migrar animacoes de energia (`carga`, `centelha`, `rajada`).
+- [x] Ajustar pivots, offsets e flip horizontal.
+- [x] Revisar leitura em 1x e 2x para garantir silhueta clara.
+
+Pronto quando:
+
+- Pino esta em alta fidelidade visual sem perder previsibilidade de colisao.
+
+### Task 18.5 - Migrar Bosses Para Escala HD
+
+- [x] Definir tamanho visual alvo por boss e manter weak points legiveis.
+- [x] Migrar `Hirolito`, `Dr. Imports` e `Giga Fabio` para sheets dedicadas.
+- [x] Ajustar ancoras de ataque, tells e projeis ao novo porte visual.
+- [x] Garantir que vida no corpo do boss continue legivel.
+- [x] Revisar contraste de cores entre boss, energia, traps e fundo.
+
+Pronto quando:
+
+- Os tres bosses usam arte HD consistente e continuam claros em combate.
+
+### Task 18.6 - Migracao De Mapas E Conteudo Declarativo
+
+- [x] Definir estrategia de migracao de coordenadas (multiplicador 2x controlado).
+- [x] Criar utilitario de migracao para bounds, terreno, hazards e checkpoints.
+- [x] Migrar `level-01` como piloto e validar jogabilidade fim a fim.
+- [x] Migrar `level-02` a `level-10` mantendo progressao e fluxo de campanha.
+- [x] Revisar hitboxes de traps, portas, itens e alvos de energia apos escala.
+- [x] Validar que nao houve softlock introduzido por dimensoes novas.
+
+Pronto quando:
+
+- As 10 fases rodam na nova escala com fluxo de progressao intacto.
+
+### Task 18.7 - Camera, UI E Leitura De Gameplay
+
+- [x] Recalibrar camera follow, deadzone e limites por fase.
+- [x] Ajustar HUD para nova resolucao sem cobrir gameplay critica.
+- [x] Revisar tamanhos de fonte e espacamentos em menu, pausa e transicao.
+- [x] Ajustar efeitos de dash, impacto e morte para nova escala.
+- [x] Garantir leitura de checkpoints, saida e sinais de perigo.
+
+Pronto quando:
+
+- A tela fica limpa, legivel e informativa durante gameplay rapido.
+
+### Task 18.8 - Rebalancear Fisica E Ritmo De Jogo
+
+- [x] Revisar velocidades, aceleracao, gravidade e pulo na nova unidade visual.
+- [x] Rebalancear dash (distancia, duracao, cooldown) para manter skill ceiling.
+- [x] Revalidar `coyote time` e `jump buffer` com plataforma maior.
+- [x] Recalibrar velocidades de projeteis e ataques de bosses.
+- [x] Validar tempo de respawn e tempo de retorno ao desafio.
+
+Pronto quando:
+
+- O jogo mantem sensacao de precisao, crueldade justa e restart rapido.
+
+### Task 18.9 - Arte De Ambiente E Efeitos Em HD
+
+- [x] Criar tilesets 32x32 para terreno, plataforma, fundo e perigo.
+- [x] Atualizar sprites de traps e itens para o novo padrao visual.
+- [x] Ajustar efeitos de energia para nao esconder hazards pequenos.
+- [x] Definir depth layers e regras de contraste para todos os elementos.
+- [x] Revisar consistencia de estilo entre blocos de fase e bosses.
+
+Pronto quando:
+
+- O mundo fica visualmente coeso e todas as ameaças permanecem legiveis.
+
+### Task 18.10 - Testes, QA E Ferramentas De Migracao
+
+- [x] Atualizar testes unitarios dependentes de tamanhos e coordenadas.
+- [x] Atualizar testes de conteudo de fases para novos bounds e areas.
+- [x] Atualizar smoke Playwright para nova camera e novos tamanhos.
+- [x] Expandir hooks de QA para validar escala e hitboxes em runtime.
+- [x] Criar checklist manual da migracao HD por fase e por boss.
+
+Pronto quando:
+
+- A suite automatizada volta a passar com cobertura das regras novas.
+
+### Task 18.11 - Performance, Build E Pacote Final
+
+- [x] Medir custo de GPU/CPU da nova escala com muitos efeitos ativos.
+- [x] Otimizar tamanhos de sheets e formatos de export sem perder nitidez.
+- [x] Revisar chunking, preload e cache de assets grandes.
+- [x] Definir regra para evitar duplicacao de assets antigos e novos.
+- [x] Rodar bateria final: lint, test, build e smoke completo.
+
+Pronto quando:
+
+- O jogo HD fica estavel, performatico e pronto para evolucao de conteudo.
+
+### Task 18.12 - Fechamento Da Migracao E Padrao Novo
+
+- [x] Atualizar `IDEIA.md` e `README.md` com o novo padrao visual definitivo.
+- [x] Atualizar `CLAUDE.md` se regras de engenharia mudarem com a migracao.
+- [x] Consolidar convencoes finais de spritesheets e escalas em docs.
+- [x] Marcar subtasks concluidas e registrar pendencias reais no roadmap.
+- [x] Definir proxima fase recomendada apos migracao (conteudo ou polimento).
+
+Pronto quando:
+
+- A migracao HD vira o novo baseline oficial do projeto.
+
+## Fase 19 - Polimento Pos-HD E Expansao De Conteudo
+
+Status: **Concluida** (2026-05-29). Release publico validado pelo autor em servidor proprio.
+
+Objetivo: consolidar qualidade pos-migracao HD, reduzir divida tecnica de assets
+legados e expandir conteudo ou polimento sem reabrir a base de escala.
+
+### Task 19.1 - Limpeza De Assets Legados
+
+- [x] Remover PNG legado de Pino/boss do bundle de producao quando seguro.
+- [x] Arquivar ou mover fallback legado para pasta explicita (`assets/legacy/`).
+- [x] Atualizar `ASSETS.md` e scripts de geracao com o fluxo final.
+
+Pronto quando:
+
+- O build de producao carrega apenas arte HD no runtime.
+
+### Task 19.2 - Polimento Visual E Audio
+
+- [x] Playtest humano longo em 960x540 (ritmo, cansaco, legibilidade).
+- [x] Variacoes musicais ou stems por bloco de fase, se desejado.
+- [x] Revisar contrastes finos boss/trap/energia apos arte HD completa.
+
+Pronto quando:
+
+- A experiencia HD parece intencional e coesa do menu ao boss final.
+
+### Task 19.3 - Expansao De Conteudo Ou Modo Desafio
+
+- [x] Definir se a proxima entrega e fase 11+, modo desafio ou segmentos extras.
+- [x] Prototipar uma fase nova ja na escala HD (ou legado + migracao).
+- [x] Validar progressao e dificuldade com QA existente.
+
+Pronto quando:
+
+- Existe conteudo novo jogavel alinhado ao baseline HD.
+
+### Task 19.4 - Release Publico
+
+- [x] Escolher hospedagem (GitHub Pages, Vercel, Netlify ou similar).
+- [x] Pipeline de deploy do build de producao.
+- [x] Checklist de release pos-HD (lint, test, build, smoke, playtest).
+
+Pronto quando:
+
+- O jogo HD pode ser compartilhado publicamente com URL estavel.
+
 ## Ordem Recomendada De Execucao
 
 1. Fase 1: scaffold tecnico.
@@ -1470,6 +1678,8 @@ Pronto quando:
 15. Fase 15: incrementos de profundidade e retencao.
 16. Fase 16: poder de energia e Bloco 3.
 17. Fase 17: trinca de chefões.
+18. Fase 18: migracao HD pixel e spritesheets (concluida).
+19. Fase 19: polimento pos-HD e expansao de conteudo.
 
 Observacao: Fase 3 e Fase 4 podem andar juntas, mas o movimento deve ser
 validado com placeholder antes de gastar tempo em arte final.
@@ -2245,3 +2455,116 @@ alteracao; apenas mudancas que ajudam a proxima IA a entender o estado.
   `npm run test:e2e -- e2e/game-smoke.e2e.ts`. Resultado: lint sem erros, 63
   arquivos de teste e 414 testes unitarios passando, build de produção gerado e
   smoke Playwright com 4 cenarios passando.
+
+### 2026-05-29
+
+- [x] Fase 18 planejada e documentada para migracao HD completa do jogo:
+  resolucao 960x540, tile 32x32, spritesheets 128x128 para personagens e
+  bosses, migracao incremental das 10 fases, recalibracao de fisica, revisao de
+  camera/UI, cobertura de testes e bateria final de performance/QA.
+- [x] `IDEIA.md` atualizado com revisao do Ponto 9 e decisoes de migracao HD,
+  incluindo novo baseline visual, regras de spritesheet e alvo de escala para
+  Pino e bosses.
+- [x] Task 18.1 concluida com documento tecnico
+  `docs/phase-18-hd-migration-plan.md`, congelando baseline atual (escala,
+  sprites/hitboxes, mapas, build e performance), metas oficiais da migracao HD,
+  alvos de qualidade/performance, criterio de rollback por fase e mapa de riscos
+  com mitigacoes para execucao segura por IA.
+- [x] Task 18.2 concluida com infraestrutura inicial de escala global: constantes
+  migradas para 960x540 e tile 32, modulo `src/game/scale.ts` criado para
+  conversoes legadas, camera ajustada para bounds minimos da viewport e layouts
+  de HUD/menu/pause/transicao revisados com offsets escalados. Validado com
+  lint em arquivos alterados, testes focados e `npm run build`.
+- [x] Task 18.3 concluida com pipeline inicial de spritesheets: convencoes
+  oficiais em `src/data/art/spritesheet-conventions.ts`, registry declarativo
+  de frames do Pino em `src/data/characters/pino-spritesheet-registry.ts`,
+  preload com suporte a `this.load.spritesheet` em `PreloadScene`, fallback
+  legado preservado em `pino-animations.ts` e regras atualizadas em
+  `assets/ASSETS.md`. Validado com testes focados, lint e build.
+- [x] Task 18.4 concluida com migracao HD do Pino: runtime fixado em 56x104,
+  hitbox em 36x80 (menor que o visual), animacoes principais e de energia
+  ativadas em spritesheets 512x512 (celulas 128x128), assets reais gerados em
+  `assets/spritesheets/` via `scripts/generate-pino-spritesheets.mjs` e
+  carregamento/preload ajustado para URLs empacotadas pelo Vite. Validado com
+  testes focados (`pino-animations` e `spritesheet-pipeline`) e `npm run build`.
+- [x] Task 18.5 concluida com migracao HD dos bosses: sheets dedicadas de
+  `Hirolito`, `Dr. Imports` e `Giga Fabio` em `assets/spritesheets/` (512x512,
+  celulas 128x128), runtime do `LevelScene` ajustado para exibir bosses com
+  escala visual HD desacoplada da hitbox de colisao e frames por estado de
+  combate (`inactive`, `windup`, `attack`, `recover`, `defeated`). Pipeline
+  de geracao adicionado em `scripts/generate-boss-spritesheets.mjs` com script
+  npm `assets:boss-sheets`. Validado com testes focados de boss/spritesheet e
+  `npm run build`.
+- [x] Task 18.6 concluida com migracao declarativa de mapas em runtime:
+  `src/data/levels/migration.ts` aplica multiplicador controlado 2x para
+  bounds, spawn, checkpoints, terreno, hazards, traps, itens, objetos
+  interativos, alvos de energia e bosses (incluindo movement/attacks/projectiles).
+  `registry.ts` passou a expor campanha migrada, preservando arquivos de fase
+  legados como fonte declarativa. Piloto `level-01` e campanha completa
+  (`level-02` a `level-10`) validados por `tests/level-migration.test.ts`,
+  `tests/dev-qa-tools.test.ts`, `validateLevels(LEVEL_DEFINITIONS)` e
+  `npm run build`.
+- [x] Task 18.7 concluida com recalibracao de camera e leitura de gameplay:
+  perfil de camera por fase em `src/game/systems/camera-profile.ts` (deadzone,
+  follow lerp e look-ahead), integração no `LevelScene` com look-ahead
+  dinâmico por velocidade, HUD compactado para topo seguro em 960x540, revisão
+  de layout/tipografia em menu, pausa e transição, efeitos do jogador (aura,
+  dash ghost, bursts) escalados para HD em `player-visual-effects.ts` e
+  visuais de checkpoint/saída reforçados com estado de bloqueio por boss.
+  Validado com testes focados de UI/leitura/câmera e `npm run build`.
+- [x] Task 18.8 concluida com rebalanceamento de fisica e ritmo para a unidade
+  HD: introduzido `WORLD_PHYSICS_SCALE` em `src/game/constants.ts` (fator 2x
+  derivado da resolucao) e aplicado nas quantidades espaciais de
+  `PLAYER_MOVEMENT` (velocidade horizontal, aceleracao, desaceleracoes,
+  gravidade, velocidade de pulo e dash), preservando altura de pulo, velocidade
+  e distancia de dash em unidades de tile; janelas temporais (`coyote 90ms`,
+  `jump buffer 100ms`, duracao/cooldown de dash) e a proporcao de corte de pulo
+  ficaram inalteradas por serem independentes de escala. Velocidade e alcance
+  dos projeteis do jogador (Centelha/Rajada Ciano) escalados em
+  `src/game/physics/energy-projectiles.ts`; projeteis e ataques de bosses ja
+  escalavam via `migration.ts`. Tempo de respawn (`450ms`, dentro de 300-600ms)
+  e recuperacao (`120ms`) revalidados. Testes de `jump-movement` e
+  `horizontal-movement` reescritos para derivar expectativas da config (escala-
+  independentes). Validado com lint dos arquivos alterados, `tsc --noEmit`,
+  testes focados de fisica/projeteis e `npm run build`. Pendencia conhecida nao
+  relacionada: `level-05` declara `fallDelayMs: 2000` (> respawn), quebrando
+  `tests/trap-fairness` e `tests/block-2-content` desde antes desta task.
+- [x] Task 18.9 concluida com arte de ambiente e efeitos em HD: criado
+  `scripts/generate-environment-sprites.mjs` (`npm run assets:environment`) que
+  desenha pixel art nativa em 32px (sem upscale) para os 4 tilesets (bloco
+  solido, plataforma, fundo, espinhos) e 16 sprites de gameplay (traps, itens,
+  marcadores, kit de energia) pela paleta semantica. Projeteis pequenos passaram
+  a 16px (`PROJECTILE_SPRITE_SIZE` em `gameplay-sprites.ts`; sprite da Centelha
+  renderizada 16x16 em `level-scene`); a Rajada Ciano teve altura/offsets de
+  origem escalados 2x em `energy-projectiles.ts` para nao virar fio fino em HD,
+  enquanto a colisao da Centelha ficou na geometria validada em 18.8. Formalizada
+  a escada unica `DEPTH_LAYERS` em `visual-readability.ts` (fonte de verdade para
+  `VISUAL_READABILITY_DEPTHS` e `PLAYER_EFFECT_DEPTHS`), aplicada nos pontos de
+  desenho (fundo, terreno, corpo de trap, alvos de energia, itens, marcadores,
+  saida) em `level-scene.ts`; perigos/projeteis ficam acima do jogador e efeitos
+  de energia abaixo dos hazards, com teto de alpha e `smallHazardMaxSizePx`
+  alinhado ao tile HD (32) para nao esconder hazards pequenos. Invariantes de
+  ordem cobertas por `tests/visual-readability.test.ts`. Corrigido tambem o
+  bloco de lint que faltava para `scripts/**` em `eslint.config.js`. Validado
+  com `npm run lint`, `tsc --noEmit`, `npx vitest run` (444 testes) e
+  `npm run build`, e inspecao visual de contact sheet dos assets gerados.
+- [x] Task 18.10 concluida com suite de QA da migracao HD: corrigido
+  `fallDelayMs` de `level-05`, criados `tests/hd-campaign-content.test.ts`,
+  `tests/dev-qa-scale.test.ts` e helper `tests/helpers/hd-campaign.ts`,
+  atualizados `tests/visual-readability.test.ts` e `tests/dev-qa-tools.test.ts`,
+  hooks `readScaleInfo()`/`readPlayerHitbox()` em `dev-qa-tools.ts`, smoke
+  Playwright recalibrado para 960x540 e checklist manual em
+  `docs/hd-migration-qa-checklist.md`. Validado com 444 testes unitarios e
+  `npm run build`. Smoke e2e depende de libs do Playwright no ambiente local.
+- [x] Task 18.11 concluida com performance, build e pacote HD: politica de
+  preload em `src/game/asset-load-policy.ts` evita duplicar PNG legado e sheets
+  HD no runtime, `RUNTIME_IMAGE_ASSETS` enxuto no `PreloadScene`, Vite com
+  `assetsInlineLimit: 4096` para cache de PNGs/sheets grandes, testes
+  `asset-load-policy` e `hd-performance-stability`, docs
+  `hd-performance-stability-check.md` e regras em `ASSETS.md`/`build-optimization.md`.
+  Validado com `npm run lint`, 450 testes unitarios e `npm run build`.
+- [x] Task 18.12 concluida: migracao HD fechada como baseline oficial. Atualizados
+  `IDEIA.md` (Ponto 9 definitivo), `README.md` (secao HD e docs), `CLAUDE.md`
+  (regras de assets, mapas e estado atual), criado `docs/hd-visual-standard.md`
+  consolidando escala, sheets, preload e QA. Fase 19 registrada no roadmap como
+  proximo foco (polimento pos-HD, limpeza de legado, conteudo e release).

@@ -5,7 +5,8 @@ import {
   PINO_ANIMATION_STATES,
   PINO_ANIMATIONS,
   PINO_POWER_ANIMATION_MODES,
-  PINO_TEXTURE_KEYS,
+  applyPinoVisualDisplaySize,
+  resolveInitialPinoSpriteFrame,
   selectPinoAnimationDefinition,
   type PinoAnimationKey,
   type PinoAnimationState,
@@ -114,10 +115,21 @@ export class Player {
 
   public constructor(scene: Phaser.Scene, config: PlayerSpawnConfig) {
     this.id = config.id;
+    const initialFrame = resolveInitialPinoSpriteFrame();
 
     this.sprite = scene.physics.add
-      .sprite(config.position.x, config.position.y, PINO_TEXTURE_KEYS.IDLE)
+      .sprite(
+        config.position.x,
+        config.position.y,
+        initialFrame.textureKey,
+        initialFrame.frame,
+      )
       .setOrigin(PLAYER_SIZE.pivot.x, PLAYER_SIZE.pivot.y);
+
+    applyPinoVisualDisplaySize(this.sprite);
+    this.sprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, () => {
+      applyPinoVisualDisplaySize(this.sprite);
+    });
 
     this.applyHitbox();
     this.getBody().allowGravity = false;
@@ -179,6 +191,17 @@ export class Player {
       },
       isGrounded: this.physicsState.isGrounded,
       hitbox: cloneHitbox(this.physicsState.hitbox),
+    };
+  }
+
+  public getWorldHitbox(): RectLike {
+    const body = this.getBody();
+
+    return {
+      x: body.x,
+      y: body.y,
+      width: body.width,
+      height: body.height,
     };
   }
 

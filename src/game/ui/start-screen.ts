@@ -1,4 +1,5 @@
 import { GAME_RESOLUTION, GAME_TITLE, TILE_SIZE_PX } from "../constants";
+import { scaleLegacyX, scaleLegacyY } from "../scale";
 import { INITIAL_LEVEL_ID } from "../systems/game-state";
 
 export const START_SCREEN_LEVEL_ID = INITIAL_LEVEL_ID;
@@ -28,21 +29,21 @@ export const START_SCREEN_HUMOR_PHRASES = [
 export const START_SCREEN_LAYOUT = {
   width: GAME_RESOLUTION.width,
   height: GAME_RESOLUTION.height,
-  titleY: 52,
-  subtitleY: 80,
-  humorPhraseY: 106,
-  commandY: 132,
-  statsY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3 + 20,
-  vibeTagY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3 - 14,
+  titleY: scaleLegacyY(46),
+  subtitleY: scaleLegacyY(72),
+  humorPhraseY: scaleLegacyY(100),
+  commandY: scaleLegacyY(128),
+  statsY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3 + scaleLegacyY(16),
+  vibeTagY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3 - scaleLegacyY(18),
   groundY: GAME_RESOLUTION.height - TILE_SIZE_PX * 3,
-  playerX: 104,
-  exitX: GAME_RESOLUTION.width - 92,
-  musicButtonX: GAME_RESOLUTION.width - 38,
-  musicButtonY: 10,
-  musicButtonWidth: 28,
-  musicButtonHeight: 14,
-  musicButtonTextX: GAME_RESOLUTION.width - 24,
-  musicButtonTextY: 17,
+  playerX: scaleLegacyX(104),
+  exitX: GAME_RESOLUTION.width - scaleLegacyX(92),
+  musicButtonX: GAME_RESOLUTION.width - scaleLegacyX(38),
+  musicButtonY: scaleLegacyY(10),
+  musicButtonWidth: scaleLegacyX(28),
+  musicButtonHeight: scaleLegacyY(14),
+  musicButtonTextX: GAME_RESOLUTION.width - scaleLegacyX(24),
+  musicButtonTextY: scaleLegacyY(17),
 } as const;
 
 export const START_SCREEN_MUSIC_BUTTON_STYLE = {

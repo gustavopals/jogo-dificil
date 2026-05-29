@@ -1,3 +1,5 @@
+import { PLAYER_SIZE, TILE_SIZE_PX } from "../../game/constants";
+
 export const VISUAL_PALETTE_ROLES = [
   "void",
   "panel",
@@ -62,22 +64,22 @@ export const INITIAL_VISUAL_PALETTE = {
 } as const satisfies Record<VisualPaletteRole, VisualPaletteEntry>;
 
 export const INITIAL_VISUAL_DIRECTION = {
-  id: "cruel-lab-pixel-art",
+  id: "cozy-cruel-lab-pixel-art",
   style: "low-res-pixel-art",
   thesis:
-    "Low-res pixel art in a hostile test lab: clean silhouettes, hard contrast and saturated semantic accents for danger, progress and false safety.",
-  tileSizePx: 16,
+    "Cozy Stardew-inspired pixel art in a tricky test world: warm stone, grass and wood platforms, soft skies, and saturated semantic accents for danger, progress and false safety.",
+  tileSizePx: TILE_SIZE_PX,
   playerApproxSizePx: {
-    width: 14,
-    height: 26,
+    width: PLAYER_SIZE.visualWidth,
+    height: PLAYER_SIZE.visualHeight,
   },
   playerHitboxSizePx: {
-    width: 10,
-    height: 22,
+    width: PLAYER_SIZE.hitboxWidth,
+    height: PLAYER_SIZE.hitboxHeight,
   },
   playerTileRatio: {
-    width: 0.875,
-    height: 1.625,
+    width: PLAYER_SIZE.tileScale.visualWidth,
+    height: PLAYER_SIZE.tileScale.visualHeight,
   },
   palette: INITIAL_VISUAL_PALETTE,
   assetRules: [

@@ -23,8 +23,8 @@ import type {
   TrapId,
   Vector2Like,
 } from "../../shared";
-import { MUSIC_AUDIO_IDS, PLAYER_AUDIO_IDS } from "../../data/audio";
-import { PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
+import { PLAYER_AUDIO_IDS, resolveGameplayMusicAudioId } from "../../data/audio";
+import { GAME_RESOLUTION, PLAYER_SIZE, TILE_SIZE_PX } from "../constants";
 import { ASSET_KEYS } from "../assets";
 import { Player } from "../entities";
 import {
@@ -110,9 +110,12 @@ import {
   getBossAttackTellAreas,
   getBossBodyHealthIndicator,
   getBossEnergyBlockingHitboxes,
+  getBossFrameByState,
   getBossProjectileTextureKey,
   getBossRuntimeHitbox,
   getBossTextureKey,
+  getBossVisualBottomOffsetY,
+  getBossVisualDisplaySize,
   getBossWeakPointCrystalFeedback,
   findTouchedBossThreat,
   isLevelExitBlockedByLivingBosses,
@@ -142,7 +145,9 @@ import {
   getLevelEnergyTargets,
 } from "../systems/level-energy-targets";
 import {
+  getCheckpointMarkerAlpha,
   getCheckpointTextureKey,
+  getExitMarkerVisual,
   getExitTextureKey,
 } from "../systems/level-markers";
 import {
@@ -172,10 +177,16 @@ import {
   shouldEmitTimedEffect,
 } from "../systems/player-visual-effects";
 import {
+  DEPTH_LAYERS,
   VISUAL_READABILITY_DEPTHS,
   VISUAL_READABILITY_SEMANTIC_COLORS,
   clampWideEffectAlpha,
 } from "../systems/visual-readability";
+import {
+  getLevelCameraProfile,
+  resolveCameraLookAhead,
+  type LevelCameraProfile,
+} from "../systems/camera-profile";
 import {
   getPlayerActionAudioId,
   shouldPlayLandingAudio,
@@ -184,6 +195,12 @@ import {
   getSolidTerrainAreas,
   getTerrainPlaceholderTextureKey,
 } from "../systems/level-terrain";
+import {
+  drawLevelDecorations,
+  drawThemedLevelBackground,
+  getPlatformTintForLevel,
+  getTerrainTintForLevel,
+} from "../systems/level-visuals";
 import {
   findTriggeredPositionTraps,
   getProjectileTextureKey,
@@ -211,10 +228,6 @@ import {
 } from "../systems/room-state";
 import { SCENE_KEYS } from "./scene-keys";
 
-const CAMERA_DEADZONE_SIZE = {
-  width: TILE_SIZE_PX * 8,
-  height: TILE_SIZE_PX * 5,
-} as const;
 const MARKER_COLORS = {
   spawn: VISUAL_READABILITY_SEMANTIC_COLORS.energy.primary,
 } as const;
@@ -290,6 +303,12 @@ export class LevelScene extends Phaser.Scene {
     string,
     Phaser.GameObjects.Image
   >();
+  private exitMarker?: Phaser.GameObjects.TileSprite;
+  private cameraProfile?: LevelCameraProfile;
+  private cameraLookAhead: Vector2Like = {
+    x: 0,
+    y: 0,
+  };
   private readonly projectileMarkers = new Map<
     string,
     Phaser.GameObjects.Image
@@ -347,6 +366,7 @@ export class LevelScene extends Phaser.Scene {
     this.playGameplayMusic();
 
     this.drawLevelBackground(this.level);
+    drawLevelDecorations(this, this.level);
     this.drawTerrain(this.level);
     this.drawHazards(this.level);
     this.drawTraps(this.level, this.roomState);
@@ -434,6 +454,8 @@ export class LevelScene extends Phaser.Scene {
               animationState: visualState.animationState,
               energy: this.playerEnergyState.energy,
               energyActivity: this.playerEnergyState.activity,
+              hitboxLocal: physicsState.hitbox,
+              hitboxWorld: this.player!.getWorldHitbox(),
             }
           : null,
       traps: Object.values(this.roomState?.traps ?? {}),
@@ -462,6 +484,14 @@ export class LevelScene extends Phaser.Scene {
       canUseCyanSpark: canUseCyanSpark(this.playerEnergyState),
       canPrepareCyanBurst: canPrepareCyanBurst(this.playerEnergyState),
     };
+  }
+
+  public readDevQaPlayerHitbox(): RectLike | null {
+    if (!this.player) {
+      return null;
+    }
+
+    return this.player.getWorldHitbox();
   }
 
   public fillDevQaEnergy(): boolean {
@@ -623,6 +653,7 @@ export class LevelScene extends Phaser.Scene {
     });
 
     this.updatePlayerEnergyAura(dashMovement.isDashing);
+    this.updateCameraLookAhead(collision.velocity);
     this.emitPlayerMovementEffects({
       isDashing: dashMovement.isDashing,
       didJump: jumpMovement.didJump,
@@ -731,9 +762,15 @@ export class LevelScene extends Phaser.Scene {
     const sprite = this.player.getSprite();
     const offset = getDashGhostOffset(this.player.getVisualState().facing);
     const ghost = this.add
-      .image(sprite.x + offset.x, sprite.y + offset.y, sprite.texture.key)
+      .image(
+        sprite.x + offset.x,
+        sprite.y + offset.y,
+        sprite.texture.key,
+        sprite.frame.name,
+      )
       .setOrigin(PLAYER_SIZE.pivot.x, PLAYER_SIZE.pivot.y)
       .setFlipX(sprite.flipX)
+      .setDisplaySize(sprite.displayWidth, sprite.displayHeight)
       .setScale(sprite.scaleX, sprite.scaleY)
       .setAngle(sprite.angle)
       .setAlpha(0.34)
@@ -784,6 +821,11 @@ export class LevelScene extends Phaser.Scene {
   private drawTerrain(level: LevelDefinition): void {
     level.terrain.forEach((terrain) => {
       const { area } = terrain;
+      const textureKey = getTerrainPlaceholderTextureKey(terrain);
+      const tint =
+        textureKey === PLACEHOLDER_TILESET_ASSET_KEYS.PLATFORM
+          ? getPlatformTintForLevel(level)
+          : getTerrainTintForLevel(level);
 
       this.add
         .tileSprite(
@@ -791,25 +833,15 @@ export class LevelScene extends Phaser.Scene {
           area.y + area.height / 2,
           area.width,
           area.height,
-          getTerrainPlaceholderTextureKey(terrain),
+          textureKey,
         )
-        .setOrigin(0.5);
+        .setOrigin(0.5)
+        .setTint(tint);
     });
   }
 
   private drawLevelBackground(level: LevelDefinition): void {
-    const { bounds } = level;
-
-    this.add
-      .tileSprite(
-        bounds.x + bounds.width / 2,
-        bounds.y + bounds.height / 2,
-        bounds.width,
-        bounds.height,
-        PLACEHOLDER_TILESET_ASSET_KEYS.BACKGROUND_PANEL,
-      )
-      .setOrigin(0.5)
-      .setDepth(-10);
+    drawThemedLevelBackground(this, level);
   }
 
   private drawHazards(level: LevelDefinition): void {
@@ -935,7 +967,7 @@ export class LevelScene extends Phaser.Scene {
       )
       .setOrigin(0.5)
       .setAlpha(alpha)
-      .setDepth(1);
+      .setDepth(DEPTH_LAYERS.trapBody);
   }
 
   private createTrapTellMarker(
@@ -997,7 +1029,8 @@ export class LevelScene extends Phaser.Scene {
         )
         .setOrigin(0.5)
         .setDisplaySize(hitbox.width, hitbox.height)
-        .setAlpha(feedback.visual.fillAlpha);
+        .setAlpha(feedback.visual.fillAlpha)
+        .setDepth(DEPTH_LAYERS.pickup);
 
       this.itemMarkers.set(item.id, marker);
     });
@@ -1066,7 +1099,7 @@ export class LevelScene extends Phaser.Scene {
           feedback.visual.strokeColor,
           feedback.visual.strokeAlpha,
         )
-        .setDepth(2);
+        .setDepth(DEPTH_LAYERS.energyTarget);
       const active = this.add
         .tileSprite(
           area.x + area.width / 2,
@@ -1078,7 +1111,7 @@ export class LevelScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setAlpha(0)
         .setVisible(false)
-        .setDepth(3);
+        .setDepth(DEPTH_LAYERS.energyTargetState);
       const broken = this.add
         .tileSprite(
           area.x + area.width / 2,
@@ -1090,7 +1123,7 @@ export class LevelScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setAlpha(0)
         .setVisible(false)
-        .setDepth(3);
+        .setDepth(DEPTH_LAYERS.energyTargetState);
 
       this.energyTargetMarkers.set(target.id, {
         base,
@@ -1120,14 +1153,19 @@ export class LevelScene extends Phaser.Scene {
 
   private createBossMarker(boss: BossDefinition): BossMarker {
     const { hitbox } = boss;
+    const displaySize = getBossVisualDisplaySize(boss);
+    const bottomOffsetY = getBossVisualBottomOffsetY(boss);
+    const centerY =
+      hitbox.y + hitbox.height - displaySize.height / 2 + bottomOffsetY;
     const sprite = this.add
       .image(
         hitbox.x + hitbox.width / 2,
-        hitbox.y + hitbox.height / 2,
+        centerY,
         getBossTextureKey(boss),
+        getBossFrameByState(boss, "inactive"),
       )
       .setOrigin(0.5)
-      .setDisplaySize(hitbox.width, hitbox.height)
+      .setDisplaySize(displaySize.width, displaySize.height)
       .setDepth(VISUAL_READABILITY_DEPTHS.bossBody);
     const health = this.add
       .graphics()
@@ -1159,7 +1197,7 @@ export class LevelScene extends Phaser.Scene {
 
     const { area: exitArea } = level.exit;
 
-    this.add
+    this.exitMarker = this.add
       .tileSprite(
         exitArea.x + exitArea.width / 2,
         exitArea.y + exitArea.height / 2,
@@ -1168,7 +1206,8 @@ export class LevelScene extends Phaser.Scene {
         getExitTextureKey(),
       )
       .setOrigin(0.5)
-      .setAlpha(0.9);
+      .setAlpha(getExitMarkerVisual(this.isExitBlockedByBoss()).alpha)
+      .setDepth(DEPTH_LAYERS.pickup);
 
     level.checkpoints.forEach((checkpoint) => {
       const { area } = checkpoint;
@@ -1181,7 +1220,8 @@ export class LevelScene extends Phaser.Scene {
           getCheckpointTextureKey(false),
         )
         .setOrigin(0.5)
-        .setAlpha(0.65);
+        .setAlpha(0.65)
+        .setDepth(DEPTH_LAYERS.pickup);
 
       this.checkpointMarkers.set(checkpoint.id, marker);
     });
@@ -1220,6 +1260,8 @@ export class LevelScene extends Phaser.Scene {
       this.hasCompletedLevel = true;
       this.completeLevel();
     }
+
+    this.updateExitMarker();
   }
 
   private isExitBlockedByBoss(): boolean {
@@ -2139,8 +2181,8 @@ export class LevelScene extends Phaser.Scene {
           ASSET_KEYS.ENERGY_IMPACT,
         )
         .setDisplaySize(
-          Math.min(Math.max(area.width + 8, 16), 32),
-          Math.min(Math.max(area.height + 8, 16), 32),
+          Math.min(Math.max(area.width + 16, 24), 48),
+          Math.min(Math.max(area.height + 16, 24), 48),
         )
         .setTint(color)
         .setAlpha(clampWideEffectAlpha(state.isBroken ? 0.68 : 0.58))
@@ -2493,11 +2535,19 @@ export class LevelScene extends Phaser.Scene {
     marker: BossMarker,
   ): void {
     const hitbox = getBossRuntimeHitbox(boss, state);
+    const displaySize = getBossVisualDisplaySize(boss);
+    const bottomOffsetY = getBossVisualBottomOffsetY(boss);
     const isDefeated = state.state === "defeated" || state.healthRemaining <= 0;
+    const centerY =
+      hitbox.y + hitbox.height - displaySize.height / 2 + bottomOffsetY;
 
     marker.sprite
-      .setPosition(hitbox.x + hitbox.width / 2, hitbox.y + hitbox.height / 2)
-      .setDisplaySize(hitbox.width, hitbox.height)
+      .setTexture(
+        getBossTextureKey(boss),
+        getBossFrameByState(boss, state.state, state.stateElapsedMs),
+      )
+      .setPosition(hitbox.x + hitbox.width / 2, centerY)
+      .setDisplaySize(displaySize.width, displaySize.height)
       .setDepth(VISUAL_READABILITY_DEPTHS.bossBody)
       .setFlipX(state.facing === "left")
       .setVisible(!isDefeated)
@@ -2833,7 +2883,7 @@ export class LevelScene extends Phaser.Scene {
 
       marker
         .setPosition(hitbox.x + hitbox.width / 2, hitbox.y + hitbox.height / 2)
-        .setDisplaySize(8, 8)
+        .setDisplaySize(16, 16)
         .setFlipX(projectile.direction < 0);
 
       this.cyanSparkProjectileMarkers.set(projectile.id, marker);
@@ -2973,7 +3023,7 @@ export class LevelScene extends Phaser.Scene {
       const isActive = checkpointId === activeCheckpointId;
 
       marker.setTexture(getCheckpointTextureKey(isActive));
-      marker.setAlpha(isActive ? 0.95 : 0.65);
+      marker.setAlpha(getCheckpointMarkerAlpha(isActive));
     });
   }
 
@@ -2983,12 +3033,58 @@ export class LevelScene extends Phaser.Scene {
     }
 
     const { bounds } = this.level;
+    this.cameraProfile = getLevelCameraProfile(this.level);
+    this.cameraLookAhead = {
+      x: 0,
+      y: 0,
+    };
 
     this.cameras.main
-      .setBounds(bounds.x, bounds.y, bounds.width, bounds.height)
+      .setBounds(
+        bounds.x,
+        bounds.y,
+        Math.max(bounds.width, GAME_RESOLUTION.width),
+        Math.max(bounds.height, GAME_RESOLUTION.height),
+      )
       .setRoundPixels(true)
-      .startFollow(this.player.getSprite(), true, 1, 1)
-      .setDeadzone(CAMERA_DEADZONE_SIZE.width, CAMERA_DEADZONE_SIZE.height);
+      .startFollow(
+        this.player.getSprite(),
+        true,
+        this.cameraProfile.followLerpX,
+        this.cameraProfile.followLerpY,
+      )
+      .setDeadzone(
+        this.cameraProfile.deadzoneWidth,
+        this.cameraProfile.deadzoneHeight,
+      )
+      .setFollowOffset(0, 0);
+  }
+
+  private updateCameraLookAhead(velocity: Vector2Like): void {
+    if (!this.cameraProfile) {
+      return;
+    }
+
+    const target = resolveCameraLookAhead(velocity, this.cameraProfile);
+
+    this.cameraLookAhead = {
+      x: Phaser.Math.Linear(this.cameraLookAhead.x, target.x, 0.18),
+      y: Phaser.Math.Linear(this.cameraLookAhead.y, target.y, 0.12),
+    };
+
+    this.cameras.main.setFollowOffset(this.cameraLookAhead.x, this.cameraLookAhead.y);
+  }
+
+  private updateExitMarker(): void {
+    if (!this.exitMarker) {
+      return;
+    }
+
+    const isBlocked = this.isExitBlockedByBoss();
+    const visual = getExitMarkerVisual(isBlocked);
+    this.exitMarker
+      .setAlpha(visual.alpha)
+      .setTint(visual.tint);
   }
 
   private pauseLevel(): void {
@@ -3042,8 +3138,12 @@ export class LevelScene extends Phaser.Scene {
   }
 
   private playGameplayMusic(): void {
+    if (!this.level) {
+      return;
+    }
+
     emitGameEvent(GAME_EVENTS.AUDIO_PLAY_REQUESTED, {
-      audioId: MUSIC_AUDIO_IDS.MVP_LOOP,
+      audioId: resolveGameplayMusicAudioId(this.level),
       category: "music",
     });
   }
@@ -3158,6 +3258,10 @@ export class LevelScene extends Phaser.Scene {
     this.cyanBurstAttackSequence = 0;
     this.levelStartedAtMs = 0;
     this.levelStartDeathCount = 0;
+    this.exitMarker?.destroy();
+    this.exitMarker = undefined;
+    this.cameraProfile = undefined;
+    this.cameraLookAhead = { x: 0, y: 0 };
     this.checkpointMarkers.clear();
     this.trapMarkers.clear();
     this.itemMarkers.forEach((marker) => marker.destroy());
