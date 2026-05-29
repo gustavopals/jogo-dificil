@@ -1913,6 +1913,11 @@ Decisões atualizadas na migração HD (Task 18.4), revisadas em 2026-05-29:
 - Projeteis extraídos das mesmas referências (cristal/fumaça, frasco, pedra).
 - Registry: `boss-spritesheet-registry.ts` + `resolveBossAnimationFrameIndex()`.
 
+### Release publico (Task 19.4, 2026-05-29)
+
+- Fase 19 concluida; build HD publicado pelo autor em servidor proprio.
+- Checklist tecnico: lint, testes unitarios e build de producao validados no repo.
+
 Decisão histórica (Task 18.4, substituída):
 
 - Visual anterior 56x104px / hitbox 36x80px (~1,75 x 3,25 tiles).
