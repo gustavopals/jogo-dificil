@@ -2,6 +2,10 @@ import type { LevelDefinition, Vector2Like } from "../../shared";
 import { GAME_RESOLUTION } from "../constants";
 import { scaleLegacyX, scaleLegacyY } from "../scale";
 
+// Zoom aplicado à câmera durante o gameplay para tornar Pino e chefões
+// mais visíveis. Reduz a área visível de 960×540 para 640×360 (20×11 tiles).
+export const GAMEPLAY_CAMERA_ZOOM = 1.5;
+
 export type LevelCameraProfile = {
   readonly deadzoneWidth: number;
   readonly deadzoneHeight: number;

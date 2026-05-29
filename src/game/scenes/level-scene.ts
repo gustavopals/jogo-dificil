@@ -199,6 +199,7 @@ import {
   getLevelCameraProfile,
   resolveCameraLookAhead,
   type LevelCameraProfile,
+  GAMEPLAY_CAMERA_ZOOM,
 } from "../systems/camera-profile";
 import {
   getPlayerActionAudioId,
@@ -3179,6 +3180,7 @@ export class LevelScene extends Phaser.Scene {
     };
 
     this.cameras.main
+      .setZoom(GAMEPLAY_CAMERA_ZOOM)
       .setBounds(
         bounds.x,
         bounds.y,
