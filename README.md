@@ -1,7 +1,7 @@
-# jogo-dificil
+# Pals Adventure 1
 
-Jogo de plataforma 2D de navegador, dificil, rapido de reiniciar e baseado em
-surpresa, precisao, tentativa e erro. A versao atual roda em **960x540** (pixel
+Repositorio `jogo-dificil`: jogo de plataforma 2D de navegador, dificil, rapido
+de reiniciar e baseado em surpresa, precisao, tentativa e erro. A versao atual roda em **960x540** (pixel
 art HD), com 10 fases curtas, checkpoints, mortes rapidas, respawn automatico,
 reinicio manual, dash, energia ciano, tres bosses, armadilhas, itens, audio
 basico, resultados locais por fase e tela inicial.

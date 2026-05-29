@@ -147,6 +147,10 @@ import {
 import {
   getCheckpointMarkerAlpha,
   getCheckpointTextureKey,
+  getCheckpointActivationPulseTargets,
+  getExitCompletionPulseTargets,
+  CHECKPOINT_ACTIVATION_PULSE,
+  EXIT_COMPLETION_PULSE,
   getExitMarkerVisual,
   getExitTextureKey,
 } from "../systems/level-markers";
@@ -167,6 +171,8 @@ import {
   PLAYER_RUN_SPARK_INTERVAL_MS,
   PLAYER_RUN_SPARK_SPEED_THRESHOLD,
   createCyanBurstPreparationParticles,
+  createCheckpointActivationParticles,
+  createDeathBurstParticles,
   createJumpBurstParticles,
   createInsufficientEnergyParticles,
   createLandingBurstParticles,
@@ -182,6 +188,13 @@ import {
   VISUAL_READABILITY_SEMANTIC_COLORS,
   clampWideEffectAlpha,
 } from "../systems/visual-readability";
+import {
+  applyScreenShake,
+  shouldTriggerHeavyLandingShake,
+  type ScreenShakePreset,
+} from "../systems/camera-juice";
+import { isJuiceEnabled } from "../systems/juice-settings";
+import { DEATH_JUICE_OVERLAY } from "../ui/death-juice";
 import {
   getLevelCameraProfile,
   resolveCameraLookAhead,
@@ -740,7 +753,117 @@ export class LevelScene extends Phaser.Scene {
       this.emitBurstParticles(
         createLandingBurstParticles(this.player.getPhysicsState().position),
       );
+
+      if (shouldTriggerHeavyLandingShake(input.velocity.y)) {
+        this.playScreenShake("subtle");
+      }
     }
+  }
+
+  private playScreenShake(preset: ScreenShakePreset): void {
+    applyScreenShake(this.cameras.main, preset);
+  }
+
+  private playDeathJuice(death: PlayerDeathContext): void {
+    if (!isJuiceEnabled()) {
+      return;
+    }
+
+    const shakePreset: ScreenShakePreset =
+      death.cause === "boss" ? "medium" : "light";
+    this.playScreenShake(shakePreset);
+    this.flashDeathOverlay();
+  }
+
+  private flashDeathOverlay(): void {
+    const overlay = this.add
+      .rectangle(
+        GAME_RESOLUTION.width / 2,
+        GAME_RESOLUTION.height / 2,
+        GAME_RESOLUTION.width,
+        GAME_RESOLUTION.height,
+        DEATH_JUICE_OVERLAY.color,
+        0,
+      )
+      .setScrollFactor(0)
+      .setDepth(DEATH_JUICE_OVERLAY.depth);
+
+    this.tweens.add({
+      targets: overlay,
+      alpha: DEATH_JUICE_OVERLAY.peakAlpha,
+      duration: DEATH_JUICE_OVERLAY.riseDurationMs,
+      ease: "Quad.easeOut",
+      onComplete: () => {
+        this.tweens.add({
+          targets: overlay,
+          alpha: 0,
+          duration: DEATH_JUICE_OVERLAY.fallDurationMs,
+          ease: "Quad.easeIn",
+          onComplete: () => {
+            overlay.destroy();
+          },
+        });
+      },
+    });
+  }
+
+  private playCheckpointActivationJuice(
+    checkpointId: CheckpointId,
+    position: Vector2Like,
+  ): void {
+    const marker = this.checkpointMarkers.get(checkpointId);
+
+    if (marker && isJuiceEnabled()) {
+      this.tweens.killTweensOf(marker);
+      marker.setScale(1);
+      const pulseTargets = getCheckpointActivationPulseTargets(
+        getCheckpointMarkerAlpha(true),
+      );
+
+      this.tweens.add({
+        targets: marker,
+        scaleX: pulseTargets.scaleX,
+        scaleY: pulseTargets.scaleY,
+        alpha: pulseTargets.alpha,
+        duration: CHECKPOINT_ACTIVATION_PULSE.durationMs / 2,
+        ease: CHECKPOINT_ACTIVATION_PULSE.ease,
+        yoyo: true,
+        onComplete: () => {
+          marker.setScale(1);
+          marker.setAlpha(getCheckpointMarkerAlpha(true));
+        },
+      });
+    }
+
+    this.emitBurstParticles(createCheckpointActivationParticles(position));
+  }
+
+  private playExitCompletionJuice(onComplete: () => void): void {
+    if (!this.exitMarker || !isJuiceEnabled()) {
+      onComplete();
+      return;
+    }
+
+    const marker = this.exitMarker;
+    const baseVisual = getExitMarkerVisual(false);
+    this.tweens.killTweensOf(marker);
+    marker.setScale(1);
+    const pulseTargets = getExitCompletionPulseTargets(baseVisual.alpha);
+
+    this.tweens.add({
+      targets: marker,
+      scaleX: pulseTargets.scaleX,
+      scaleY: pulseTargets.scaleY,
+      alpha: pulseTargets.alpha,
+      duration: EXIT_COMPLETION_PULSE.durationMs / 2,
+      ease: EXIT_COMPLETION_PULSE.ease,
+      yoyo: true,
+      onComplete: () => {
+        marker.setScale(1);
+        marker.setAlpha(baseVisual.alpha);
+        onComplete();
+      },
+    });
   }
 
   private emitDashGhost(): void {
@@ -1246,10 +1369,19 @@ export class LevelScene extends Phaser.Scene {
     );
 
     if (touchedCheckpoint) {
+      const checkpointPosition = {
+        x: touchedCheckpoint.position.x,
+        y: touchedCheckpoint.position.y,
+      };
+
       gameStateStore.setActiveCheckpoint(
         createActiveCheckpointFromDefinition(this.level, touchedCheckpoint),
       );
       this.updateCheckpointMarkers(touchedCheckpoint.id);
+      this.playCheckpointActivationJuice(
+        touchedCheckpoint.id,
+        checkpointPosition,
+      );
     }
 
     if (
@@ -1282,11 +1414,13 @@ export class LevelScene extends Phaser.Scene {
     const levelResult = this.completeLevelResult(this.level, deathCount);
 
     gameStateStore.completeLevel(nextLevelId);
-    this.scene.start(SCENE_KEYS.LEVEL_TRANSITION, {
-      completedLevelId: this.level.id,
-      nextLevelId,
-      deathCount,
-      levelResult,
+    this.playExitCompletionJuice(() => {
+      this.scene.start(SCENE_KEYS.LEVEL_TRANSITION, {
+        completedLevelId: this.level!.id,
+        nextLevelId,
+        deathCount,
+        levelResult,
+      });
     });
   }
 
@@ -1976,6 +2110,10 @@ export class LevelScene extends Phaser.Scene {
       this.playLevelSfx(bossDamageAudioId);
     }
 
+    if (result.didApplyDamage) {
+      this.playScreenShake("medium");
+    }
+
     return true;
   }
 
@@ -2266,8 +2404,9 @@ export class LevelScene extends Phaser.Scene {
     this.resetTemporaryEnergyStateForCheckpoint();
     this.player.die();
     this.updatePlayerEnergyAura(false);
+    this.playDeathJuice(death);
     this.emitBurstParticles(
-      createLandingBurstParticles(this.player.getPhysicsState().position),
+      createDeathBurstParticles(this.player.getPhysicsState().position),
     );
     this.jumpState = createInitialJumpMovementState();
     this.dashState = resetDashMovementState(this.dashState);

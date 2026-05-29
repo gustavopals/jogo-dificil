@@ -214,7 +214,7 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
   });
 
   await page.goto("/");
-  await expect(page).toHaveTitle("Jogo Difícil");
+  await expect(page).toHaveTitle("Pals Adventure 1");
 
   const canvas = page.locator("canvas");
 

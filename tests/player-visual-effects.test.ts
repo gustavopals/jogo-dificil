@@ -5,6 +5,8 @@ import {
   PLAYER_RUN_SPARK_INTERVAL_MS,
   createCyanBurstPreparationParticles,
   createInsufficientEnergyParticles,
+  createCheckpointActivationParticles,
+  createDeathBurstParticles,
   createJumpBurstParticles,
   createLandingBurstParticles,
   createRunSparkParticle,
@@ -59,6 +61,8 @@ describe("player visual effects", () => {
   it("builds deterministic burst particles and timed effect gates", () => {
     expect(createJumpBurstParticles({ x: 40, y: 80 })).toHaveLength(3);
     expect(createLandingBurstParticles({ x: 40, y: 80 })).toHaveLength(3);
+    expect(createDeathBurstParticles({ x: 40, y: 80 }).length).toBeGreaterThan(3);
+    expect(createCheckpointActivationParticles({ x: 40, y: 80 })).toHaveLength(4);
     expect(
       createRunSparkParticle({ x: 40, y: 80 }, "right").offsetX,
     ).toBeLessThan(0);

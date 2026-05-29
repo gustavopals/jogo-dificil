@@ -1,4 +1,4 @@
-export const GAME_TITLE = "Jogo Difícil";
+export const GAME_TITLE = "Pals Adventure 1";
 export const GAME_PARENT_ID = "app";
 
 export const GAME_RESOLUTION = {

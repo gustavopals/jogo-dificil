@@ -23,9 +23,12 @@ Definido inicialmente:
 - Personagem principal provisório: Pino, uma criatura original pequena, teimosa
   e legível em pixel art de baixa resolução.
 
+Decidido (2026-05-29):
+
+- Nome do jogo: **Pals Adventure 1** (`GAME_TITLE` em `src/game/constants.ts`).
+
 Ainda vamos definir:
 
-- Nome do jogo.
 - Tema visual final.
 - Nome definitivo do personagem principal.
 - Mundo.
@@ -744,8 +747,8 @@ Implementação inicial da música do MVP:
 
 Implementação inicial da tela inicial:
 
-- A tela de abertura usa `Jogo Difícil` como nome provisório e mantém apenas uma
-  linha de comando visível: `INICIAR FASE 1: ENTER / ESPAÇO`.
+- A tela de abertura exibe `Pals Adventure 1` (antes `Jogo Difícil`) e mantém
+  apenas uma linha de comando visível: `INICIAR FASE 1: ENTER / ESPAÇO`.
 - A tela inicial toca o loop `Entrada Pulante`; ao começar a fase, a música
   troca para `Pulos de Azar` sem manter duas faixas ativas.
 - O visual deixa claro que é um jogo de plataforma: Pino aparece no chão, a

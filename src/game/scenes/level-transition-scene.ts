@@ -14,6 +14,10 @@ import {
   LEVEL_TRANSITION_DELAY_MS,
   normalizeTransitionDeathCount,
 } from "../ui/level-transition";
+import {
+  LEVEL_TRANSITION_JUICE,
+  resolveLevelTransitionFadeOutStartMs,
+} from "../ui/level-transition-juice";
 import { SCENE_KEYS } from "./scene-keys";
 
 export type LevelTransitionSceneData = {
@@ -26,6 +30,8 @@ export type LevelTransitionSceneData = {
 export class LevelTransitionScene extends Phaser.Scene {
   private nextLevelId?: LevelId;
   private transitionTimer?: Phaser.Time.TimerEvent;
+  private fadeOutTimer?: Phaser.Time.TimerEvent;
+  private fadeOverlay?: Phaser.GameObjects.Rectangle;
 
   public constructor() {
     super(SCENE_KEYS.LEVEL_TRANSITION);
@@ -54,6 +60,12 @@ export class LevelTransitionScene extends Phaser.Scene {
     );
 
     if (nextLevel) {
+      this.fadeOutTimer = this.time.delayedCall(
+        resolveLevelTransitionFadeOutStartMs(LEVEL_TRANSITION_DELAY_MS),
+        this.fadeOutBeforeNextLevel,
+        undefined,
+        this,
+      );
       this.transitionTimer = this.time.delayedCall(
         LEVEL_TRANSITION_DELAY_MS,
         this.startNextLevel,
@@ -126,7 +138,8 @@ export class LevelTransitionScene extends Phaser.Scene {
         },
       })
       .setOrigin(0.5)
-      .setAlpha(0);
+      .setAlpha(0)
+      .setScale(LEVEL_TRANSITION_JUICE.titleScaleFrom);
     const detailText = this.add
       .text(centerX, centerY - scaleLegacyY(4), detail, {
         color: "#80d7c2",
@@ -175,10 +188,50 @@ export class LevelTransitionScene extends Phaser.Scene {
     }
 
     this.tweens.add({
-      targets: [titleText, detailText, resultText, deathsText],
+      targets: [detailText, resultText, deathsText],
       alpha: 1,
-      duration: 220,
+      duration: LEVEL_TRANSITION_JUICE.titleFadeDurationMs,
       ease: "Sine.easeOut",
+    });
+    this.tweens.add({
+      targets: titleText,
+      alpha: 1,
+      scaleX: 1,
+      scaleY: 1,
+      duration: LEVEL_TRANSITION_JUICE.titleScaleDurationMs,
+      ease: "Back.easeOut",
+    });
+
+    this.fadeOverlay = this.add
+      .rectangle(
+        centerX,
+        centerY,
+        GAME_RESOLUTION.width,
+        GAME_RESOLUTION.height,
+        0x050608,
+        1,
+      )
+      .setDepth(100);
+
+    this.tweens.add({
+      targets: this.fadeOverlay,
+      alpha: 0,
+      duration: LEVEL_TRANSITION_JUICE.fadeInDurationMs,
+      ease: "Quad.easeOut",
+    });
+  }
+
+  private fadeOutBeforeNextLevel(): void {
+    if (!this.fadeOverlay) {
+      return;
+    }
+
+    this.tweens.killTweensOf(this.fadeOverlay);
+    this.tweens.add({
+      targets: this.fadeOverlay,
+      alpha: 1,
+      duration: LEVEL_TRANSITION_JUICE.fadeOutDurationMs,
+      ease: "Quad.easeIn",
     });
   }
 
@@ -215,6 +268,8 @@ export class LevelTransitionScene extends Phaser.Scene {
   private cleanup(): void {
     this.transitionTimer?.remove(false);
     this.transitionTimer = undefined;
+    this.fadeOutTimer?.remove(false);
+    this.fadeOutTimer = undefined;
     this.input.keyboard?.off("keydown-ENTER", this.restartRun, this);
     this.input.keyboard?.off("keydown-SPACE", this.restartRun, this);
     this.input.off(Phaser.Input.Events.POINTER_DOWN, this.restartRun, this);

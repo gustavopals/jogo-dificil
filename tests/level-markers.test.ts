@@ -4,6 +4,8 @@ import { GAMEPLAY_SPRITE_KEYS } from "../src/data/art";
 import {
   getCheckpointMarkerAlpha,
   getCheckpointTextureKey,
+  getCheckpointActivationPulseTargets,
+  getExitCompletionPulseTargets,
   getExitMarkerVisual,
   getExitTextureKey,
   LEVEL_MARKER_VISUAL,
@@ -42,5 +44,17 @@ describe("level markers", () => {
       alpha: LEVEL_MARKER_VISUAL.exitBlockedAlpha,
       tint: LEVEL_MARKER_VISUAL.exitBlockedTint,
     });
+  });
+
+  it("builds stronger pulse targets for checkpoint activation and exit completion", () => {
+    const checkpointBaseAlpha = getCheckpointMarkerAlpha(true);
+    const checkpointPulse = getCheckpointActivationPulseTargets(checkpointBaseAlpha);
+    const exitPulse = getExitCompletionPulseTargets(
+      getExitMarkerVisual(false).alpha,
+    );
+
+    expect(checkpointPulse.scaleX).toBeGreaterThan(1);
+    expect(checkpointPulse.alpha).toBeGreaterThanOrEqual(checkpointBaseAlpha);
+    expect(exitPulse.scaleX).toBeGreaterThan(checkpointPulse.scaleX);
   });
 });

@@ -168,6 +168,105 @@ export function createJumpBurstParticles(
   ];
 }
 
+export function createCheckpointActivationParticles(
+  position: Vector2Like,
+): readonly PlayerBurstParticle[] {
+  return [
+    createBurstParticle(
+      position,
+      0,
+      -sy(6),
+      0,
+      -sy(10),
+      sx(8),
+      sy(3),
+      ENERGY_COLOR,
+      0.62,
+      200,
+    ),
+    createBurstParticle(
+      position,
+      -sx(9),
+      sy(1),
+      -sx(12),
+      sy(2),
+      sx(5),
+      sy(2),
+      ENERGY_HOT_COLOR,
+      0.48,
+      170,
+    ),
+    createBurstParticle(
+      position,
+      sx(9),
+      sy(1),
+      sx(12),
+      sy(2),
+      sx(5),
+      sy(2),
+      ENERGY_HOT_COLOR,
+      0.48,
+      170,
+    ),
+    createBurstParticle(
+      position,
+      0,
+      sy(2),
+      0,
+      sy(6),
+      sx(6),
+      sy(2),
+      WHITE_COLOR,
+      0.4,
+      150,
+    ),
+  ];
+}
+
+export function createDeathBurstParticles(
+  position: Vector2Like,
+): readonly PlayerBurstParticle[] {
+  return [
+    ...createLandingBurstParticles(position),
+    createBurstParticle(
+      position,
+      -sx(10),
+      -sy(8),
+      -sx(18),
+      -sy(14),
+      sx(8),
+      sy(3),
+      IMPACT_COLOR,
+      0.72,
+      190,
+    ),
+    createBurstParticle(
+      position,
+      sx(10),
+      -sy(8),
+      sx(18),
+      -sy(14),
+      sx(8),
+      sy(3),
+      IMPACT_COLOR,
+      0.72,
+      190,
+    ),
+    createBurstParticle(
+      position,
+      0,
+      -sy(12),
+      0,
+      -sy(20),
+      sx(6),
+      sy(4),
+      WHITE_COLOR,
+      0.56,
+      170,
+    ),
+  ];
+}
+
 export function createLandingBurstParticles(
   position: Vector2Like,
 ): readonly PlayerBurstParticle[] {
