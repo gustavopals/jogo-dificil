@@ -38,10 +38,10 @@ export function getLevelCameraProfile(
     deadzoneHeight,
     followLerpX: hasBossArena
       ? 0.22
-      : 0.14 + normalizedDifficulty * 0.14,
+      : 0.10 + normalizedDifficulty * 0.10,
     followLerpY: hasBossArena
       ? 0.2
-      : 0.12 + normalizedDifficulty * 0.1,
+      : 0.09 + normalizedDifficulty * 0.09,
     lookAheadMaxX: hasBossArena
       ? scaleLegacyX(120)
       : Math.round(scaleLegacyX(72) + scaleLegacyX(20) * normalizedDifficulty),

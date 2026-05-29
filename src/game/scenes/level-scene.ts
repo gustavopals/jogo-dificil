@@ -3196,10 +3196,6 @@ export class LevelScene extends Phaser.Scene {
         this.cameraProfile.followLerpX,
         this.cameraProfile.followLerpY,
       )
-      .setDeadzone(
-        this.cameraProfile.deadzoneWidth,
-        this.cameraProfile.deadzoneHeight,
-      )
       .setFollowOffset(0, 0);
   }
 
@@ -3208,14 +3204,12 @@ export class LevelScene extends Phaser.Scene {
       return;
     }
 
-    const target = resolveCameraLookAhead(velocity, this.cameraProfile);
-
-    this.cameraLookAhead = {
-      x: Phaser.Math.Linear(this.cameraLookAhead.x, target.x, 0.18),
-      y: Phaser.Math.Linear(this.cameraLookAhead.y, target.y, 0.12),
-    };
-
-    this.cameras.main.setFollowOffset(this.cameraLookAhead.x, this.cameraLookAhead.y);
+    // Aplica lookahead direto — sem lerp extra. O lerp interno do startFollow
+    // é a única suavização ativa, evitando dois lerps em cascata que criavam
+    // movimento inconsistente (ora lento, ora rápido).
+    const lookahead = resolveCameraLookAhead(velocity, this.cameraProfile);
+    this.cameraLookAhead = lookahead;
+    this.cameras.main.setFollowOffset(lookahead.x, lookahead.y);
   }
 
   private updateExitMarker(): void {
