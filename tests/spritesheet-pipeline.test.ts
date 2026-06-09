@@ -31,20 +31,20 @@ import { SPRITESHEET_ASSETS } from "../src/game/assets";
 
 describe("spritesheet pipeline", () => {
   it("defines official spritesheet conventions for migration", () => {
-    expect(SPRITESHEET_CELL_SIZE_PX).toBe(128);
-    expect(SPRITESHEET_ALLOWED_SHEET_SIZES_PX).toEqual([512, 1024]);
-    expect(SPRITESHEET_GRID_BY_SIZE[512]).toEqual({
+    expect(SPRITESHEET_CELL_SIZE_PX).toBe(256);
+    expect(SPRITESHEET_ALLOWED_SHEET_SIZES_PX).toEqual([1024, 2048]);
+    expect(SPRITESHEET_GRID_BY_SIZE[1024]).toEqual({
       columns: 4,
       rows: 4,
       maxFrames: 16,
     });
-    expect(SPRITESHEET_GRID_BY_SIZE[1024]).toEqual({
+    expect(SPRITESHEET_GRID_BY_SIZE[2048]).toEqual({
       columns: 8,
       rows: 8,
       maxFrames: 64,
     });
-    expect(isValidSpritesheetFrameSize(128, 128)).toBe(true);
-    expect(isValidSpritesheetFrameSize(64, 128)).toBe(false);
+    expect(isValidSpritesheetFrameSize(256, 256)).toBe(true);
+    expect(isValidSpritesheetFrameSize(128, 256)).toBe(false);
   });
 
   it("registers declarative Pino frame ids for each animation state", () => {
@@ -73,27 +73,27 @@ describe("spritesheet pipeline", () => {
 
   it("maps every Pino frame id to a spritesheet key and frame index", () => {
     expect(PINO_SPRITESHEET_FRAME_REGISTRY[PINO_FRAME_IDS.IDLE]).toEqual({
-      textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+      textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
       frame: 0,
     });
     expect(
       PINO_SPRITESHEET_FRAME_REGISTRY[PINO_FRAME_IDS.CYAN_BURST_FIRE_02],
     ).toEqual({
-      textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+      textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
       frame: 7,
     });
   });
 
-  it("keeps spritesheet assets enabled with valid 128x128 cells", () => {
+  it("keeps spritesheet assets enabled with valid 256x256 cells", () => {
     expect(PINO_SPRITESHEET_ASSETS.map((asset) => asset.key)).toEqual([
-      PINO_SPRITESHEET_KEYS.CORE_512,
-      PINO_SPRITESHEET_KEYS.ENERGY_512,
+      PINO_SPRITESHEET_KEYS.CORE_1024,
+      PINO_SPRITESHEET_KEYS.ENERGY_1024,
     ]);
-    expect(PINO_SPRITESHEET_ASSETS.every((asset) => asset.frameWidth === 128)).toBe(
+    expect(PINO_SPRITESHEET_ASSETS.every((asset) => asset.frameWidth === 256)).toBe(
       true,
     );
     expect(
-      PINO_SPRITESHEET_ASSETS.every((asset) => asset.frameHeight === 128),
+      PINO_SPRITESHEET_ASSETS.every((asset) => asset.frameHeight === 256),
     ).toBe(true);
     expect(PINO_SPRITESHEET_ASSETS.every((asset) => asset.enabled === true)).toBe(
       true,
@@ -105,15 +105,15 @@ describe("spritesheet pipeline", () => {
 
   it("registers dedicated HD spritesheets and state frames for bosses", () => {
     expect(BOSS_SPRITESHEET_ASSETS.map((asset) => asset.key)).toEqual([
-      BOSS_SPRITESHEET_KEYS.HIROLITO_512,
-      BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512,
-      BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
+      BOSS_SPRITESHEET_KEYS.HIROLITO_1024,
+      BOSS_SPRITESHEET_KEYS.DR_IMPORTS_1024,
+      BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024,
     ]);
-    expect(BOSS_SPRITESHEET_ASSETS.every((asset) => asset.frameWidth === 128)).toBe(
+    expect(BOSS_SPRITESHEET_ASSETS.every((asset) => asset.frameWidth === 256)).toBe(
       true,
     );
     expect(
-      BOSS_SPRITESHEET_ASSETS.every((asset) => asset.frameHeight === 128),
+      BOSS_SPRITESHEET_ASSETS.every((asset) => asset.frameHeight === 256),
     ).toBe(true);
     expect(BOSS_SPRITESHEET_ASSETS.every((asset) => asset.enabled)).toBe(true);
     expect(BOSS_HD_VISUAL_PROFILES.HIROLITO_NARGUILITO.displaySize).toEqual({
@@ -250,12 +250,12 @@ describe("spritesheet pipeline", () => {
       PINO_ANIMATIONS.map((animation) => [animation.state, animation]),
     );
     expect(animationByState[PINO_ANIMATION_STATES.IDLE]?.frames).toEqual([
-      { textureKey: PINO_SPRITESHEET_KEYS.CORE_512, frame: 0 },
+      { textureKey: PINO_SPRITESHEET_KEYS.CORE_1024, frame: 0 },
     ]);
     expect(animationByState[PINO_ANIMATION_STATES.RUN]?.frames).toEqual([
-      { textureKey: PINO_SPRITESHEET_KEYS.CORE_512, frame: 1 },
-      { textureKey: PINO_SPRITESHEET_KEYS.CORE_512, frame: 2 },
-      { textureKey: PINO_SPRITESHEET_KEYS.CORE_512, frame: 3 },
+      { textureKey: PINO_SPRITESHEET_KEYS.CORE_1024, frame: 1 },
+      { textureKey: PINO_SPRITESHEET_KEYS.CORE_1024, frame: 2 },
+      { textureKey: PINO_SPRITESHEET_KEYS.CORE_1024, frame: 3 },
     ]);
   });
 });

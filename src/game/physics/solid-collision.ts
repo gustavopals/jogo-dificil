@@ -31,6 +31,14 @@ export type KinematicCollisionResult = {
 
 const TOUCH_EPSILON_PX = 1;
 
+/**
+ * Profundidade máxima de penetração rasa corrigida ao cair/estar parado sobre
+ * um sólido. Cobre spawns/checkpoints declarados poucos pixels dentro do chão
+ * e evita o estado "em pé mas nunca aterrado", sem ejetar o corpo em
+ * sobreposições profundas (ex.: blocos revelados).
+ */
+const MAX_SHALLOW_PENETRATION_PX = 4;
+
 export function resolveKinematicCollisions(
   input: KinematicCollisionInput,
 ): KinematicCollisionResult {
@@ -244,8 +252,13 @@ function resolveVerticalMovement(input: {
     if (input.velocityY > 0) {
       const currentBottom = currentHitbox.y + currentHitbox.height;
       const targetBottom = targetHitbox.y + targetHitbox.height;
+      const shallowPenetration = currentBottom - solid.y;
+      const didCrossTop = currentBottom <= solid.y && targetBottom > solid.y;
+      const isShallowlyEmbedded =
+        shallowPenetration > 0 &&
+        shallowPenetration <= MAX_SHALLOW_PENETRATION_PX;
 
-      if (currentBottom <= solid.y && targetBottom > solid.y) {
+      if (didCrossTop || isShallowlyEmbedded) {
         const candidateY = getPivotYForHitboxBottom(solid.y, input.body);
 
         if (candidateY < positionY) {

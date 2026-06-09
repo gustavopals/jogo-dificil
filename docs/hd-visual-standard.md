@@ -8,12 +8,12 @@ permanece em `docs/phase-18-hd-migration-plan.md`.
 
 ## Escala Global
 
-| Constante              | Valor oficial                          | Onde vive                          |
-| ---------------------- | -------------------------------------- | ---------------------------------- |
-| Resolucao logica       | `960x540` (16:9)                       | `src/game/constants.ts`            |
-| Tile base              | `32x32` px                             | `src/game/constants.ts`            |
-| Escala fisica espacial | `WORLD_PHYSICS_SCALE = 2`              | `src/game/constants.ts`            |
-| Baseline legado        | `480x270`, tile `16` (somente migracao)| `src/game/scale.ts`                |
+| Constante              | Valor oficial                           | Onde vive               |
+| ---------------------- | --------------------------------------- | ----------------------- |
+| Resolucao logica       | `960x540` (16:9)                        | `src/game/constants.ts` |
+| Tile base              | `32x32` px                              | `src/game/constants.ts` |
+| Escala fisica espacial | `WORLD_PHYSICS_SCALE = 2`               | `src/game/constants.ts` |
+| Baseline legado        | `480x270`, tile `16` (somente migracao) | `src/game/scale.ts`     |
 
 Regras:
 
@@ -33,9 +33,9 @@ Regras:
 
 Spritesheets:
 
-- `assets/spritesheets/player-pino-core-512.png` — locomocao e estados base.
-- `assets/spritesheets/player-pino-energy-512.png` — Carga, Centelha, Rajada.
-- Celulas `128x128`, sheet `512x512` (grade 4x4).
+- `assets/spritesheets/player-pino-core-1024.png` — locomocao e estados base.
+- `assets/spritesheets/player-pino-energy-1024.png` — Carga, Centelha, Rajada.
+- Celulas `256x256`, sheet `1024x1024` (grade 4x4).
 - Registry: `src/data/characters/pino-spritesheet-registry.ts`.
 - Modo ativo: `ACTIVE_PINO_FRAME_SOURCE_MODE = spritesheets` em
   `pino-animations.ts`.
@@ -44,13 +44,13 @@ Geracao: `npm run assets:pino-sheets`.
 
 ## Bosses
 
-| Boss        | Visual runtime | Sheet                                      |
-| ----------- | -------------- | ------------------------------------------ |
-| Hirolito    | `96x112`       | `assets/spritesheets/boss-hirolito-sheet-512.png` |
-| Dr. Imports | `96x128`       | `assets/spritesheets/boss-dr-imports-sheet-512.png` |
-| Giga Fabio  | `120x128`      | `assets/spritesheets/boss-giga-fabio-sheet-512.png` |
+| Boss        | Visual runtime | Sheet                                                |
+| ----------- | -------------- | ---------------------------------------------------- |
+| Hirolito    | `96x112`       | `assets/spritesheets/boss-hirolito-sheet-1024.png`   |
+| Dr. Imports | `96x128`       | `assets/spritesheets/boss-dr-imports-sheet-1024.png` |
+| Giga Fabio  | `120x128`      | `assets/spritesheets/boss-giga-fabio-sheet-1024.png` |
 
-- Celulas `128x128`, sheets `512x512`.
+- Celulas `256x256`, sheets `1024x1024`.
 - Registry: `src/data/characters/boss-spritesheet-registry.ts`.
 - Perfis de exibicao: `BOSS_HD_VISUAL_PROFILES`.
 
@@ -71,7 +71,7 @@ Paleta semantica: `src/data/art/visual-direction.ts` e
 
 Documento de referencia: `src/data/art/spritesheet-conventions.ts`.
 
-- Celula padrao: `128x128`.
+- Celula padrao: `256x256`.
 - Tamanhos de sheet permitidos: `512x512` (4x4) e `1024x1024` (8x8).
 - Export: PNG pixel art, sem antialias, sem compressao lossy.
 - Nomes: `assets/spritesheets/<dominio>-<nome>-<tamanho>.png` em kebab-case.

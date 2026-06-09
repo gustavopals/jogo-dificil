@@ -6,6 +6,14 @@ export type JumpMovementConfig = {
   readonly jumpCutMultiplier: number;
   readonly coyoteTimeMs: number;
   readonly jumpBufferMs: number;
+  /** Banda de velocidade vertical (px/s) tratada como ápice do pulo. */
+  readonly apexSpeedThreshold: number;
+  /** Multiplicador de gravidade dentro da banda de ápice (hang time). */
+  readonly apexGravityMultiplier: number;
+  /** Multiplicador de gravidade na descida, para queda mais firme. */
+  readonly fallGravityMultiplier: number;
+  /** Velocidade terminal de queda (px/s). */
+  readonly maxFallSpeed: number;
 };
 
 export type JumpMovementState = {
@@ -23,7 +31,7 @@ export type JumpMovementInput = {
   readonly wasJumpReleased: boolean;
   readonly deltaMs: number;
   readonly state: JumpMovementState;
-  readonly config?: JumpMovementConfig;
+  readonly config?: Partial<JumpMovementConfig>;
 };
 
 export type JumpMovementResult = {
@@ -40,6 +48,10 @@ export const DEFAULT_JUMP_MOVEMENT_CONFIG = {
   jumpCutMultiplier: PLAYER_MOVEMENT.jumpCutMultiplier,
   coyoteTimeMs: PLAYER_MOVEMENT.coyoteTimeMs,
   jumpBufferMs: PLAYER_MOVEMENT.jumpBufferMs,
+  apexSpeedThreshold: PLAYER_MOVEMENT.apexSpeedThreshold,
+  apexGravityMultiplier: PLAYER_MOVEMENT.apexGravityMultiplier,
+  fallGravityMultiplier: PLAYER_MOVEMENT.fallGravityMultiplier,
+  maxFallSpeed: PLAYER_MOVEMENT.maxFallSpeed,
 } as const satisfies JumpMovementConfig;
 
 export function createInitialJumpMovementState(): JumpMovementState {
@@ -52,7 +64,7 @@ export function createInitialJumpMovementState(): JumpMovementState {
 export function calculateJumpMovement(
   input: JumpMovementInput,
 ): JumpMovementResult {
-  const config = input.config ?? DEFAULT_JUMP_MOVEMENT_CONFIG;
+  const config = { ...DEFAULT_JUMP_MOVEMENT_CONFIG, ...input.config };
   const deltaMs = Math.max(0, input.deltaMs);
   const deltaSeconds = deltaMs / 1000;
 
@@ -79,7 +91,8 @@ export function calculateJumpMovement(
   }
 
   if (!isGrounded || velocityY < 0) {
-    velocityY += config.gravity * deltaSeconds;
+    velocityY += config.gravity * resolveGravityScale(velocityY, config) * deltaSeconds;
+    velocityY = Math.min(velocityY, config.maxFallSpeed);
   }
 
   let positionY = input.currentPositionY + velocityY * deltaSeconds;
@@ -109,4 +122,24 @@ export function calculateJumpMovement(
 
 function reduceTimer(value: number, deltaMs: number): number {
   return Math.max(0, value - deltaMs);
+}
+
+/**
+ * Arco de pulo v2: gravidade reduzida na banda do ápice (hang time para
+ * ajustes finos), gravidade ampliada na descida (queda firme e legível) e
+ * gravidade normal durante a subida, preservando a altura máxima do pulo.
+ */
+function resolveGravityScale(
+  velocityY: number,
+  config: JumpMovementConfig,
+): number {
+  if (Math.abs(velocityY) <= config.apexSpeedThreshold) {
+    return config.apexGravityMultiplier;
+  }
+
+  if (velocityY > 0) {
+    return config.fallGravityMultiplier;
+  }
+
+  return 1;
 }

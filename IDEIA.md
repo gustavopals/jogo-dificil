@@ -1189,7 +1189,7 @@ Fase 16 - Kit de energia original:
   passagens temporárias declaradas por `activationDurationMs`, fecha o objeto e
   rearma a vida ao expirar.
 - Sprites de energia do Pino migrados para spritesheet HD:
-  `assets/spritesheets/player-pino-energy-512.png` (512x512, células 128x128)
+  `assets/spritesheets/player-pino-energy-1024.png` (1024x1024, células 256x256)
   com os frames `charge`, `cyan-spark`, `cyan-burst-prepare` e
   `cyan-burst-fire`.
 - Os PNGs 14x26 antigos seguem no repositório como base histórica e fallback
@@ -2695,6 +2695,46 @@ Direção pendente:
 - Criar pipeline de assets.
 
 ## Decisões Registradas
+
+### Reescrita Aprimorada (2026-06): física v2, personagens HD2 e câmera viva
+
+- **Física de pulo v2** (`src/game/physics/jump-movement.ts`): gravidade
+  modulada por fase do arco — banda de ápice com gravidade reduzida
+  (`apexGravityMultiplier 0.58`, banda de ±140 px/s) para mais controle no
+  topo, descida 15% mais pesada (`fallGravityMultiplier 1.15`) para queda
+  firme e legível, e velocidade terminal (`maxFallSpeed 1040 px/s`). A subida
+  usa gravidade normal, então a altura máxima do pulo não muda e as fases
+  continuam solváveis. Coyote time, jump buffer e jump cut preservados.
+- **Depenetração rasa na colisão** (`solid-collision.ts`): corpo que termina
+  até 4 px dentro de um sólido ao cair é assentado no topo. Corrige spawns e
+  checkpoints declarados poucos px dentro do chão (estado "em pé mas nunca
+  aterrado" herdado da mudança de geometria do jogador) sem ejetar
+  sobreposições profundas.
+- **Personagens e bosses HD2**: sheets regenerados direto da arte de
+  referência (1254x1254) para células `256x256` em sheets `1024x1024` com
+  resampling lanczos3 — antes o pipeline reduzia o Pino a 32x48 com nearest e
+  re-ampliava, destruindo o detalhe. Hirolito Narguilito, Dr. Imports e Giga
+  Fabio mantêm nomes, poses e identidades; só a fidelidade dobrou. A proporção
+  conteúdo/célula foi mantida, então o tamanho em tela não mudou (Pino usa
+  `getPinoRenderScale()` para compensar a célula maior; o corpo arcade
+  compensa a escala em `applyHitbox`).
+- **Filtro por textura**: `pixelArt: true` global continua (tiles nítidos),
+  mas as texturas de Pino e bosses recebem filtro LINEAR no preload para
+  downscale suave do detalhe — visual mais "realista" sem serrilhado.
+- **Câmera viva**: o perfil de câmera por fase (deadzone, lerp e look-ahead em
+  `camera-profile.ts`) foi religado na `LevelScene` — estava implementado mas
+  desconectado (código morto que quebrava o build). A câmera agora antecipa a
+  direção do movimento com suavização (`CAMERA_LOOK_AHEAD_SMOOTHING 0.08`).
+- **Nuvens com deriva**: decorações de nuvem ganharam tween lento de ida e
+  volta para dar vida ao fundo sem distrair.
+- **Layouts de fase preservados de propósito**: as 11 fases têm revisão de
+  justiça documentada e suíte de validação; redesenhar às cegas arriscaria
+  regressões. A melhoria de mapas veio por câmera, física, leitura visual e
+  fidelidade de arte.
+- **Smoke e2e corrigido**: expectativas obsoletas da geometria antiga do
+  jogador (hitbox 36x80 e repouso em y=444) atualizadas para 20x36 e y=448,
+  com `expect.poll` no assentamento pós-spawn para eliminar corrida.
+
 
 - O jogo será de navegador.
 - O gênero base será plataforma 2D difícil.

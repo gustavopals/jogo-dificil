@@ -57,4 +57,15 @@ export const PLAYER_MOVEMENT = {
   dashSpeed: 420 * WORLD_PHYSICS_SCALE,
   dashDurationMs: 150,
   dashCooldownMs: 300,
+  // Física v2 do arco de pulo: o ápice ganha uma janela de gravidade reduzida
+  // (mais controle no topo) e a descida fica mais pesada que a subida, com
+  // velocidade terminal para leitura da queda. A altura máxima do pulo não
+  // muda (subida usa gravidade normal), então as fases continuam solváveis.
+  apexSpeedThreshold: 70 * WORLD_PHYSICS_SCALE,
+  apexGravityMultiplier: 0.58,
+  // 1.15 mantém a queda mais firme sem encurtar de forma perceptível o
+  // alcance horizontal de saltos descendentes das fases existentes (o hang
+  // de ápice compensa o tempo perdido na descida).
+  fallGravityMultiplier: 1.15,
+  maxFallSpeed: 520 * WORLD_PHYSICS_SCALE,
 } as const;

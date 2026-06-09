@@ -242,7 +242,7 @@ describe("block 2 content", () => {
       entryDoorId: "level-06-dr-imports-entry-door",
       defeatUnlocks: ["level-06-dr-imports-exit-door"],
     });
-    expect(boss.assetId).toBe("boss-dr-imports-sheet-512");
+    expect(boss.assetId).toBe("boss-dr-imports-sheet-1024");
     expect(getBossVisualDisplaySize(boss)).toEqual(
       BOSS_HD_VISUAL_PROFILES.DR_IMPORTS.displaySize,
     );
@@ -336,7 +336,7 @@ describe("block 2 content", () => {
     expect(weakPoint.area).toEqual(boss.weakPoint);
     expect(LEVEL_06.assets.sprites).toEqual(
       expect.arrayContaining([
-        BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512,
+        BOSS_SPRITESHEET_KEYS.DR_IMPORTS_1024,
         "boss-projectile-import-bottle",
       ]),
     );

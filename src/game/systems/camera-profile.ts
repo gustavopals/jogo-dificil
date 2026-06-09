@@ -51,6 +51,12 @@ export function getLevelCameraProfile(
   };
 }
 
+/**
+ * Fator de interpolação por frame do offset de look-ahead da câmera.
+ * Valores menores deixam a antecipação mais suave.
+ */
+export const CAMERA_LOOK_AHEAD_SMOOTHING = 0.08;
+
 export function resolveCameraLookAhead(
   velocity: Vector2Like,
   profile: Pick<LevelCameraProfile, "lookAheadMaxX" | "lookAheadMaxY">,

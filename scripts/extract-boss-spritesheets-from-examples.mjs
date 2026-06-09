@@ -3,7 +3,7 @@ import path from "node:path";
 
 import sharp from "sharp";
 
-const CELL_SIZE = 128;
+const CELL_SIZE = 256;
 const GRID_COLUMNS = 4;
 const GRID_ROWS = 4;
 const SHEET_SIZE = CELL_SIZE * GRID_COLUMNS;
@@ -12,25 +12,31 @@ const TOTAL_CELLS = GRID_COLUMNS * GRID_ROWS;
 const ROOT = process.cwd();
 const OUTPUT_DIR = path.join(ROOT, "assets", "spritesheets");
 
-/** Boss sheets: 4x4 reference art → 512 spritesheet (16 frames × 128px cells). */
+/**
+ * Boss sheets: 4x4 reference art → 1024 spritesheet (16 frames × 256px cells).
+ * O conteúdo mantém a mesma proporção conteúdo/célula da geração anterior
+ * (alvo 2x em célula 2x), então o tamanho em tela não muda — apenas a
+ * fidelidade dobra. O resize usa lanczos3 para preservar o sombreamento e o
+ * detalhe da arte de referência (visual mais realista que nearest).
+ */
 const BOSS_SHEET_CONFIGS = [
   {
     id: "hirolito",
     source: path.join(ROOT, "assets", "boss", "examples", "boss-1-examples.png"),
-    output: "boss-hirolito-sheet-512.png",
-    frameTarget: { width: 72, height: 88 },
+    output: "boss-hirolito-sheet-1024.png",
+    frameTarget: { width: 144, height: 176 },
   },
   {
     id: "dr-imports",
     source: path.join(ROOT, "assets", "boss", "examples", "boss-2-examples.png"),
-    output: "boss-dr-imports-sheet-512.png",
-    frameTarget: { width: 72, height: 96 },
+    output: "boss-dr-imports-sheet-1024.png",
+    frameTarget: { width: 144, height: 192 },
   },
   {
     id: "giga-fabio",
     source: path.join(ROOT, "assets", "boss", "examples", "boss-3-examples.png"),
-    output: "boss-giga-fabio-sheet-512.png",
-    frameTarget: { width: 88, height: 96 },
+    output: "boss-giga-fabio-sheet-1024.png",
+    frameTarget: { width: 176, height: 192 },
   },
 ];
 
@@ -163,7 +169,7 @@ async function fitFrameToTarget(cellImage, frameTarget) {
     .resize({
       width: resizedWidth,
       height: resizedHeight,
-      kernel: sharp.kernel.nearest,
+      kernel: sharp.kernel.lanczos3,
     })
     .png()
     .toBuffer();

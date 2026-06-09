@@ -471,7 +471,7 @@ export function getBossTextureKey(boss: BossDefinition): LevelAssetId {
     return GAMEPLAY_SPRITE_KEYS.BOSS_GIGA_FABIO;
   }
 
-  return BOSS_SPRITESHEET_KEYS.HIROLITO_512;
+  return BOSS_SPRITESHEET_KEYS.HIROLITO_1024;
 }
 
 export function getBossVisualDisplaySize(
@@ -901,7 +901,7 @@ function getBossHdVisualProfile(
 
   if (boss.id.includes("boss-schema-test")) {
     return {
-      textureKey: BOSS_SPRITESHEET_KEYS.HIROLITO_512,
+      textureKey: BOSS_SPRITESHEET_KEYS.HIROLITO_1024,
       displaySize: BOSS_HD_VISUAL_PROFILES.HIROLITO_NARGUILITO.displaySize,
       bottomOffsetY: 0,
     };

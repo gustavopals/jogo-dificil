@@ -31,6 +31,23 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   public create(): void {
+    this.applySmoothCharacterFiltering();
     this.scene.start(SCENE_KEYS.MENU);
+  }
+
+  /**
+   * Os sheets HD de personagem e bosses guardam arte detalhada (células 256)
+   * exibida em tamanho menor; com o filtro NEAREST global (pixelArt) o
+   * downscale serrilharia. LINEAR só nessas texturas mantém tiles e traps
+   * pixel-perfect e personagens suaves e nítidos.
+   */
+  private applySmoothCharacterFiltering(): void {
+    SPRITESHEET_ASSETS.forEach((asset) => {
+      if (!asset.enabled || !this.textures.exists(asset.key)) {
+        return;
+      }
+
+      this.textures.get(asset.key).setFilter(Phaser.Textures.FilterMode.LINEAR);
+    });
   }
 }

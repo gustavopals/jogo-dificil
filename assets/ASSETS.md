@@ -49,92 +49,92 @@ jogo.
 
 ## Registro
 
-| Arquivo                                                   | Origem                         | Licenca             | Observacoes                                                      |
-| --------------------------------------------------------- | ------------------------------ | ------------------- | ---------------------------------------------------------------- |
-| `assets/legacy/pino/player-pino-idle.png`                 | Gerado no projeto por script   | Original do projeto | Frame legado 14x26px de idle; fonte para sheet HD.               |
-| `assets/legacy/pino/player-pino-run-01.png`               | Gerado no projeto por script   | Original do projeto | Frame legado 1 de corrida do Pino.                              |
-| `assets/legacy/pino/player-pino-run-02.png`               | Gerado no projeto por script   | Original do projeto | Frame legado 2 de corrida do Pino.                              |
-| `assets/legacy/pino/player-pino-run-03.png`               | Gerado no projeto por script   | Original do projeto | Frame legado 3 de corrida do Pino.                              |
-| `assets/legacy/pino/player-pino-jump.png`                 | Gerado no projeto por script   | Original do projeto | Pose legada de pulo do Pino.                                     |
-| `assets/legacy/pino/player-pino-jump-peak.png`            | Gerado no projeto por script   | Original do projeto | Frame legado de apice do pulo do Pino.                           |
-| `assets/legacy/pino/player-pino-fall.png`                 | Gerado no projeto por script   | Original do projeto | Pose legada de queda do Pino.                                    |
-| `assets/legacy/pino/player-pino-dash.png`                 | Gerado no projeto por script   | Original do projeto | Pose legada de dash do Pino.                                     |
-| `assets/legacy/pino/player-pino-charge-01.png`            | Gerado no projeto por script   | Original do projeto | Frame legado 1 da Carga Ciano.                                   |
-| `assets/legacy/pino/player-pino-charge-02.png`            | Gerado no projeto por script   | Original do projeto | Frame legado 2 da Carga Ciano.                                   |
-| `assets/legacy/pino/player-pino-cyan-spark-01.png`        | Gerado no projeto por script   | Original do projeto | Frame legado 1 da Centelha Ciano.                                |
-| `assets/legacy/pino/player-pino-cyan-spark-02.png`        | Gerado no projeto por script   | Original do projeto | Frame legado 2 da Centelha Ciano.                                |
-| `assets/legacy/pino/player-pino-cyan-burst-prepare-01.png`| Gerado no projeto por script   | Original do projeto | Frame legado 1 da preparacao da Rajada Ciano.                    |
-| `assets/legacy/pino/player-pino-cyan-burst-prepare-02.png`| Gerado no projeto por script   | Original do projeto | Frame legado 2 da preparacao da Rajada Ciano.                    |
-| `assets/legacy/pino/player-pino-cyan-burst-fire-01.png`   | Gerado no projeto por script   | Original do projeto | Frame legado 1 da soltura da Rajada Ciano.                       |
-| `assets/legacy/pino/player-pino-cyan-burst-fire-02.png`   | Gerado no projeto por script   | Original do projeto | Frame legado 2 da soltura da Rajada Ciano.                       |
-| `assets/legacy/pino/player-pino-death-01.png`             | Gerado no projeto por script   | Original do projeto | Frame legado 1 de morte do Pino.                                 |
-| `assets/legacy/pino/player-pino-death-02.png`             | Gerado no projeto por script   | Original do projeto | Frame legado 2 de morte do Pino.                                 |
-| `assets/legacy/pino/player-pino-respawn-01.png`           | Gerado no projeto por script   | Original do projeto | Frame legado 1 de respawn do Pino.                               |
-| `assets/legacy/pino/player-pino-respawn-02.png`           | Gerado no projeto por script   | Original do projeto | Frame legado 2 de respawn do Pino.                               |
-| `assets/legacy/bosses/hirolito-narguilito.png`            | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Hirolito; substituido por sheet HD.        |
-| `assets/legacy/bosses/dr-imports.png`                     | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Dr. Imports; substituido por sheet HD.     |
-| `assets/legacy/bosses/giga-fabio.png`                     | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Giga Fabio; substituido por sheet HD.      |
-| `assets/sprites/trap-spikes.png`                          | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de espinhos e spike-pop, contorno duro.        |
-| `assets/sprites/trap-false-block.png`                     | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de bloco falso com indício roxo sutil.         |
-| `assets/sprites/trap-falling-platform.png`                | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de plataforma instável com alerta inferior.    |
-| `assets/sprites/trap-breakable-floor.png`                 | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de piso quebrável com rachaduras vermelhas.    |
-| `assets/sprites/trap-projectile.png`                      | Gerado no projeto por script   | Original do projeto | Sprite 16x16px HD de projétil roxo em losango.                   |
-| `assets/sprites/energy-cyan-spark-projectile.png`         | Gerado no projeto por script   | Original do projeto | Sprite 16x16px HD do projétil da Centelha Ciano.                 |
-| `assets/sprites/energy-cyan-burst-beam.png`               | Gerado no projeto por script   | Original do projeto | Segmento 32x32px HD tileável do feixe da Rajada Ciano.           |
-| `assets/sprites/energy-impact.png`                        | Gerado no projeto por script   | Original do projeto | Impacto ciano 32x32px HD para acertos em alvos.                  |
-| `assets/sprites/energy-target-active.png`                 | Gerado no projeto por script   | Original do projeto | Alvo ativo 32x32px HD com aro ciano e núcleo amarelo.            |
-| `assets/sprites/energy-cracked-block-broken.png`          | Gerado no projeto por script   | Original do projeto | Bloco rachado quebrado 32x32px HD com fendas claras.             |
-| `assets/sprites/item-required-chip.png`                   | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de chip obrigatório amarelo com núcleo ciano.  |
-| `assets/sprites/item-mechanism-key.png`                   | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de chave de mecanismo coral.                   |
-| `assets/sprites/item-optional-token.png`                  | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de coletável opcional em losango.              |
-| `assets/sprites/marker-checkpoint-inactive.png`           | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de checkpoint inativo (faixa amarela).         |
-| `assets/sprites/marker-checkpoint-active.png`             | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de checkpoint ativo (poste ciano com brilho).  |
-| `assets/sprites/marker-exit.png`                          | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de saída de fase coral com painel claro.       |
-| `assets/spritesheets/player-pino-core-512.png`            | Gerado no projeto por script   | Original do projeto | Sheet 512x512 (128x128 por celula) do Pino para movimento base. |
-| `assets/spritesheets/player-pino-energy-512.png`          | Gerado no projeto por script   | Original do projeto | Sheet 512x512 (128x128 por celula) do Pino para Energia Ciano.  |
-| `assets/spritesheets/boss-hirolito-sheet-512.png`         | Gerado no projeto por script   | Original do projeto | Sheet 512x512 (128x128 por célula) do Hirolito para estados de combate. |
-| `assets/spritesheets/boss-dr-imports-sheet-512.png`       | Gerado no projeto por script   | Original do projeto | Sheet 512x512 (128x128 por célula) do Dr. Imports para estados de combate. |
-| `assets/spritesheets/boss-giga-fabio-sheet-512.png`       | Gerado no projeto por script   | Original do projeto | Sheet 512x512 (128x128 por célula) do Giga Fabio para estados de combate. |
-| `assets/sprites/bosses/boss-projectile-smoke-puff.png`    | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de projétil de fumaça roxa de boss.               |
-| `assets/sprites/bosses/boss-projectile-import-bottle.png` | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de garrafa/projétil do Dr. Imports.               |
-| `assets/sprites/bosses/boss-projectile-boulder.png`       | Gerado no projeto com `magick` | Original do projeto | Sprite 24x24px de pedra pesada do Giga Fabio.                    |
-| `assets/sprites/bosses/boss-impact-burst.png`             | Gerado no projeto com `magick` | Original do projeto | Sprite 24x24px de impacto coral e amarelo para bosses.           |
-| `assets/tilesets/lab-solid-block.png`                     | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de bloco solido industrial (bisel e rebites).    |
-| `assets/tilesets/lab-platform.png`                        | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de plataforma metalica com borda ciano de ledge. |
-| `assets/tilesets/lab-hazard-spikes.png`                   | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de perigo de espinhos vermelhos com base escura. |
-| `assets/tilesets/lab-background-panel.png`                | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de painel escuro repetivel, mais escuro que gameplay. |
-| `assets/audio/sfx/player-jump.wav`                        | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — pulo organico curto.                               |
-| `assets/audio/sfx/player-land.wav`                        | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de aterrissagem do Pino.                       |
-| `assets/audio/sfx/player-death-01.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                           |
-| `assets/audio/sfx/player-death-02.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                           |
-| `assets/audio/sfx/player-death-03.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                           |
-| `assets/audio/sfx/player-respawn.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de respawn do Pino.                            |
-| `assets/audio/sfx/player-primary.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de ação primária.                              |
-| `assets/audio/sfx/player-secondary.wav`                   | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de ação secundária.                            |
-| `assets/audio/sfx/level-checkpoint.wav`                   | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de checkpoint.                                 |
-| `assets/audio/sfx/level-complete.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de fim de fase.                                |
-| `assets/audio/sfx/level-item.wav`                         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de coleta de item.                             |
-| `assets/audio/sfx/level-trap.wav`                         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de armadilha ativada.                          |
-| `assets/audio/sfx/level-falling-platform.wav`             | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de plataforma caindo.                          |
-| `assets/audio/sfx/level-projectile.wav`                   | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de projétil disparando.                        |
-| `assets/audio/sfx/energy-charge-loop.wav`                 | Gerado no projeto por script   | Original do projeto | Loop baixo da Carga Ciano enquanto segura energia.               |
-| `assets/audio/sfx/energy-charge-full.wav`                 | Gerado no projeto por script   | Original do projeto | Ping curto de Energia Ciano cheia.                               |
-| `assets/audio/sfx/energy-shot.wav`                        | Gerado no projeto por script   | Original do projeto | Disparo seco e curto da Centelha Ciano.                          |
-| `assets/audio/sfx/energy-shot-empty.wav`                  | Gerado no projeto por script   | Original do projeto | Falha curta ao tentar usar energia insuficiente.                 |
-| `assets/audio/sfx/energy-special-windup.wav`              | Gerado no projeto por script   | Original do projeto | Subida curta da preparação da Rajada Ciano.                      |
-| `assets/audio/sfx/energy-special-fire.wav`                | Gerado no projeto por script   | Original do projeto | Disparo curto e forte da Rajada Ciano.                           |
-| `assets/audio/sfx/energy-impact-small.wav`                | Gerado no projeto por script   | Original do projeto | Impacto pequeno da Centelha Ciano.                               |
-| `assets/audio/sfx/energy-impact-heavy.wav`                | Gerado no projeto por script   | Original do projeto | Impacto pesado da Rajada Ciano em bloco ou alvo.                 |
-| `assets/audio/sfx/boss-entry.wav`                         | Gerado no projeto por script   | Original do projeto | Entrada curta de boss com subida grave e ruído leve.             |
-| `assets/audio/sfx/boss-windup.wav`                        | Gerado no projeto por script   | Original do projeto | Tell sonoro de windup com subida tensa.                          |
-| `assets/audio/sfx/boss-attack.wav`                        | Gerado no projeto por script   | Original do projeto | Ataque seco de boss com impacto grave curto.                     |
-| `assets/audio/sfx/boss-hit.wav`                           | Gerado no projeto por script   | Original do projeto | Hit metálico curto quando boss perde vida.                       |
-| `assets/audio/sfx/boss-defeat.wav`                        | Gerado no projeto por script   | Original do projeto | Queda musical curta para derrota de boss.                        |
-| `assets/audio/music/menu-loop.wav`                        | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — loop do tema `Entrada Pulante`.                 |
-| `assets/audio/music/mvp-loop.wav`                         | Gerado no projeto por script   | Original do projeto | Loop do bloco 1 (fases 01-03), tema `Pulos de Azar`.             |
-| `assets/audio/music/block-2-dash-loop.wav`                | Gerado no projeto por script   | Original do projeto | Loop do bloco 2 (fases 04-06), tema `Dash Sob Suspeita`.       |
-| `assets/audio/music/block-3-energy-loop.wav`              | Gerado no projeto por script   | Original do projeto | Loop do bloco 3 (fases 07-10), tema `Nucleo Ciano`.            |
-| `assets/audio/music/mvp-level-complete-sting.wav`         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — vinheta de fim de fase.                            |
+| Arquivo                                                    | Origem                         | Licenca             | Observacoes                                                                       |
+| ---------------------------------------------------------- | ------------------------------ | ------------------- | --------------------------------------------------------------------------------- |
+| `assets/legacy/pino/player-pino-idle.png`                  | Gerado no projeto por script   | Original do projeto | Frame legado 14x26px de idle; fonte para sheet HD.                                |
+| `assets/legacy/pino/player-pino-run-01.png`                | Gerado no projeto por script   | Original do projeto | Frame legado 1 de corrida do Pino.                                                |
+| `assets/legacy/pino/player-pino-run-02.png`                | Gerado no projeto por script   | Original do projeto | Frame legado 2 de corrida do Pino.                                                |
+| `assets/legacy/pino/player-pino-run-03.png`                | Gerado no projeto por script   | Original do projeto | Frame legado 3 de corrida do Pino.                                                |
+| `assets/legacy/pino/player-pino-jump.png`                  | Gerado no projeto por script   | Original do projeto | Pose legada de pulo do Pino.                                                      |
+| `assets/legacy/pino/player-pino-jump-peak.png`             | Gerado no projeto por script   | Original do projeto | Frame legado de apice do pulo do Pino.                                            |
+| `assets/legacy/pino/player-pino-fall.png`                  | Gerado no projeto por script   | Original do projeto | Pose legada de queda do Pino.                                                     |
+| `assets/legacy/pino/player-pino-dash.png`                  | Gerado no projeto por script   | Original do projeto | Pose legada de dash do Pino.                                                      |
+| `assets/legacy/pino/player-pino-charge-01.png`             | Gerado no projeto por script   | Original do projeto | Frame legado 1 da Carga Ciano.                                                    |
+| `assets/legacy/pino/player-pino-charge-02.png`             | Gerado no projeto por script   | Original do projeto | Frame legado 2 da Carga Ciano.                                                    |
+| `assets/legacy/pino/player-pino-cyan-spark-01.png`         | Gerado no projeto por script   | Original do projeto | Frame legado 1 da Centelha Ciano.                                                 |
+| `assets/legacy/pino/player-pino-cyan-spark-02.png`         | Gerado no projeto por script   | Original do projeto | Frame legado 2 da Centelha Ciano.                                                 |
+| `assets/legacy/pino/player-pino-cyan-burst-prepare-01.png` | Gerado no projeto por script   | Original do projeto | Frame legado 1 da preparacao da Rajada Ciano.                                     |
+| `assets/legacy/pino/player-pino-cyan-burst-prepare-02.png` | Gerado no projeto por script   | Original do projeto | Frame legado 2 da preparacao da Rajada Ciano.                                     |
+| `assets/legacy/pino/player-pino-cyan-burst-fire-01.png`    | Gerado no projeto por script   | Original do projeto | Frame legado 1 da soltura da Rajada Ciano.                                        |
+| `assets/legacy/pino/player-pino-cyan-burst-fire-02.png`    | Gerado no projeto por script   | Original do projeto | Frame legado 2 da soltura da Rajada Ciano.                                        |
+| `assets/legacy/pino/player-pino-death-01.png`              | Gerado no projeto por script   | Original do projeto | Frame legado 1 de morte do Pino.                                                  |
+| `assets/legacy/pino/player-pino-death-02.png`              | Gerado no projeto por script   | Original do projeto | Frame legado 2 de morte do Pino.                                                  |
+| `assets/legacy/pino/player-pino-respawn-01.png`            | Gerado no projeto por script   | Original do projeto | Frame legado 1 de respawn do Pino.                                                |
+| `assets/legacy/pino/player-pino-respawn-02.png`            | Gerado no projeto por script   | Original do projeto | Frame legado 2 de respawn do Pino.                                                |
+| `assets/legacy/bosses/hirolito-narguilito.png`             | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Hirolito; substituido por sheet HD.    |
+| `assets/legacy/bosses/dr-imports.png`                      | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Dr. Imports; substituido por sheet HD. |
+| `assets/legacy/bosses/giga-fabio.png`                      | Gerado no projeto com `magick` | Original do projeto | Procedural melhorado (Fase 20) — legado do Giga Fabio; substituido por sheet HD.  |
+| `assets/sprites/trap-spikes.png`                           | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de espinhos e spike-pop, contorno duro.                         |
+| `assets/sprites/trap-false-block.png`                      | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de bloco falso com indício roxo sutil.                          |
+| `assets/sprites/trap-falling-platform.png`                 | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de plataforma instável com alerta inferior.                     |
+| `assets/sprites/trap-breakable-floor.png`                  | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de piso quebrável com rachaduras vermelhas.                     |
+| `assets/sprites/trap-projectile.png`                       | Gerado no projeto por script   | Original do projeto | Sprite 16x16px HD de projétil roxo em losango.                                    |
+| `assets/sprites/energy-cyan-spark-projectile.png`          | Gerado no projeto por script   | Original do projeto | Sprite 16x16px HD do projétil da Centelha Ciano.                                  |
+| `assets/sprites/energy-cyan-burst-beam.png`                | Gerado no projeto por script   | Original do projeto | Segmento 32x32px HD tileável do feixe da Rajada Ciano.                            |
+| `assets/sprites/energy-impact.png`                         | Gerado no projeto por script   | Original do projeto | Impacto ciano 32x32px HD para acertos em alvos.                                   |
+| `assets/sprites/energy-target-active.png`                  | Gerado no projeto por script   | Original do projeto | Alvo ativo 32x32px HD com aro ciano e núcleo amarelo.                             |
+| `assets/sprites/energy-cracked-block-broken.png`           | Gerado no projeto por script   | Original do projeto | Bloco rachado quebrado 32x32px HD com fendas claras.                              |
+| `assets/sprites/item-required-chip.png`                    | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de chip obrigatório amarelo com núcleo ciano.                   |
+| `assets/sprites/item-mechanism-key.png`                    | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de chave de mecanismo coral.                                    |
+| `assets/sprites/item-optional-token.png`                   | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de coletável opcional em losango.                               |
+| `assets/sprites/marker-checkpoint-inactive.png`            | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de checkpoint inativo (faixa amarela).                          |
+| `assets/sprites/marker-checkpoint-active.png`              | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de checkpoint ativo (poste ciano com brilho).                   |
+| `assets/sprites/marker-exit.png`                           | Gerado no projeto por script   | Original do projeto | Sprite 32x32px HD de saída de fase coral com painel claro.                        |
+| `assets/spritesheets/player-pino-core-1024.png`            | Gerado no projeto por script   | Original do projeto | Sheet 1024x1024 (256x256 por celula) do Pino para movimento base.                 |
+| `assets/spritesheets/player-pino-energy-1024.png`          | Gerado no projeto por script   | Original do projeto | Sheet 1024x1024 (256x256 por celula) do Pino para Energia Ciano.                  |
+| `assets/spritesheets/boss-hirolito-sheet-1024.png`         | Gerado no projeto por script   | Original do projeto | Sheet 1024x1024 (256x256 por célula) do Hirolito para estados de combate.         |
+| `assets/spritesheets/boss-dr-imports-sheet-1024.png`       | Gerado no projeto por script   | Original do projeto | Sheet 1024x1024 (256x256 por célula) do Dr. Imports para estados de combate.      |
+| `assets/spritesheets/boss-giga-fabio-sheet-1024.png`       | Gerado no projeto por script   | Original do projeto | Sheet 1024x1024 (256x256 por célula) do Giga Fabio para estados de combate.       |
+| `assets/sprites/bosses/boss-projectile-smoke-puff.png`     | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de projétil de fumaça roxa de boss.                                |
+| `assets/sprites/bosses/boss-projectile-import-bottle.png`  | Gerado no projeto com `magick` | Original do projeto | Sprite 16x16px de garrafa/projétil do Dr. Imports.                                |
+| `assets/sprites/bosses/boss-projectile-boulder.png`        | Gerado no projeto com `magick` | Original do projeto | Sprite 24x24px de pedra pesada do Giga Fabio.                                     |
+| `assets/sprites/bosses/boss-impact-burst.png`              | Gerado no projeto com `magick` | Original do projeto | Sprite 24x24px de impacto coral e amarelo para bosses.                            |
+| `assets/tilesets/lab-solid-block.png`                      | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de bloco solido industrial (bisel e rebites).                     |
+| `assets/tilesets/lab-platform.png`                         | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de plataforma metalica com borda ciano de ledge.                  |
+| `assets/tilesets/lab-hazard-spikes.png`                    | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de perigo de espinhos vermelhos com base escura.                  |
+| `assets/tilesets/lab-background-panel.png`                 | Gerado no projeto por script   | Original do projeto | Tile 32x32px HD de painel escuro repetivel, mais escuro que gameplay.             |
+| `assets/audio/sfx/player-jump.wav`                         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — pulo organico curto.                             |
+| `assets/audio/sfx/player-land.wav`                         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de aterrissagem do Pino.                   |
+| `assets/audio/sfx/player-death-01.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                       |
+| `assets/audio/sfx/player-death-02.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                       |
+| `assets/audio/sfx/player-death-03.wav`                     | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — variação de morte do Pino.                       |
+| `assets/audio/sfx/player-respawn.wav`                      | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de respawn do Pino.                        |
+| `assets/audio/sfx/player-primary.wav`                      | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de ação primária.                          |
+| `assets/audio/sfx/player-secondary.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de ação secundária.                        |
+| `assets/audio/sfx/level-checkpoint.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de checkpoint.                             |
+| `assets/audio/sfx/level-complete.wav`                      | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de fim de fase.                            |
+| `assets/audio/sfx/level-item.wav`                          | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de coleta de item.                         |
+| `assets/audio/sfx/level-trap.wav`                          | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de armadilha ativada.                      |
+| `assets/audio/sfx/level-falling-platform.wav`              | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de plataforma caindo.                      |
+| `assets/audio/sfx/level-projectile.wav`                    | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — curto de projétil disparando.                    |
+| `assets/audio/sfx/energy-charge-loop.wav`                  | Gerado no projeto por script   | Original do projeto | Loop baixo da Carga Ciano enquanto segura energia.                                |
+| `assets/audio/sfx/energy-charge-full.wav`                  | Gerado no projeto por script   | Original do projeto | Ping curto de Energia Ciano cheia.                                                |
+| `assets/audio/sfx/energy-shot.wav`                         | Gerado no projeto por script   | Original do projeto | Disparo seco e curto da Centelha Ciano.                                           |
+| `assets/audio/sfx/energy-shot-empty.wav`                   | Gerado no projeto por script   | Original do projeto | Falha curta ao tentar usar energia insuficiente.                                  |
+| `assets/audio/sfx/energy-special-windup.wav`               | Gerado no projeto por script   | Original do projeto | Subida curta da preparação da Rajada Ciano.                                       |
+| `assets/audio/sfx/energy-special-fire.wav`                 | Gerado no projeto por script   | Original do projeto | Disparo curto e forte da Rajada Ciano.                                            |
+| `assets/audio/sfx/energy-impact-small.wav`                 | Gerado no projeto por script   | Original do projeto | Impacto pequeno da Centelha Ciano.                                                |
+| `assets/audio/sfx/energy-impact-heavy.wav`                 | Gerado no projeto por script   | Original do projeto | Impacto pesado da Rajada Ciano em bloco ou alvo.                                  |
+| `assets/audio/sfx/boss-entry.wav`                          | Gerado no projeto por script   | Original do projeto | Entrada curta de boss com subida grave e ruído leve.                              |
+| `assets/audio/sfx/boss-windup.wav`                         | Gerado no projeto por script   | Original do projeto | Tell sonoro de windup com subida tensa.                                           |
+| `assets/audio/sfx/boss-attack.wav`                         | Gerado no projeto por script   | Original do projeto | Ataque seco de boss com impacto grave curto.                                      |
+| `assets/audio/sfx/boss-hit.wav`                            | Gerado no projeto por script   | Original do projeto | Hit metálico curto quando boss perde vida.                                        |
+| `assets/audio/sfx/boss-defeat.wav`                         | Gerado no projeto por script   | Original do projeto | Queda musical curta para derrota de boss.                                         |
+| `assets/audio/music/menu-loop.wav`                         | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — loop do tema `Entrada Pulante`.                  |
+| `assets/audio/music/mvp-loop.wav`                          | Gerado no projeto por script   | Original do projeto | Loop do bloco 1 (fases 01-03), tema `Pulos de Azar`.                              |
+| `assets/audio/music/block-2-dash-loop.wav`                 | Gerado no projeto por script   | Original do projeto | Loop do bloco 2 (fases 04-06), tema `Dash Sob Suspeita`.                          |
+| `assets/audio/music/block-3-energy-loop.wav`               | Gerado no projeto por script   | Original do projeto | Loop do bloco 3 (fases 07-10), tema `Nucleo Ciano`.                               |
+| `assets/audio/music/mvp-level-complete-sting.wav`          | Gerado no projeto por script   | Original do projeto | Procedural melhorado (Fase 20) — vinheta de fim de fase.                          |
 
 ## Referencias De Boss
 

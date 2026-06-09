@@ -156,7 +156,7 @@ describe("level 10 final arena content", () => {
       entryCheckpointId: "level-10-before-giga-fabio",
       entryDoorId: "level-10-giga-fabio-entry-door",
       defeatUnlocks: ["level-10-giga-fabio-exit-door"],
-      assetId: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
+      assetId: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024,
       movement: {
         kind: "patrol",
         speedPxPerSecond: 38,
@@ -367,7 +367,7 @@ describe("level 10 final arena content", () => {
     )!;
 
     expect(BOSS_HD_VISUAL_PROFILES.GIGA_FABIO).toEqual({
-      textureKey: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
+      textureKey: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024,
       displaySize: { width: 72, height: 88 },
       bottomOffsetY: 0,
     });
@@ -381,7 +381,7 @@ describe("level 10 final arena content", () => {
   it("preloads the final boss placeholder assets for the future fight", () => {
     expect(LEVEL_10.assets.sprites).toEqual(
       expect.arrayContaining([
-        BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
+        BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024,
         GAMEPLAY_SPRITE_KEYS.BOSS_PROJECTILE_BOULDER,
         GAMEPLAY_SPRITE_KEYS.BOSS_IMPACT_BURST,
         GAMEPLAY_SPRITE_KEYS.ENERGY_CYAN_BURST_BEAM,

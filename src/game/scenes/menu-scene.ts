@@ -2,6 +2,7 @@ import Phaser from "phaser";
 
 import {
   applyPinoSpriteFrame,
+  getPinoRenderScale,
   PINO_ANIMATIONS,
   PINO_FRAME_IDS,
   type PinoFrameId,
@@ -423,7 +424,7 @@ export class MenuScene extends Phaser.Scene {
       .setOrigin(0.5, 1);
 
     // Escala maior para o herói ficar prominente na tela inicial (3× o tamanho de jogo)
-    player.setScale(3);
+    player.setScale(3 * getPinoRenderScale());
     player.setAlpha(0.95);
 
     this.playDanceLoop(player, playerX, groundY, 3);
@@ -510,7 +511,7 @@ export class MenuScene extends Phaser.Scene {
     groundY: number,
     scale = 2,
   ): void {
-    const s = scale;
+    const s = scale * getPinoRenderScale();
     const runWidth = scaleLegacyX(44);
     const bigJumpH = scaleLegacyY(48);
     const idleBobH = scaleLegacyY(4);

@@ -4,8 +4,8 @@ import {
 } from "../art";
 
 export const PINO_SPRITESHEET_KEYS = {
-  CORE_512: "player-pino-core-512",
-  ENERGY_512: "player-pino-energy-512",
+  CORE_1024: "player-pino-core-1024",
+  ENERGY_1024: "player-pino-energy-1024",
 } as const;
 
 export type PinoSpritesheetKey =
@@ -13,26 +13,26 @@ export type PinoSpritesheetKey =
 
 export const PINO_SPRITESHEET_ASSETS = [
   {
-    key: PINO_SPRITESHEET_KEYS.CORE_512,
-    path: "assets/spritesheets/player-pino-core-512.png",
-    sheetSizePx: 512,
+    key: PINO_SPRITESHEET_KEYS.CORE_1024,
+    path: "assets/spritesheets/player-pino-core-1024.png",
+    sheetSizePx: 1024,
     frameWidth: SPRITESHEET_CELL_SIZE_PX,
     frameHeight: SPRITESHEET_CELL_SIZE_PX,
     purpose: "player",
     enabled: true,
     description:
-      "Sheet 512 do Pino para locomocao e estados basicos em celulas 128x128.",
+      "Sheet 1024 do Pino para locomocao e estados basicos em celulas 256x256.",
   },
   {
-    key: PINO_SPRITESHEET_KEYS.ENERGY_512,
-    path: "assets/spritesheets/player-pino-energy-512.png",
-    sheetSizePx: 512,
+    key: PINO_SPRITESHEET_KEYS.ENERGY_1024,
+    path: "assets/spritesheets/player-pino-energy-1024.png",
+    sheetSizePx: 1024,
     frameWidth: SPRITESHEET_CELL_SIZE_PX,
     frameHeight: SPRITESHEET_CELL_SIZE_PX,
     purpose: "player",
     enabled: true,
     description:
-      "Sheet 512 do Pino para Carga/Centelha/Rajada em celulas 128x128.",
+      "Sheet 1024 do Pino para Carga/Centelha/Rajada em celulas 256x256.",
   },
 ] as const satisfies readonly SpritesheetAssetDefinition[];
 
@@ -63,83 +63,83 @@ export type PinoFrameId = (typeof PINO_FRAME_IDS)[keyof typeof PINO_FRAME_IDS];
 
 export const PINO_SPRITESHEET_FRAME_REGISTRY = {
   [PINO_FRAME_IDS.IDLE]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 0,
   },
   [PINO_FRAME_IDS.RUN_01]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 1,
   },
   [PINO_FRAME_IDS.RUN_02]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 2,
   },
   [PINO_FRAME_IDS.RUN_03]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 3,
   },
   [PINO_FRAME_IDS.JUMP]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 4,
   },
   [PINO_FRAME_IDS.JUMP_PEAK]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 5,
   },
   [PINO_FRAME_IDS.FALL]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 6,
   },
   [PINO_FRAME_IDS.DASH]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 7,
   },
   [PINO_FRAME_IDS.DEATH_01]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 8,
   },
   [PINO_FRAME_IDS.DEATH_02]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 9,
   },
   [PINO_FRAME_IDS.RESPAWN_01]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 10,
   },
   [PINO_FRAME_IDS.RESPAWN_02]: {
-    textureKey: PINO_SPRITESHEET_KEYS.CORE_512,
+    textureKey: PINO_SPRITESHEET_KEYS.CORE_1024,
     frame: 11,
   },
   [PINO_FRAME_IDS.CHARGE_01]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 0,
   },
   [PINO_FRAME_IDS.CHARGE_02]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 1,
   },
   [PINO_FRAME_IDS.CYAN_SPARK_01]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 2,
   },
   [PINO_FRAME_IDS.CYAN_SPARK_02]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 3,
   },
   [PINO_FRAME_IDS.CYAN_BURST_PREPARE_01]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 4,
   },
   [PINO_FRAME_IDS.CYAN_BURST_PREPARE_02]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 5,
   },
   [PINO_FRAME_IDS.CYAN_BURST_FIRE_01]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 6,
   },
   [PINO_FRAME_IDS.CYAN_BURST_FIRE_02]: {
-    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_512,
+    textureKey: PINO_SPRITESHEET_KEYS.ENERGY_1024,
     frame: 7,
   },
 } as const satisfies Record<

@@ -4,9 +4,9 @@ import {
 } from "../art";
 
 export const BOSS_SPRITESHEET_KEYS = {
-  HIROLITO_512: "boss-hirolito-sheet-512",
-  DR_IMPORTS_512: "boss-dr-imports-sheet-512",
-  GIGA_FABIO_512: "boss-giga-fabio-sheet-512",
+  HIROLITO_1024: "boss-hirolito-sheet-1024",
+  DR_IMPORTS_1024: "boss-dr-imports-sheet-1024",
+  GIGA_FABIO_1024: "boss-giga-fabio-sheet-1024",
 } as const;
 
 export type BossSpritesheetKey =
@@ -14,37 +14,37 @@ export type BossSpritesheetKey =
 
 export const BOSS_SPRITESHEET_ASSETS = [
   {
-    key: BOSS_SPRITESHEET_KEYS.HIROLITO_512,
-    path: "assets/spritesheets/boss-hirolito-sheet-512.png",
-    sheetSizePx: 512,
+    key: BOSS_SPRITESHEET_KEYS.HIROLITO_1024,
+    path: "assets/spritesheets/boss-hirolito-sheet-1024.png",
+    sheetSizePx: 1024,
     frameWidth: SPRITESHEET_CELL_SIZE_PX,
     frameHeight: SPRITESHEET_CELL_SIZE_PX,
     purpose: "boss",
     enabled: true,
     description:
-      "Sheet 512 do Hirolito Narguilito com estados de idle, windup, attack e recover.",
+      "Sheet 1024 do Hirolito Narguilito com estados de idle, windup, attack e recover.",
   },
   {
-    key: BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512,
-    path: "assets/spritesheets/boss-dr-imports-sheet-512.png",
-    sheetSizePx: 512,
+    key: BOSS_SPRITESHEET_KEYS.DR_IMPORTS_1024,
+    path: "assets/spritesheets/boss-dr-imports-sheet-1024.png",
+    sheetSizePx: 1024,
     frameWidth: SPRITESHEET_CELL_SIZE_PX,
     frameHeight: SPRITESHEET_CELL_SIZE_PX,
     purpose: "boss",
     enabled: true,
     description:
-      "Sheet 512 do Dr. Imports com estados de idle, windup, attack e recover.",
+      "Sheet 1024 do Dr. Imports com estados de idle, windup, attack e recover.",
   },
   {
-    key: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
-    path: "assets/spritesheets/boss-giga-fabio-sheet-512.png",
-    sheetSizePx: 512,
+    key: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024,
+    path: "assets/spritesheets/boss-giga-fabio-sheet-1024.png",
+    sheetSizePx: 1024,
     frameWidth: SPRITESHEET_CELL_SIZE_PX,
     frameHeight: SPRITESHEET_CELL_SIZE_PX,
     purpose: "boss",
     enabled: true,
     description:
-      "Sheet 512 do Giga Fabio com estados de idle, windup, attack e recover.",
+      "Sheet 1024 do Giga Fabio com estados de idle, windup, attack e recover.",
   },
 ] as const satisfies readonly SpritesheetAssetDefinition[];
 
@@ -123,7 +123,7 @@ export type BossHdVisualProfile = {
 
 export const BOSS_HD_VISUAL_PROFILES = {
   HIROLITO_NARGUILITO: {
-    textureKey: BOSS_SPRITESHEET_KEYS.HIROLITO_512,
+    textureKey: BOSS_SPRITESHEET_KEYS.HIROLITO_1024,
     displaySize: {
       width: 56,
       height: 72,
@@ -131,7 +131,7 @@ export const BOSS_HD_VISUAL_PROFILES = {
     bottomOffsetY: 0,
   },
   DR_IMPORTS: {
-    textureKey: BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512,
+    textureKey: BOSS_SPRITESHEET_KEYS.DR_IMPORTS_1024,
     displaySize: {
       width: 56,
       height: 80,
@@ -139,7 +139,7 @@ export const BOSS_HD_VISUAL_PROFILES = {
     bottomOffsetY: 0,
   },
   GIGA_FABIO: {
-    textureKey: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
+    textureKey: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024,
     displaySize: {
       width: 72,
       height: 88,

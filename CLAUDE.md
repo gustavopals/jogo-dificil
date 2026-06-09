@@ -115,7 +115,7 @@ Evitar:
 
 Todos os assets devem ser originais, gerados para o projeto ou usados com licença compatível.
 
-**Baseline visual oficial (pós-Fase 18):** resolução `960x540`, tile `32x32`, spritesheets com células `128x128` para Pino e bosses. Ver `docs/hd-visual-standard.md`.
+**Baseline visual oficial (pós-Fase 18, revisado na reescrita HD2):** resolução `960x540`, tile `32x32`, spritesheets com células `256x256` (sheets `1024x1024`) para Pino e bosses, com filtro LINEAR aplicado só a essas texturas. Ver `docs/hd-visual-standard.md`.
 
 Naming:
 
@@ -125,7 +125,7 @@ Naming:
 
 Sprites e animações:
 
-- Personagem e bosses usam spritesheets (`512x512`, células `128x128`) em runtime; PNG por frame é fallback legado, não preload duplicado.
+- Personagem e bosses usam spritesheets (`1024x1024`, células `256x256`) em runtime; PNG por frame é fallback legado, não preload duplicado.
 - Ambiente, traps e itens usam pixel art nativa em `32x32` (projéteis pequenos em `16x16`).
 - Respeitar `src/game/asset-load-policy.ts`: nunca preloadar PNG legado e sheet HD do mesmo personagem/boss.
 - Documentar dimensões base do personagem.

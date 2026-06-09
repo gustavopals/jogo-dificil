@@ -397,6 +397,29 @@ export function getPinoVisualDisplaySize(): typeof PINO_SPRITE_SIZE_PX {
   return PINO_SPRITE_SIZE_PX;
 }
 
+/**
+ * Conteúdo útil dentro da célula 256 dos sheets HD do Pino
+ * (ver scripts/generate-pino-spritesheets.mjs).
+ */
+export const PINO_SHEET_CONTENT_SIZE_PX = {
+  width: 64,
+  height: 96,
+} as const;
+
+/**
+ * Escala que converte o frame nativo do spritesheet para o tamanho visual de
+ * jogo (32x48). Os sheets HD guardam o personagem em 64x96 dentro da célula,
+ * então a renderização em gameplay usa metade da escala; no modo legado os
+ * PNGs já têm o tamanho visual e a escala é 1.
+ */
+export function getPinoRenderScale(): number {
+  if (canUsePinoSpritesheetFrames()) {
+    return PINO_SPRITE_SIZE_PX.width / PINO_SHEET_CONTENT_SIZE_PX.width;
+  }
+
+  return 1;
+}
+
 export function applyPinoVisualDisplaySize(sprite: {
   setDisplaySize(width: number, height: number): unknown;
 }): void {

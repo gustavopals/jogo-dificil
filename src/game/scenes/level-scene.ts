@@ -196,6 +196,7 @@ import {
 import { isJuiceEnabled } from "../systems/juice-settings";
 import { DEATH_JUICE_OVERLAY } from "../ui/death-juice";
 import {
+  CAMERA_LOOK_AHEAD_SMOOTHING,
   getLevelCameraProfile,
   resolveCameraLookAhead,
   type LevelCameraProfile,
@@ -3175,7 +3176,8 @@ export class LevelScene extends Phaser.Scene {
     }
 
     const { bounds } = this.level;
-    this.cameraProfile = getLevelCameraProfile(this.level);
+    const cameraProfile = getLevelCameraProfile(this.level);
+    this.cameraProfile = cameraProfile;
     this.cameraLookAhead = {
       x: 0,
       y: 0,
@@ -3190,12 +3192,36 @@ export class LevelScene extends Phaser.Scene {
         Math.max(bounds.height, GAME_RESOLUTION.height),
       )
       .setRoundPixels(true)
-      .startFollow(this.player.getSprite(), true, 1, 1)
+      .startFollow(
+        this.player.getSprite(),
+        true,
+        cameraProfile.followLerpX,
+        cameraProfile.followLerpY,
+      )
+      .setDeadzone(cameraProfile.deadzoneWidth, cameraProfile.deadzoneHeight)
       .setFollowOffset(0, 0);
   }
 
-  private updateCameraLookAhead(_velocity: Vector2Like): void {
-    // Câmera fixa no herói, sem lookahead por enquanto.
+  /**
+   * Look-ahead suave: a câmera antecipa a direção do movimento (perfil por
+   * fase em getLevelCameraProfile), interpolando o offset para evitar saltos.
+   */
+  private updateCameraLookAhead(velocity: Vector2Like): void {
+    if (!this.cameraProfile) {
+      return;
+    }
+
+    const target = resolveCameraLookAhead(velocity, this.cameraProfile);
+    const smoothing = CAMERA_LOOK_AHEAD_SMOOTHING;
+
+    this.cameraLookAhead = {
+      x: this.cameraLookAhead.x + (target.x - this.cameraLookAhead.x) * smoothing,
+      y: this.cameraLookAhead.y + (target.y - this.cameraLookAhead.y) * smoothing,
+    };
+    this.cameras.main.setFollowOffset(
+      -this.cameraLookAhead.x,
+      -this.cameraLookAhead.y,
+    );
   }
 
   private updateExitMarker(): void {

@@ -424,10 +424,25 @@ function drawCloud(
   colors: { readonly primary: number; readonly secondary: number },
 ): void {
   const depth = DEPTH_LAYERS.background;
+  const puffs = [
+    scene.add.circle(x, y, size * 0.35, colors.primary, 0.35).setDepth(depth),
+    scene.add.circle(x - size * 0.28, y + size * 0.05, size * 0.28, colors.primary, 0.3).setDepth(depth),
+    scene.add.circle(x + size * 0.3, y + size * 0.03, size * 0.25, colors.primary, 0.28).setDepth(depth),
+  ];
 
-  scene.add.circle(x, y, size * 0.35, colors.primary, 0.35).setDepth(depth);
-  scene.add.circle(x - size * 0.28, y + size * 0.05, size * 0.28, colors.primary, 0.3).setDepth(depth);
-  scene.add.circle(x + size * 0.3, y + size * 0.03, size * 0.25, colors.primary, 0.28).setDepth(depth);
+  // Deriva lenta para dar vida ao fundo sem distrair do gameplay; amplitude e
+  // duração derivam da posição para nuvens vizinhas não andarem em fase.
+  const driftAmplitude = size * 0.3;
+  const driftDurationMs = 6000 + ((x + y) % 5) * 700;
+
+  scene.tweens.add({
+    targets: puffs,
+    x: `+=${driftAmplitude}`,
+    duration: driftDurationMs,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.easeInOut",
+  });
 }
 
 function drawMushroom(

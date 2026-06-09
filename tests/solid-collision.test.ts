@@ -70,6 +70,67 @@ describe("solid collision", () => {
     expect(result.blocked.down).toBe(true);
   });
 
+  it("snaps out of shallow ground penetration while falling", () => {
+    // Spawns/checkpoints declarados poucos px dentro do chão devem aterrissar.
+    const result = resolveKinematicCollisions({
+      currentPosition: {
+        x: 64,
+        y: 225,
+      },
+      targetPosition: {
+        x: 64,
+        y: 226,
+      },
+      velocity: {
+        x: 0,
+        y: 50,
+      },
+      body: BODY,
+      solids: [
+        {
+          x: 0,
+          y: 222,
+          width: 480,
+          height: 16,
+        },
+      ],
+    });
+
+    expect(result.position.y).toBe(223);
+    expect(result.velocity.y).toBe(0);
+    expect(result.isGrounded).toBe(true);
+    expect(result.blocked.down).toBe(true);
+  });
+
+  it("does not eject the body from deep solid overlap", () => {
+    const result = resolveKinematicCollisions({
+      currentPosition: {
+        x: 64,
+        y: 240,
+      },
+      targetPosition: {
+        x: 64,
+        y: 241,
+      },
+      velocity: {
+        x: 0,
+        y: 50,
+      },
+      body: BODY,
+      solids: [
+        {
+          x: 0,
+          y: 222,
+          width: 480,
+          height: 16,
+        },
+      ],
+    });
+
+    expect(result.position.y).toBe(241);
+    expect(result.blocked.down).toBe(false);
+  });
+
   it("does not tunnel through ground on a large vertical step", () => {
     const result = resolveKinematicCollisions({
       currentPosition: {

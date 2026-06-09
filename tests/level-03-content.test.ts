@@ -196,7 +196,7 @@ describe("level 03 content", () => {
       entryDoorId: "level-03-hirolito-entry-door",
       defeatUnlocks: ["level-03-hirolito-exit-door"],
     });
-    expect(boss.assetId).toBe("boss-hirolito-sheet-512");
+    expect(boss.assetId).toBe("boss-hirolito-sheet-1024");
     expect(BOSS_HD_VISUAL_PROFILES.HIROLITO_NARGUILITO).toMatchObject({
       displaySize: { width: 56, height: 72 },
       bottomOffsetY: 0,

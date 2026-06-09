@@ -237,8 +237,8 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
       tileSizePx: 32,
       worldPhysicsScale: 2,
       playerHitbox: {
-        width: 36,
-        height: 80,
+        width: 20,
+        height: 36,
       },
     });
   await waitForQaTools(page);
@@ -251,21 +251,25 @@ test("abre, inicia partida, renderiza jogador e responde a movimento", async ({
     .poll(async () => (await readSmokeSnapshot(page)).activeScenes)
     .toContain("level");
 
+  // O assentamento no chão leva alguns frames após o spawn; poll evita corrida.
+  await expect
+    .poll(async () => (await readSmokeSnapshot(page)).player)
+    .toMatchObject({
+      isAlive: true,
+      isGrounded: true,
+      x: 128,
+      y: 448,
+    });
+
   const startSnapshot = await readSmokeSnapshot(page);
 
-  expect(startSnapshot.player).toMatchObject({
-    isAlive: true,
-    isGrounded: true,
-    x: 128,
-    y: 444,
-  });
   expect(startSnapshot.player?.hitboxWorld).toMatchObject({
-    width: 36,
-    height: 80,
+    width: 20,
+    height: 36,
   });
   expect(await readPlayerHitboxWithQa(page)).toMatchObject({
-    width: 36,
-    height: 80,
+    width: 20,
+    height: 36,
   });
 
   await page.keyboard.down("Space");

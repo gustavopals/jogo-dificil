@@ -6,6 +6,7 @@ import {
   PINO_ANIMATIONS,
   PINO_POWER_ANIMATION_MODES,
   applyPinoVisualDisplaySize,
+  getPinoRenderScale,
   resolveInitialPinoSpriteFrame,
   selectPinoAnimationDefinition,
   type PinoAnimationKey,
@@ -332,9 +333,15 @@ export class Player {
 
   private applyHitbox(): void {
     const body = this.getBody();
+    // O corpo arcade é multiplicado pela escala do sprite; compensa a escala
+    // de renderização dos sheets HD para manter o hitbox em pixels de mundo.
+    const renderScale = getPinoRenderScale();
 
-    body.setSize(PLAYER_SIZE.hitboxWidth, PLAYER_SIZE.hitboxHeight);
-    body.setOffset(PLAYER_HITBOX.x, PLAYER_HITBOX.y);
+    body.setSize(
+      PLAYER_SIZE.hitboxWidth / renderScale,
+      PLAYER_SIZE.hitboxHeight / renderScale,
+    );
+    body.setOffset(PLAYER_HITBOX.x / renderScale, PLAYER_HITBOX.y / renderScale);
   }
 
   private applyFacing(facing: FacingDirection): void {
@@ -434,8 +441,12 @@ export class Player {
       }
     >;
     const transform = transformByState[state];
+    const renderScale = getPinoRenderScale();
 
-    this.sprite.setScale(transform.scaleX, transform.scaleY);
+    this.sprite.setScale(
+      transform.scaleX * renderScale,
+      transform.scaleY * renderScale,
+    );
     this.sprite.setAngle(transform.angle);
   }
 

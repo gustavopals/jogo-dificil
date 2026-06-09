@@ -54,11 +54,11 @@ import trapFallingPlatformUrl from "../../assets/sprites/trap-falling-platform.p
 import trapFalseBlockUrl from "../../assets/sprites/trap-false-block.png";
 import trapProjectileUrl from "../../assets/sprites/trap-projectile.png";
 import trapSpikesUrl from "../../assets/sprites/trap-spikes.png";
-import bossDrImportsSheet512Url from "../../assets/spritesheets/boss-dr-imports-sheet-512.png";
-import bossGigaFabioSheet512Url from "../../assets/spritesheets/boss-giga-fabio-sheet-512.png";
-import bossHirolitoSheet512Url from "../../assets/spritesheets/boss-hirolito-sheet-512.png";
-import playerPinoCoreSheet512Url from "../../assets/spritesheets/player-pino-core-512.png";
-import playerPinoEnergySheet512Url from "../../assets/spritesheets/player-pino-energy-512.png";
+import bossDrImportsSheet1024Url from "../../assets/spritesheets/boss-dr-imports-sheet-1024.png";
+import bossGigaFabioSheet1024Url from "../../assets/spritesheets/boss-giga-fabio-sheet-1024.png";
+import bossHirolitoSheet1024Url from "../../assets/spritesheets/boss-hirolito-sheet-1024.png";
+import playerPinoCoreSheet1024Url from "../../assets/spritesheets/player-pino-core-1024.png";
+import playerPinoEnergySheet1024Url from "../../assets/spritesheets/player-pino-energy-1024.png";
 import labBackgroundPanelUrl from "../../assets/tilesets/lab-background-panel.png";
 import labHazardSpikesUrl from "../../assets/tilesets/lab-hazard-spikes.png";
 import labPlatformUrl from "../../assets/tilesets/lab-platform.png";
@@ -110,11 +110,11 @@ export const ASSET_KEYS = {
   PLAYER_PINO_DEATH_02: PINO_TEXTURE_KEYS.DEATH_02,
   PLAYER_PINO_RESPAWN_01: PINO_TEXTURE_KEYS.RESPAWN_01,
   PLAYER_PINO_RESPAWN_02: PINO_TEXTURE_KEYS.RESPAWN_02,
-  PLAYER_PINO_CORE_SHEET_512: PINO_SPRITESHEET_KEYS.CORE_512,
-  PLAYER_PINO_ENERGY_SHEET_512: PINO_SPRITESHEET_KEYS.ENERGY_512,
-  BOSS_HIROLITO_SHEET_512: BOSS_SPRITESHEET_KEYS.HIROLITO_512,
-  BOSS_DR_IMPORTS_SHEET_512: BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512,
-  BOSS_GIGA_FABIO_SHEET_512: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512,
+  PLAYER_PINO_CORE_SHEET_1024: PINO_SPRITESHEET_KEYS.CORE_1024,
+  PLAYER_PINO_ENERGY_SHEET_1024: PINO_SPRITESHEET_KEYS.ENERGY_1024,
+  BOSS_HIROLITO_SHEET_1024: BOSS_SPRITESHEET_KEYS.HIROLITO_1024,
+  BOSS_DR_IMPORTS_SHEET_1024: BOSS_SPRITESHEET_KEYS.DR_IMPORTS_1024,
+  BOSS_GIGA_FABIO_SHEET_1024: BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024,
   TRAP_SPIKES: GAMEPLAY_SPRITE_KEYS.TRAP_SPIKES,
   TRAP_FALSE_BLOCK: GAMEPLAY_SPRITE_KEYS.TRAP_FALSE_BLOCK,
   TRAP_FALLING_PLATFORM: GAMEPLAY_SPRITE_KEYS.TRAP_FALLING_PLATFORM,
@@ -285,18 +285,18 @@ function resolveSpritesheetUrl(
   key: (typeof ASSET_KEYS)[keyof typeof ASSET_KEYS],
 ): string {
   switch (key) {
-    case PINO_SPRITESHEET_KEYS.CORE_512:
-      return playerPinoCoreSheet512Url;
-    case PINO_SPRITESHEET_KEYS.ENERGY_512:
-      return playerPinoEnergySheet512Url;
-    case BOSS_SPRITESHEET_KEYS.HIROLITO_512:
-      return bossHirolitoSheet512Url;
-    case BOSS_SPRITESHEET_KEYS.DR_IMPORTS_512:
-      return bossDrImportsSheet512Url;
-    case BOSS_SPRITESHEET_KEYS.GIGA_FABIO_512:
-      return bossGigaFabioSheet512Url;
+    case PINO_SPRITESHEET_KEYS.CORE_1024:
+      return playerPinoCoreSheet1024Url;
+    case PINO_SPRITESHEET_KEYS.ENERGY_1024:
+      return playerPinoEnergySheet1024Url;
+    case BOSS_SPRITESHEET_KEYS.HIROLITO_1024:
+      return bossHirolitoSheet1024Url;
+    case BOSS_SPRITESHEET_KEYS.DR_IMPORTS_1024:
+      return bossDrImportsSheet1024Url;
+    case BOSS_SPRITESHEET_KEYS.GIGA_FABIO_1024:
+      return bossGigaFabioSheet1024Url;
     default:
-      return playerPinoCoreSheet512Url;
+      return playerPinoCoreSheet1024Url;
   }
 }
 

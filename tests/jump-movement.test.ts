@@ -11,6 +11,10 @@ const {
   jumpVelocity: JUMP_VELOCITY,
   gravity: GRAVITY,
   jumpCutMultiplier: JUMP_CUT_MULTIPLIER,
+  apexSpeedThreshold: APEX_SPEED_THRESHOLD,
+  apexGravityMultiplier: APEX_GRAVITY_MULTIPLIER,
+  fallGravityMultiplier: FALL_GRAVITY_MULTIPLIER,
+  maxFallSpeed: MAX_FALL_SPEED,
 } = DEFAULT_JUMP_MOVEMENT_CONFIG;
 
 describe("jump movement", () => {
@@ -121,7 +125,60 @@ describe("jump movement", () => {
     });
 
     expect(expiredResult.didJump).toBe(false);
-    expect(expiredResult.velocityY).toBe(GRAVITY * 0.12);
+    expect(expiredResult.velocityY).toBe(
+      GRAVITY * APEX_GRAVITY_MULTIPLIER * 0.12,
+    );
+  });
+
+  it("reduces gravity inside the apex band for extra hang time", () => {
+    const apexVelocityY = -APEX_SPEED_THRESHOLD / 2;
+    const result = calculateJumpMovement({
+      currentPositionY: 180,
+      currentVelocityY: apexVelocityY,
+      isGrounded: false,
+      isJumpDown: true,
+      wasJumpPressed: false,
+      wasJumpReleased: false,
+      deltaMs: 100,
+      state: createInitialJumpMovementState(),
+    });
+
+    expect(result.velocityY).toBe(
+      apexVelocityY + GRAVITY * APEX_GRAVITY_MULTIPLIER * 0.1,
+    );
+  });
+
+  it("applies stronger gravity while falling fast", () => {
+    const fallingVelocityY = APEX_SPEED_THRESHOLD * 2;
+    const result = calculateJumpMovement({
+      currentPositionY: 180,
+      currentVelocityY: fallingVelocityY,
+      isGrounded: false,
+      isJumpDown: false,
+      wasJumpPressed: false,
+      wasJumpReleased: false,
+      deltaMs: 100,
+      state: createInitialJumpMovementState(),
+    });
+
+    expect(result.velocityY).toBe(
+      fallingVelocityY + GRAVITY * FALL_GRAVITY_MULTIPLIER * 0.1,
+    );
+  });
+
+  it("clamps falling speed to the terminal velocity", () => {
+    const result = calculateJumpMovement({
+      currentPositionY: 180,
+      currentVelocityY: MAX_FALL_SPEED,
+      isGrounded: false,
+      isJumpDown: false,
+      wasJumpPressed: false,
+      wasJumpReleased: false,
+      deltaMs: 100,
+      state: createInitialJumpMovementState(),
+    });
+
+    expect(result.velocityY).toBe(MAX_FALL_SPEED);
   });
 
   it("uses isolated coyote and jump buffer timers from the supplied state", () => {
